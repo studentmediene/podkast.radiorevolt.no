@@ -1,0 +1,4 @@
+# Simple webserver framework
+flask
+# We will need to use the generator, so install its dependencies
+-r ../generator/requirements.txt

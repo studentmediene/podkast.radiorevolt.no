@@ -19,6 +19,6 @@ This project uses Python v3.4 only, and is written so that the podcast feeds can
 ## How to set up ##
 
 1. [Use virtualenv!](https://iamzed.com/2009/05/07/a-primer-on-virtualenv/)
-2. `pip install -r requirements.txt`
+2. Run `pip install -r web-server/requirements.txt` if you plan on generating feeds on request, or run `pip install -r generator/requirements.txt` if you plan on just running a cron job.
 3. More to come!
 

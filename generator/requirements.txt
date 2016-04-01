@@ -1,0 +1,5 @@
+# Easily send HTTP requests
+requests
+# Easily generate podcast feeds
+feedgen
+
