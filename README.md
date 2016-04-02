@@ -66,3 +66,22 @@ Use the `--help` flag to see available options for any script.
     <dt>webserver/settings.py</dt>
     <dd>Settings for the web server.</dd>
 </dl>
+
+
+## Details: How it works ##
+
+### Generating the feed for a podcast ###
+
+First, episodes for this podcast are fetched. The `episode_source` is responsible for this.
+It also writes basic metadata for all episodes.
+
+Secondly, `metadata_sources` may act on a subset of the episodes and add or overwrite the existing metadata with new data.
+Each metadata source has a method for figuring out if this is a relevant episode for this source. If it is, then the
+metadata source is asked to edit the XML item for that episode.
+
+**Only one** metadata source may supply metadata for any given episode. The first one that is deemed relevant for an
+episode is the one that is chosen. The order in which the metadata sources appear in
+`generator/metadata_sources/__init__.py` is thus of big importance.
+
+Note that it is perfectly acceptable for no metadata source to match an episode – in such cases, the default metadata
+from the `episode_source` is used.
