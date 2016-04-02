@@ -41,7 +41,11 @@ This project uses Python v3.4 only, and is written so that the podcast feeds can
         <dd><code>pip install -r generator/requirements.txt</code></dd>
     </dl>
 
-5. More to come!
+5. Copy `generator/settings_template.py` to `generator/settings.py` and fill in settings.
+6. Do the same with `webserver/settings_template.py` if you intend to use the provided web server.
+
+TODO: Correct the use of term `web server`, since what we're really making is something that can be run _by_ a
+web server.
 
 
 ## Scripts ##
