@@ -1,0 +1,2 @@
+class NoSuchShowError(Exception):
+    pass
