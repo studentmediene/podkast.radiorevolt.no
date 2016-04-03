@@ -147,7 +147,7 @@ class Show:
                     source.populate(episode)
             # Add this episode to the feed
             episode.add_to_feed(self.feed)
-            thread = Thread(target=self.write_episode_to_feed,
+            thread = Thread(target=self._write_episode_to_feed,
                             kwargs={'episode': episode, 'feed_access_lock': feed_access_lock, 'fg': self.feed})
             thread.start()
             threads.append(thread)
@@ -156,7 +156,7 @@ class Show:
         for thread in threads:
             thread.join()
 
-    def write_episode_to_feed(self, episode, feed_access_lock, fg):
+    def _write_episode_to_feed(self, episode, feed_access_lock, fg):
         with self.write_feed_constraint:
             try:
                 episode.populate_feed_entry()
