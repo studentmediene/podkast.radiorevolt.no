@@ -1,8 +1,9 @@
 import requests
 import json
 from .settings import EPISODE_SOURCE as SETTINGS
-from . import NoSuchShowError, NoEpisodesError
+from . import NoSuchShowError, NoEpisodesError, Episode
 import threading
+import datetime
 
 class EpisodeSource:
     """Class for fetching episodes for a podcast.
@@ -46,7 +47,7 @@ class EpisodeSource:
 
     @staticmethod
     def get_all_episodes() -> list:
-        """Returns a list with all the episodes in the database, regardless of show."""
+        """Fetches a list with all the episodes in the database, regardless of show."""
         episode_list = requests.get(
             url=SETTINGS['RADIO_REST_API_URL'] + "/lyd/podcast/"
         ).json()
@@ -86,16 +87,31 @@ class EpisodeSource:
 
     def populate_episodes(self):
         """Populate list of all episodes for this show."""
+        # Fetch data about this show if it isn't done already
         if not self.exists:
             self.fetch_show_data()
 
+        # Determine whether all episodes are downloaded in batch or not
         with self.fetch_episode_lock:
             use_all_episodes = self.all_episodes is not None
 
         if not use_all_episodes:
+            # Fetch episodes for this show only
             self.episodes = self.get_episodes_for(self.id)
         else:
+            # Use the existing list of episodes and find the relevant ones
             self.episodes = [episode for episode in self.all_episodes if episode['program_defnr'] == self.id]
 
         if not self.episodes:
             raise NoEpisodesError(self.id)
+
+    def episode_generator(self):
+        for episode_dict in self.episodes:
+            episode = Episode(
+                sound_url=episode_dict['url'],
+                title=episode_dict['title'],
+                description=episode_dict['comment'],
+                date=datetime.datetime.strptime(episode_dict['dato'], "%Y%m%d").date(),
+                author=episode_dict['author'],
+            )
+            yield episode

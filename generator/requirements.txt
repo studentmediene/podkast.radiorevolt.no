@@ -2,4 +2,5 @@
 requests
 # Easily generate podcast feeds
 feedgen
-
+# Get duration of an MP3 file
+tinytag
