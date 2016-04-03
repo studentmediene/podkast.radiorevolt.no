@@ -1,25 +1,108 @@
-import requests
-import feedgen
-import argparse
-
-from . import settings
 from . import metadata_sources
 from . import episode_source
+from . import Show
+from .show_source import ShowSource
+from . import NoEpisodesError, NoSuchShowError
+
+from cached_property import cached_property
+
+import sys
 
 
-def parse_cli_arguments() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Output RSS podcast feed for a single podcast.",
-                                     epilog="See batch_generate_feed.py if you want to generate feeds for more"
-                                            " than one podcast at a time.")
-    parser.add_argument("show", type=int, help="DigAS ID for the show which shall have its podcast feed generated.")
+class PodcastFeedGenerator:
 
-    return parser.parse_args()
+    def __init__(self):
+        self.show_source = ShowSource()
+
+    @cached_property
+    def episode_metadata_sources(self):
+        # Ensure the metadata sources are of the correct type
+        for source in metadata_sources.EPISODE_METADATA_SOURCES:
+            assert isinstance(source, metadata_sources.EpisodeMetadataSource), \
+                "%s is not subclass of EpisodeMetadataSource" % source
+        # Instantiate all of them
+        return [source() for source in metadata_sources.EPISODE_METADATA_SOURCES]
+
+    @cached_property
+    def show_metadata_sources(self):
+        # Ensure the metadata sources are of the correct type
+        for source in metadata_sources.SHOW_METADATA_SOURCES:
+            assert isinstance(source, metadata_sources.ShowMetadataSource), \
+                "%r is not subclass of ShowMetadataSource" % source
+        # Instantiate all of them
+        return [source() for source in metadata_sources.SHOW_METADATA_SOURCES]
+
+    def generate_feed(self, show_id: int) -> bytes:
+        """Generate RSS feed for the show represented by the given show_id.
+
+        Args:
+            show_id (int): DigAS ID for the show.
+
+        Returns:
+            str: The RSS podcast feed for the given show_id.
+        """
+        try:
+            return self._generate_feed(self.show_source.shows[show_id])
+        except KeyError as e:
+            raise NoSuchShowError from e
+
+    def _generate_feed(self, show: Show, skip_empty: bool =True) -> bytes:
+        """Generate RSS feed for the provided show.
+
+        This differs from generate_feed in that it accept Show, not show_id, as argument.
+
+        Args:
+            show (Show): The show which shall have its podcast feed generated. Its metadata will be filled by metadata
+                sources.
+
+        Returns:
+            str: The RSS podcast feed for the given show.
+        """
+        # Populate show with more metadata
+        self._populate_show_metadata(show)
+
+        # Start generating feed
+        feed = show.init_feed()
+
+        # Add episodes
+        es = episode_source.EpisodeSource(show)
+        try:
+            es.populate_episodes()
+        except NoEpisodesError as e:
+            if skip_empty:
+                raise e
+            else:
+                # Go on and generate empty feed
+                pass
+        show.add_episodes_to_feed(es, self.episode_metadata_sources)
+
+        # Generate!
+        return feed.rss_str()
+
+    def generate_all_feeds_sequence(self) -> list:
+        """Generate RSS feeds for all known shows, one at a time."""
+        # Prepare for progress bar
+        num_shows = len(self.show_source.shows)
+        progress_bar_width = 50
+        i = 0
+
+        feeds = list()
+        for show in self.show_source.shows:
+            # Update progress bar
+            i += 1
+            print("{0: <30} {1}".format(show.title, "#" * (i * progress_bar_width // num_shows)),
+                  file=sys.stderr, end="\r")
+            try:
+                # Do the job
+                feeds.append(self._generate_feed(show))
+            except NoEpisodesError:
+                # Skip this show
+                pass
+        return feeds
+
+    def _populate_show_metadata(self, show):
+        for source in self.show_metadata_sources:
+            if source.accepts(show):
+                source.populate(show)
 
 
-def main():
-    args = parse_cli_arguments()
-
-
-
-if __name__ == '__main__':
-    main()

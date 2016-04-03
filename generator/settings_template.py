@@ -10,17 +10,31 @@ DEFAULT_AUTHOR_EMAIL = "EMAIL HERE"
 DEFAULT_EDITORIAL_EMAIL = "EMAIL HERE"
 DEFAULT_TECHNICAL_EMAIL = "EMAIL HERE"
 
-# EPISODE SOURCE SETTINGS
+DEFAULT_SHORT_FEED_DESCRIPTION = "TEXT HERE"
+DEFAULT_WEBSITE = "URL HERE"
 
-EPISODE_SOURCE = {
+FIND_EPISODE_DURATIONS = True or False
+
+
+# SHOW SOURCE SETTINGS
+
+SHOW_SOURCE = {
     # Base URL for the Radio Rest API (without trailing slash). Example: "http://example.org/v1"
-    'RADIO_REST_API_URL': "URL",
+    'RADIO_REST_API_URL': "URL HERE",
 
     # Username for authenticating with the Radio Rest API
     'RADIO_REST_API_USERNAME': "USERNAME HERE",
 
     # Password for authenticating with the Radio Rest API
     'RADIO_REST_API_PASSWORD': "PASSWORD HERE",
+}
+
+
+# EPISODE SOURCE SETTINGS
+
+EPISODE_SOURCE = {
+    # Base URL for the Radio Rest API (without trailing slash). Example: "http://example.org/v1"
+    'RADIO_REST_API_URL': SHOW_SOURCE['RADIO_REST_API_URL'],
 }
 
 

@@ -4,3 +4,5 @@ requests
 feedgen
 # Get duration of an MP3 file
 tinytag
+# Easily cache properties which could take some time to calculate
+cached-property

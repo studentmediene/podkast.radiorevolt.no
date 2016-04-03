@@ -1,9 +1,10 @@
 import requests
-import json
 from .settings import EPISODE_SOURCE as SETTINGS
-from . import NoSuchShowError, NoEpisodesError, Episode
+from .NoEpisodesError import NoEpisodesError
+from .episode import Episode
 import threading
 import datetime
+import time
 
 class EpisodeSource:
     """Class for fetching episodes for a podcast.
@@ -18,35 +19,23 @@ class EpisodeSource:
     fetch_episode_lock = threading.RLock()
     """Lock ensuring only one thread fetches and parses list of all episodes."""
 
-    def __init__(self, show_id: int):
+    def __init__(self, show):
         """
         Initialize an episode source for the given show.
-        :param show_id: DigAS ID for this show.
+
+        :param show: Fetch episodes for this show.
         """
-        self.id = show_id
+        self.id = show.show_id
         """DigAS ID for this show."""
 
-        self.name = None
-        """Name of this show."""
-        self.exists = False
-        """True if the id is known to correspond to a show in the database."""
+        self.show = show
 
         self.episodes = None
         """List of episodes for this show, sorted with the most recent first."""
 
-    @staticmethod
-    def get_all_shows() -> dict:
-        """Returns list of all shows in the database."""
-        show_list = requests.get(
-            url=SETTINGS['RADIO_REST_API_URL'] + "/programmer/list",
-            auth=(SETTINGS['RADIO_REST_API_USERNAME'], SETTINGS['RADIO_REST_API_PASSWORD']),
-        ).json()
-
-        # Convert to dictionary with id as key and show name as value (ignoring old)
-        return {show['id']: show['name'] for show in show_list}
 
     @staticmethod
-    def get_all_episodes() -> list:
+    def _get_all_episodes() -> list:
         """Fetches a list with all the episodes in the database, regardless of show."""
         episode_list = requests.get(
             url=SETTINGS['RADIO_REST_API_URL'] + "/lyd/podcast/"
@@ -58,38 +47,18 @@ class EpisodeSource:
         """Fetch all podcast episodes. Saves time when processing multiple shows."""
         with cls.fetch_episode_lock:
             if cls.all_episodes is None:
-                cls.all_episodes = cls.get_all_episodes()
+                cls.all_episodes = cls._get_all_episodes()
 
     @staticmethod
-    def get_episodes_for(show_id: int) -> list:
+    def _get_episodes_for(show_id: int) -> list:
         """Returns a list with all the episodes in the database for the given show."""
         episode_list = requests.get(
             url=SETTINGS['RADIO_REST_API_URL'] + "/lyd/podcast/" + str(show_id)
         ).json()
         return episode_list
 
-    @classmethod
-    def populate_shows(cls):
-        cls.shows = cls.get_all_shows()
-
-    def fetch_show_data(self):
-        """Populate basic metadata for the show"""
-        with self.fetch_show_lock:
-            if self.shows is None:
-                self.populate_shows()
-
-        # Check if our show_id matches one of the shows
-        if self.id in self.shows.keys():
-            self.name = self.shows[self.id]
-            self.exists = True
-        else:
-            raise NoSuchShowError(self.id)
-
     def populate_episodes(self):
         """Populate list of all episodes for this show."""
-        # Fetch data about this show if it isn't done already
-        if not self.exists:
-            self.fetch_show_data()
 
         # Determine whether all episodes are downloaded in batch or not
         with self.fetch_episode_lock:
@@ -97,7 +66,7 @@ class EpisodeSource:
 
         if not use_all_episodes:
             # Fetch episodes for this show only
-            self.episodes = self.get_episodes_for(self.id)
+            self.episodes = self._get_episodes_for(self.id)
         else:
             # Use the existing list of episodes and find the relevant ones
             self.episodes = [episode for episode in self.all_episodes if episode['program_defnr'] == self.id]
@@ -108,10 +77,12 @@ class EpisodeSource:
     def episode_generator(self):
         for episode_dict in self.episodes:
             episode = Episode(
+                show=self.show,
                 sound_url=episode_dict['url'],
                 title=episode_dict['title'],
-                description=episode_dict['comment'],
-                date=datetime.datetime.strptime(episode_dict['dato'], "%Y%m%d").date(),
+                long_description=episode_dict['comment'],
+                date=datetime.datetime.strptime(str(episode_dict['dato']) + " 12:00:00 " + time.strftime("%z"),
+                                                "%Y%m%d %H:%M:%S %z"),
                 author=episode_dict['author'],
             )
             yield episode
