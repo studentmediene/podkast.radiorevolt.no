@@ -31,5 +31,8 @@ class EpisodeMetadataSource(metaclass=ABCMeta):
 
         Returns:
             None
+
+        Raises:
+            SkipEpisode: When this episode shouldn't be included in the feed.
         """
         pass

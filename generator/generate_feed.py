@@ -3,6 +3,7 @@ from . import episode_source
 from . import Show
 from .show_source import ShowSource
 from . import NoEpisodesError, NoSuchShowError
+from .metadata_sources.SkipShow import SkipShow
 
 from cached_property import cached_property
 
@@ -42,7 +43,7 @@ class PodcastFeedGenerator:
             str: The RSS podcast feed for the given show_id.
         """
         try:
-            return self._generate_feed(self.show_source.shows[show_id])
+            return self._generate_feed(self.show_source.shows[show_id], skip_empty=False)
         except KeyError as e:
             raise NoSuchShowError from e
 
@@ -58,6 +59,7 @@ class PodcastFeedGenerator:
         Returns:
             str: The RSS podcast feed for the given show.
         """
+
         # Populate show with more metadata
         self._populate_show_metadata(show)
 
@@ -95,14 +97,15 @@ class PodcastFeedGenerator:
             try:
                 # Do the job
                 feeds.append(self._generate_feed(show))
-            except NoEpisodesError:
+            except (NoEpisodesError, SkipShow):
                 # Skip this show
                 pass
+
         return feeds
 
     def _populate_show_metadata(self, show):
+        # TODO (Thorben 4. april): Actually ignore SkipShow when generating a single podcast feed
         for source in self.show_metadata_sources:
             if source.accepts(show):
                 source.populate(show)
-
 

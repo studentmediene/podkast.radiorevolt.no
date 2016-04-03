@@ -31,5 +31,10 @@ class ShowMetadataSource(metaclass=ABCMeta):
 
         Returns:
             None
+
+        Raises:
+            SkipShow: When this episode shouldn't have its feed generated. Applicable only when feeds are batch
+                generated; SkipShow is ignored when a show is requested explicitly (but it will still stop execution
+                in the metadata source, so make your changes before raising SkipShow).
         """
         pass
