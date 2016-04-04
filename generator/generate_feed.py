@@ -17,20 +17,12 @@ class PodcastFeedGenerator:
 
     @cached_property
     def episode_metadata_sources(self):
-        # Ensure the metadata sources are of the correct type
-        for source in metadata_sources.EPISODE_METADATA_SOURCES:
-            assert isinstance(source, metadata_sources.EpisodeMetadataSource), \
-                "%s is not subclass of EpisodeMetadataSource" % source
-        # Instantiate all of them
+        # Instantiate them
         return [source() for source in metadata_sources.EPISODE_METADATA_SOURCES]
 
     @cached_property
     def show_metadata_sources(self):
-        # Ensure the metadata sources are of the correct type
-        for source in metadata_sources.SHOW_METADATA_SOURCES:
-            assert isinstance(source, metadata_sources.ShowMetadataSource), \
-                "%r is not subclass of ShowMetadataSource" % source
-        # Instantiate all of them
+        # Instantiate them
         return [source() for source in metadata_sources.SHOW_METADATA_SOURCES]
 
     def generate_feed(self, show_id: int) -> bytes:
@@ -43,11 +35,11 @@ class PodcastFeedGenerator:
             str: The RSS podcast feed for the given show_id.
         """
         try:
-            return self._generate_feed(self.show_source.shows[show_id], skip_empty=False)
+            return self._generate_feed(self.show_source.shows[show_id], skip_empty=False, enable_skip_show=False)
         except KeyError as e:
             raise NoSuchShowError from e
 
-    def _generate_feed(self, show: Show, skip_empty: bool =True) -> bytes:
+    def _generate_feed(self, show: Show, skip_empty: bool =True, enable_skip_show: bool =True) -> bytes:
         """Generate RSS feed for the provided show.
 
         This differs from generate_feed in that it accept Show, not show_id, as argument.
@@ -61,7 +53,7 @@ class PodcastFeedGenerator:
         """
 
         # Populate show with more metadata
-        self._populate_show_metadata(show)
+        self._populate_show_metadata(show, enable_skip_show)
 
         # Start generating feed
         feed = show.init_feed()
@@ -103,9 +95,16 @@ class PodcastFeedGenerator:
 
         return feeds
 
-    def _populate_show_metadata(self, show):
-        # TODO (Thorben 4. april): Actually ignore SkipShow when generating a single podcast feed
+    def _populate_show_metadata(self, show, enable_skip_show: bool=True):
         for source in self.show_metadata_sources:
             if source.accepts(show):
-                source.populate(show)
+                try:
+                    source.populate(show)
+                except SkipShow as e:
+                    if enable_skip_show:
+                        # Skip
+                        raise e
+                    else:
+                        # We're not skipping this show, just go on...
+                        pass
 
