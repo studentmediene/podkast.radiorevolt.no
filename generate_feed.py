@@ -1,8 +1,14 @@
-from generator.generate_feed import PodcastFeedGenerator
-from generator import settings, NoSuchShowError
-
 import argparse
 import sys
+
+try:
+    from generator import settings
+except ImportError:
+    sys.exit("ERROR: You have not created generator/settings.py yet.\n"
+             "Make a copy of generator/settings_template.py called generator/settings.py and fill in the settings.")
+
+from generator.generate_feed import PodcastFeedGenerator
+from generator import NoSuchShowError
 
 
 def parse_cli_arguments() -> argparse.Namespace:
