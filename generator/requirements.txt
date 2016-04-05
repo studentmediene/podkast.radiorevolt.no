@@ -6,3 +6,5 @@ feedgen
 tinytag
 # Easily cache properties which could take some time to calculate
 cached-property
+# Make it possible to work with timezones
+pytz
