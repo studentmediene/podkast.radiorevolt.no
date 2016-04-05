@@ -8,3 +8,5 @@ tinytag
 cached-property
 # Make it possible to work with timezones
 pytz
+# Testing without boilerplate
+pytest

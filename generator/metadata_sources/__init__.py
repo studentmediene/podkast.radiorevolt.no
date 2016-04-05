@@ -1,5 +1,8 @@
 from .episode_metadata_source import EpisodeMetadataSource
 from .show_metadata_source import ShowMetadataSource
+from .SkipEpisode import SkipEpisode
+from .SkipShow import SkipShow
+
 # Import the metadata sources you will use here.
 from .episode.skip_future import SkipFutureEpisodes
 
