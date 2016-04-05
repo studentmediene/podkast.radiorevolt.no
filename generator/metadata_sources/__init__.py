@@ -6,6 +6,7 @@ from .skip_show import SkipShow
 # Import the metadata sources you will use here.
 from .episode.skip_future import SkipFutureEpisodes
 from .episode.chimera import Chimera as ChimeraEpisode
+from .show.chimera import Chimera as ChimeraShow
 
 """Metadata sources.
 
@@ -32,5 +33,5 @@ EPISODE_METADATA_SOURCES = [
 
 
 SHOW_METADATA_SOURCES = [
-
+    ChimeraShow,
 ]
