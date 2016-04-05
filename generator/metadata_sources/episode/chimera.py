@@ -35,8 +35,6 @@ class Chimera(EpisodeMetadataSource):
         shows = r.json()
         return {show['showID']: show['id'] for show in shows}
 
-
-
     @staticmethod
     def _fetch_episodes(chimera_id):
         r = requests.get(
@@ -48,7 +46,10 @@ class Chimera(EpisodeMetadataSource):
         return {episode['podcast_url']: episode for episode in episodes}
 
     def accepts(self, episode) -> bool:
-        return episode.date > self._start_date and episode.sound_url in self._get_episodes(episode.show.show_id)
+        # Return True if date is after our start date, the show is in Chimera and the episode is in Chimera
+        return episode.date > self._start_date\
+               and episode.show.show_id in self._shows_by_digas_id\
+               and episode.sound_url in self._get_episodes(episode.show.show_id)
 
     def populate(self, episode) -> None:
         try:
