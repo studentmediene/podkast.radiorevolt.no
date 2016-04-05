@@ -11,9 +11,9 @@ import sys
 from cached_property import cached_property
 
 # Number of threads that can download episodes at the same time.
-MAX_CONCURRENT_EPISODE_DOWNLOADS = 100
+MAX_CONCURRENT_EPISODE_DOWNLOADS = 10
 # Max size of memory that can be used by download process at any time.
-max_megabytes = 250
+max_megabytes = 500
 # How many bytes shall be read into memory before they're written to disc?
 CHUNK_SIZE = (max_megabytes // MAX_CONCURRENT_EPISODE_DOWNLOADS) * (1024 ** 2)
 
