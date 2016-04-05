@@ -5,6 +5,7 @@ from .episode import Episode
 import threading
 import datetime
 import time
+from cached_property import cached_property
 
 class EpisodeSource:
     """Class for fetching episodes for a podcast.
@@ -74,9 +75,11 @@ class EpisodeSource:
         if not self.episodes:
             raise NoEpisodesError(self.id)
 
-    def episode_generator(self):
-        for episode_dict in self.episodes:
-            episode = Episode(
+    @cached_property
+    def episode_list(self):
+        """List of Episode objects."""
+        return [
+            Episode(
                 show=self.show,
                 sound_url=episode_dict['url'],
                 title=episode_dict['title'],
@@ -84,5 +87,4 @@ class EpisodeSource:
                 date=datetime.datetime.strptime(str(episode_dict['dato']) + " 12:00:00 " + time.strftime("%z"),
                                                 "%Y%m%d %H:%M:%S %z"),
                 author=episode_dict['author'],
-            )
-            yield episode
+            ) for episode_dict in self.episodes]
