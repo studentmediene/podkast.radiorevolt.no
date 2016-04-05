@@ -1,4 +1,4 @@
-import datetime
+import datetime, pytz
 
 # Set to True to enable debugging mode, False to disable. Do not leave on in production!
 DEBUG = False
@@ -53,8 +53,9 @@ METADATA_SOURCE = {
         'API_URL': "URL",
 
         # Episodes from this date or newer will get metadata from Chimera.
-        # datetime.date(year, month, day) or None
-        'START_DATE': datetime.date(2000, 1, 1)
+        # Remember that it is set to UTC timezone, not CET or CEST.
+        # datetime.datetime(year, month, day, hour, minute, tzinfo=pytz.utc) or None
+        'START_DATE': datetime.datetime(2016, 4, 12, 0, 0, tzinfo=pytz.utc)
     },
 
     # RADIOREVOLT.NO SETTINGS

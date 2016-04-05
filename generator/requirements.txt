@@ -10,3 +10,5 @@ cached-property
 pytz
 # Testing without boilerplate
 pytest
+# Others
+Markdown

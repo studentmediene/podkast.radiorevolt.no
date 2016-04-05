@@ -5,6 +5,7 @@ from .skip_show import SkipShow
 
 # Import the metadata sources you will use here.
 from .episode.skip_future import SkipFutureEpisodes
+from .episode.chimera import Chimera as ChimeraEpisode
 
 """Metadata sources.
 
@@ -12,8 +13,8 @@ This module contains lists with metadata sources to be used, in the order they w
 The order is important, since metadata from a later source will override metadata from an earlier one
 (if they provide data for the same fields).
 
-An episode metadata source must extend EpisodeMetadataSource, and likewise for show metadata sources which must extend
-ShowMetadataSource.
+An episode metadata source should extend EpisodeMetadataSource, and likewise for show metadata sources which should
+extend ShowMetadataSource.
 
 Attributes:
     EPISODE_METADATA_SOURCES (list): List of episode metadata sources, in the order they will be executed
@@ -25,6 +26,7 @@ Attributes:
 
 
 EPISODE_METADATA_SOURCES = [
+    ChimeraEpisode,
     SkipFutureEpisodes,
 ]
 
