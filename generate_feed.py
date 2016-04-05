@@ -37,10 +37,13 @@ def main():
     durations = args.durations
     no_durations = args.no_durations
     pretty_xml = args.pretty
+    quiet = args.quiet
 
     # Check if one of the durations flags are provided.
     if durations or no_durations:
         settings.FIND_EPISODE_DURATIONS = durations
+    if quiet:
+        settings.QUIET = quiet
 
     program = PodcastFeedGenerator()
     program.pretty_xml = pretty_xml

@@ -4,6 +4,7 @@ from . import Show
 from .show_source import ShowSource
 from . import NoEpisodesError, NoSuchShowError
 from .metadata_sources.skip_show import SkipShow
+from . import settings as SETTINGS
 
 from cached_property import cached_property
 
@@ -81,15 +82,15 @@ class PodcastFeedGenerator:
         """Generate RSS feeds for all known shows, one at a time."""
         # Prepare for progress bar
         num_shows = len(self.show_source.shows)
-        progress_bar_width = 50
         i = 0
 
         feeds = list()
         for show in self.show_source.shows:
-            # Update progress bar
-            i += 1
-            print("{0: <30} {1}".format(show.title, "#" * (i * progress_bar_width // num_shows)),
-                  file=sys.stderr, end="\r")
+            if not SETTINGS.QUIET:
+                # Update progress bar
+                i += 1
+                print("{0: <30} ({1:03}/{2:03})".format(show.title, i, num_shows),
+                      file=sys.stderr)
             try:
                 # Do the job
                 feeds.append(self._generate_feed(show))

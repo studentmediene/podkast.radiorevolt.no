@@ -18,6 +18,9 @@ DEFAULT_WEBSITE = "http://example.org"
 # unless we're a background task
 FIND_EPISODE_DURATIONS = True
 
+# Don't change
+QUIET = False
+
 
 # SHOW SOURCE SETTINGS
 

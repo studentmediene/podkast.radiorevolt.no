@@ -4,9 +4,10 @@ from feedgen.feed import FeedGenerator
 from .metadata_sources import EpisodeMetadataSource
 from .metadata_sources.skip_episode import SkipEpisode
 from threading import Thread, BoundedSemaphore, RLock
+import sys
 
 
-MAX_CONCURRENT_EPISODE_FEED_WRITERS = 15
+MAX_CONCURRENT_EPISODE_FEED_WRITERS = 100
 
 class Show:
     def __init__(
@@ -98,6 +99,9 @@ class Show:
         """FeedGenerator: Reference to the FeedGenerator associated with this show."""
 
         self.write_feed_constraint = BoundedSemaphore(MAX_CONCURRENT_EPISODE_FEED_WRITERS)
+        self.print_lock = RLock()
+        self.progress_i = 0
+        self.progress_n = None
 
     def init_feed(self) -> FeedGenerator:
         feed = FeedGenerator()
@@ -140,7 +144,8 @@ class Show:
 
         threads = list()
         feed_access_lock = RLock()
-        for episode in episode_source.episode_generator():
+        self.progress_n = len(episode_source.episode_list)
+        for episode in episode_source.episode_list:
             # Let each metadata source provide metadata, if they have it
             for source in metadata_sources:
                 if source.accepts(episode):
@@ -164,4 +169,11 @@ class Show:
                 # Don't include this episode
                 with feed_access_lock:
                     episode.remove_from_feed(fg)
+        if not SETTINGS.QUIET:
+            with self.print_lock:
+                self.progress_i += 1
+                print(
+                    "Processed episode {0} of {1}".format(self.progress_i, self.progress_n),
+                    file=sys.stderr, end="\r"
+                )
 
