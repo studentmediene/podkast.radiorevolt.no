@@ -12,8 +12,9 @@ import sys
 
 class PodcastFeedGenerator:
 
-    def __init__(self):
+    def __init__(self, pretty_xml = False):
         self.show_source = ShowSource()
+        self.pretty_xml = pretty_xml
 
     @cached_property
     def episode_metadata_sources(self):
@@ -71,7 +72,7 @@ class PodcastFeedGenerator:
         show.add_episodes_to_feed(es, self.episode_metadata_sources)
 
         # Generate!
-        return feed.rss_str()
+        return feed.rss_str(pretty=self.pretty_xml)
 
     def generate_all_feeds_sequence(self) -> list:
         """Generate RSS feeds for all known shows, one at a time."""
