@@ -171,5 +171,5 @@ pip-selfcheck.json
 .idea/
 
 ### Application-specific ###
-# Ignore settings.py files
 **/settings.py
+**/episode_durations.txt
