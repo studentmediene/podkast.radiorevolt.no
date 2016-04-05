@@ -18,7 +18,7 @@ class Chimera(EpisodeMetadataSource):
         EpisodeMetadataSource.__init__(self)
         self._episodes_by_chimera_id = dict()
         self._start_date = SETTINGS['START_DATE']
-        self.markdown = Markdown()
+        self.markdown = Markdown(output="html5")
 
     def _get_episodes(self, digas_id):
         chimera_id = self._shows_by_digas_id[digas_id]
@@ -67,8 +67,10 @@ class Chimera(EpisodeMetadataSource):
 
         episode.short_description = metadata['lead']
 
-        markdown_description = metadata['body']
-        html_description = self.markdown.reset().convert(markdown_description)
+        # For long_description, use the article lead and body
+        markdown_description = """**{0}**\n\n{1}""".format(metadata['lead'], metadata['body'])
+        html_description = self.markdown.reset()\
+            .convert(markdown_description)
         episode.long_description = html_description
 
         # article URL is not part of the api, so use search page instead
