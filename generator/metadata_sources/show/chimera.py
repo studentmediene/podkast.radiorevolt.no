@@ -1,10 +1,6 @@
-from .. import SkipShow, ShowMetadataSource
+from .. import ShowMetadataSource
 from ...settings import METADATA_SOURCE
-from datetime import datetime
-from pytz import timezone
-import pytz
 import requests
-import urllib.parse
 from cached_property import cached_property
 
 SETTINGS = METADATA_SOURCE['CHIMERA']
