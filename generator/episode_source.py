@@ -1,6 +1,6 @@
 import requests
 from .settings import EPISODE_SOURCE as SETTINGS
-from .NoEpisodesError import NoEpisodesError
+from .no_episodes_error import NoEpisodesError
 from .episode import Episode
 import threading
 import datetime
