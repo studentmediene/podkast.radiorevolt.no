@@ -25,6 +25,8 @@ def parse_cli_arguments() -> argparse.Namespace:
                            help="Do not include episode durations in the feed. Use when time is of essence.")
     parser.add_argument("--quiet", "-q", action="store_true",
                         help="Disable progress messages.")
+    parser.add_argument("--pretty", "-p", action="store_true",
+                        help="Generate pretty, human-readable XML instead of hard-to-read XML.")
 
     return parser.parse_args()
 
@@ -34,12 +36,14 @@ def main():
     show = args.show_id
     durations = args.durations
     no_durations = args.no_durations
+    pretty_xml = args.pretty
 
     # Check if one of the durations flags are provided.
     if durations or no_durations:
         settings.FIND_EPISODE_DURATIONS = durations
 
     program = PodcastFeedGenerator()
+    program.pretty_xml = pretty_xml
     try:
         feed = program.generate_feed(show)
         print(feed.decode("utf-8"))
