@@ -35,7 +35,7 @@ class Chimera(ShowMetadataSource):
 
         show.short_description = metadata['lead']
 
-        show.long_description = metadata['description']
+        show.long_description = show.short_description
 
         show.image = NEW_IMAGE_PREFIX + metadata['image'][len(ORIG_IMAGE_PREFIX):-len(ORIG_IMAGE_SUFFIX)] + \
                      NEW_IMAGE_SUFFIX
