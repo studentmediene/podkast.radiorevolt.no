@@ -3,11 +3,6 @@ import datetime
 # Set to True to enable debugging mode, False to disable. Do not leave on in production!
 DEBUG = False
 
-# Default author name to use for episodes with no author
-DEFAULT_AUTHOR = "Anonymous"
-# Default author email to use for episodes with no author email address
-DEFAULT_AUTHOR_EMAIL = "someone@example.org"
-
 # Default email address for who to contact regarding content in a show.
 DEFAULT_EDITORIAL_EMAIL = "editor@example.org"
 # Default email address for who to contact regarding technical aspects of the podcast feed.

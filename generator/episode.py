@@ -61,8 +61,8 @@ class Episode:
             date (datetime.datetime): The timezone-aware date and time this episode was published. Mandatory.
             article_url (str): URL on which the entire description can be read, for example article on dusken.no.
                 Defaults to sound_url.
-            author (str): Name of the person who authored this episode. Defaults to value given in settings.py.
-            author_email (str): Email of the person who authored this episode. Defaults to value given in settings.py.
+            author (str): Name of the person who authored this episode. Defaults to the show's author.
+            author_email (str): Email of the person who authored this episode. Defaults to the show's editorial email.
             short_description (str): Short description used to give users an idea on what this episode contains. Cannot
                 contain markup of any kind. Defaults to the episode's title, or the first line of long_description if
                 present.
@@ -101,10 +101,10 @@ class Episode:
         self.article_url = article_url if article_url is not None else sound_url
         """str: URL on which the entire description can be read, for example article on dusken.no."""
 
-        self.author = author if author is not None else SETTINGS.DEFAULT_AUTHOR
+        self.author = author if author is not None else show.author
         """str: Name of the person who authored this episode."""
 
-        self.author_email = author_email if author_email is not None else SETTINGS.DEFAULT_AUTHOR_EMAIL
+        self.author_email = author_email if author_email is not None else show.editorial_email
         """str: Email of the person who authored this episode."""
 
         self.long_description = long_description if long_description is not None else short_description
