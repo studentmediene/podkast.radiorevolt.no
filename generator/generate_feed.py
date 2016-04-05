@@ -35,9 +35,12 @@ class PodcastFeedGenerator:
             str: The RSS podcast feed for the given show_id.
         """
         try:
-            return self._generate_feed(self.show_source.shows[show_id], skip_empty=False, enable_skip_show=False)
+            show = self.show_source.shows[show_id]
         except KeyError as e:
             raise NoSuchShowError from e
+
+        return self._generate_feed(show, skip_empty=False, enable_skip_show=False)
+
 
     def _generate_feed(self, show: Show, skip_empty: bool =True, enable_skip_show: bool =True) -> bytes:
         """Generate RSS feed for the provided show.
