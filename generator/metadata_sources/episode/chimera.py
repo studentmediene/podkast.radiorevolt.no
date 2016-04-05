@@ -6,14 +6,12 @@ import pytz
 import requests
 from markdown import Markdown
 import urllib.parse
-import pdb
 from cached_property import cached_property
 
 SETTINGS = METADATA_SOURCE['CHIMERA']
 
 
 class Chimera(EpisodeMetadataSource):
-
     def __init__(self):
         EpisodeMetadataSource.__init__(self)
         self._episodes_by_chimera_id = dict()
@@ -46,9 +44,9 @@ class Chimera(EpisodeMetadataSource):
         return {episode['podcast_url']: episode for episode in episodes}
 
     def accepts(self, episode) -> bool:
-        # Return True if date is after our start date, the show is in Chimera and the episode is in Chimera
-        return episode.date > self._start_date\
-               and episode.show.show_id in self._shows_by_digas_id\
+        """Return True if date is after our start date, the show is in Chimera and the episode is in Chimera."""
+        return episode.date > self._start_date \
+               and episode.show.show_id in self._shows_by_digas_id \
                and episode.sound_url in self._get_episodes(episode.show.show_id)
 
     def populate(self, episode) -> None:
@@ -70,7 +68,7 @@ class Chimera(EpisodeMetadataSource):
 
         # For long_description, use the article lead and body
         markdown_description = """**{0}**\n\n{1}""".format(metadata['lead'], metadata['body'])
-        html_description = self.markdown.reset()\
+        html_description = self.markdown.reset() \
             .convert(markdown_description)
         episode.long_description = html_description
 
