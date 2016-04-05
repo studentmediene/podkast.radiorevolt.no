@@ -2,7 +2,7 @@ from . import settings as SETTINGS
 from .episode_source import EpisodeSource
 from feedgen.feed import FeedGenerator
 from .metadata_sources import EpisodeMetadataSource
-from .metadata_sources.SkipEpisode import SkipEpisode
+from .metadata_sources.skip_episode import SkipEpisode
 from threading import Thread, BoundedSemaphore, RLock
 
 

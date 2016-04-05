@@ -3,7 +3,7 @@ from . import episode_source
 from . import Show
 from .show_source import ShowSource
 from . import NoEpisodesError, NoSuchShowError
-from .metadata_sources.SkipShow import SkipShow
+from .metadata_sources.skip_show import SkipShow
 
 from cached_property import cached_property
 
