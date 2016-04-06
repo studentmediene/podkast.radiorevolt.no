@@ -7,6 +7,7 @@ from .skip_show import SkipShow
 from .episode.skip_future import SkipFutureEpisodes
 from .episode.chimera import Chimera as ChimeraEpisode
 from .show.chimera import Chimera as ChimeraShow
+from .show.manual_changes import ManualChanges as ManualChangesShow
 
 """Metadata sources.
 
@@ -34,4 +35,5 @@ EPISODE_METADATA_SOURCES = [
 
 SHOW_METADATA_SOURCES = [
     ChimeraShow,
+    ManualChangesShow
 ]

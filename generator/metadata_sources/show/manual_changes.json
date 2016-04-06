@@ -1,0 +1,25 @@
+{
+  "digas_show_id (in quotes)":
+  {
+    "IMPORTANT": "Those are ALL the properties you can set, but please don't actually use them all! You need only overwrite a few fields, since data for the rest is found automatically by other metadata sources. Properties you omit will not be touched. Start with an empty plate and add only the properties not fetched from elsewhere.",
+    "title": "Name of the show",
+    "short_description": "Short description (couple words) describing the show.",
+    "long_description": "Long description, which is used when you hover the i icon in iTunes.",
+    "image": "URL for image which will be used for this show. It must be PNG or JPEG, and it must be between 1400x1400 and 3000x3000 pixels in resolution.",
+    "category": "iTunes category for this show. See https://help.apple.com/itc/podcasts_connect/#/itc9267a2f12 for available categories.",
+    "sub_category": "iTunes sub-category for this show. See https://help.apple.com/itc/podcasts_connect/#/itc9267a2f12 for available sub-categories.",
+    "language": "Language of this show. Use one of the two-letter values found in http://www.loc.gov/standards/iso639-2/php/code_list.php.",
+    "show_url": "This show's website.",
+    "author": "Name of the author.",
+    "explicit": "(remove quotes) true if this show is explicit, false if this show is clean, null if it's undecided.",
+    "old": "(remove quotes) true if there won't be more episodes in this show, false otherwise",
+    "editorial_email": "Email for whoever is accountable for the content.",
+    "technical_email": "Email for whoever is responsible for the technical aspect of the feed, for instance the webmaster."
+  },
+  "2592": {
+    "category": "Games & Hobbies",
+    "sub_category": "Video Games",
+    "long_description": "I spillmagasinet Nerdeprat tar vi opp ukas nyheter og informerer deg om de spillene du burde spille ‒ spesielt de du kanskje har gått glipp av. Vi diskuterer også tema rundt spill og nerdekultur, med akademisk og humoristisk tilnærming, og spiller aktuelle låter fra dataspill. Du hører oss live hver onsdag, fra 17 til 19.",
+    "show_url": "http://dusken.no/radio/nerdeprat/"
+  }
+}

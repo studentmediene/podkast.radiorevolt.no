@@ -10,5 +10,5 @@ cached-property
 pytz
 # Testing without boilerplate
 pytest
-# Others
+# For Chimera episode source
 Markdown
