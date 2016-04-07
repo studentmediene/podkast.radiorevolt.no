@@ -1,5 +1,4 @@
 from .. import SkipEpisode, EpisodeMetadataSource
-from ...settings import METADATA_SOURCE
 from datetime import datetime
 from pytz import timezone
 import pytz
@@ -7,15 +6,13 @@ import requests
 from markdown import Markdown
 import urllib.parse
 from cached_property import cached_property
-
-SETTINGS = METADATA_SOURCE['CHIMERA']
+from sys import stderr
 
 
 class Chimera(EpisodeMetadataSource):
-    def __init__(self):
-        EpisodeMetadataSource.__init__(self)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self._episodes_by_chimera_id = dict()
-        self._start_date = SETTINGS['START_DATE']
         self.markdown = Markdown(output="html5")
 
     def _get_episodes(self, digas_id):
@@ -28,15 +25,14 @@ class Chimera(EpisodeMetadataSource):
 
     @cached_property
     def _shows_by_digas_id(self):
-        r = requests.get(SETTINGS['API_URL'] + "/shows/", params={"format": "json"})
+        r = requests.get(self.settings['API_URL'] + "/shows/", params={"format": "json"})
         r.raise_for_status()
         shows = r.json()
         return {show['showID']: show['id'] for show in shows}
 
-    @staticmethod
-    def _fetch_episodes(chimera_id):
+    def _fetch_episodes(self, chimera_id):
         r = requests.get(
-            SETTINGS['API_URL'] + "/episodes/" + str(chimera_id) + "/",
+            self.settings['API_URL'] + "/episodes/" + str(chimera_id) + "/",
             params={"format": "json"}
         )
         r.raise_for_status()
@@ -44,17 +40,14 @@ class Chimera(EpisodeMetadataSource):
         return {episode['podcast_url']: episode for episode in episodes}
 
     def accepts(self, episode) -> bool:
-        """Return True if date is after our start date, the show is in Chimera and the episode is in Chimera."""
-        return episode.date > self._start_date \
-               and episode.show.show_id in self._shows_by_digas_id \
-               and episode.sound_url in self._get_episodes(episode.show.show_id)
+        return super().accepts(episode)
 
     def populate(self, episode) -> None:
         try:
             metadata = self._get_episodes(episode.show.show_id)[episode.sound_url]
-        except KeyError:
-            # episode not in Chimera
-            return
+        except KeyError as e:
+            # episode or show not in Chimera - that could mean the article isn't published yet, so hide the episode
+            raise SkipEpisode from e
         if not metadata['is_published']:
             raise SkipEpisode
 

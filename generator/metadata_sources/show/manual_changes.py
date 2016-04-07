@@ -8,8 +8,8 @@ import sys
 
 class ManualChanges(ShowMetadataSource):
 
-    def __init__(self):
-        ShowMetadataSource.__init__(self)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
     @staticmethod
     def _get_key(show):

@@ -47,31 +47,64 @@ EPISODE_SOURCE = {
 }
 
 
-# METADATA SOURCE SETTINGS
+# METADATA SOURCE SETTINGS - key must match the class name.
+
+# If an episode source and a show source shares their class name, they will share settings.
+
+# Two special settings are START_DATE and END_DATE. With those, you can limit the source to accepting episodes which are
+# published within the given range.
+# If START_DATE is None, all episodes before END_DATE will be accepted.
+# If END_DATE is None, all episodes after START_DATE will be accepted.
+# If they're both None or one or zero of them are present, there will be no limits imposed in regards to episode date.
+# When not None, they must be a timezone-aware instance of datetime.datetime. Syntax for date given in UTC:
+# datetime.datetime(year, month, day, hour, minute, tzinfo=pytz.utc)
 
 METADATA_SOURCE = {
 
     # CHIMERA SETTINGS
-    # TODO: Implement metadata source for Chimera
-    'CHIMERA': {
+    'Chimera': {
         # Base URL for CHIMERA RADIO API (without trailing slash). Example: "http://example.org/radio/api"
         'API_URL': "URL",
 
-        # Episodes from this date or newer will get metadata from Chimera.
-        # Remember that it is set to UTC timezone, not CET or CEST.
-        # datetime.datetime(year, month, day, hour, minute, tzinfo=pytz.utc) or None
-        'START_DATE': datetime.datetime(2016, 4, 12, 0, 0, tzinfo=pytz.utc)
+        'START_DATE': datetime.datetime(2016, 4, 12, 0, 0, tzinfo=pytz.utc),
+
+        'END_DATE': None,
     },
 
     # RADIOREVOLT.NO SETTINGS
     # TODO: Implement metadata source for RadioRevolt.no
-    'RADIO_REVOLT': {
+    'RadioRevolt': {
         # Base URL for RADIO REVOLT API (without trailing slash).
         'API_URL': "URL",
 
-        # Episodes from this date or newer will get metadata from RadioRevolt.no.
-        # datetime.date(year, month, day) or None
-        'START_DATE': datetime.date(2000, 1, 1)
+        'START_DATE': datetime.date(2000, 1, 1),
     },
 
 }
+
+# BYPASS - define which episodes and shows should be bypassed by the different metadata sources.
+
+# There are two variables, BYPASS_EPISODE and BYPASS_SHOW, which both are dictionaries.
+# In those dictionaries, the metadata source class name is used as key and a set with episodes or
+# shows to bypass are used as values.
+
+# Episodes to bypass are identified by their sound_url, that is the URL where the podcast episode can be found.
+# Shows to bypass are identified by their show_id, that is the DigAS ID used to identify that show.
+
+BYPASS_EPISODE = {
+    'Chimera': {
+
+    },
+    'SkipFutureEpisodes': {
+
+    },
+}
+BYPASS_SHOW = {
+    'Chimera': {
+
+    },
+    'ManualChanges': {
+
+    },
+}
+

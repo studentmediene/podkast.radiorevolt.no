@@ -26,7 +26,7 @@ def parse_cli_arguments() -> argparse.Namespace:
                            "task which can spend a lot of time calculating durations. Those durations can then be used"
                            " when the feed is requested by a user without this flag set.")
     parser.add_argument("--quiet", "-q", action="store_true",
-                        help="Disable progress messages.")
+                        help="Disable progress messages and notices.")
     parser.add_argument("--pretty", "-p", action="store_true",
                         help="Generate pretty, human-readable XML instead of hard-to-read, minified XML.")
 
