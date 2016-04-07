@@ -7,7 +7,7 @@ The main goal is to **eliminate the need for Feedburner**, since Google might sh
 
 ## Features ##
 
-* **Use metadata** like episode title, description, image and link from dusken.no/radio and radiorevolt.no (using podcast date to decide which one to use)
+* **Use metadata** like episode title, description, image and link from dusken.no/radio and radiorevolt.no (using podcast date to decide which of them to use)
 * Use metadata like feed title, description and image from dusken.no/radio or radiorevolt.no (whichever is in use)
 * Only publish a podcast episode if its corresponding episode post on dusken.no/radio or radiorevolt.no is published (enabling **preproduction of podcasts**)
 * Follow the **guidelines set by iTunes** so that the feed can be used directly by it.
@@ -23,6 +23,12 @@ This project uses Python v3.4 only, and is written so that the podcast feeds can
 ## How to set up ##
 
 1. [Use virtualenv!](https://iamzed.com/2009/05/07/a-primer-on-virtualenv/)
+
+   ```bash
+   virtualenv -p python3.4 venv
+   . venv/bin/activate
+   ```
+
 2. Install the following packages (assuming Ubuntu/Debian):
 
     * libxml2
@@ -44,19 +50,20 @@ This project uses Python v3.4 only, and is written so that the podcast feeds can
 5. Copy `generator/settings_template.py` to `generator/settings.py` and fill in settings.
 6. Do the same with `webserver/settings_template.py` if you intend to use the provided web server.
 
-TODO: Correct the use of term `web server`, since what we're really making is something that can be run _by_ a
-web server.
-
 
 ## Scripts ##
 
 <dl>
-    <dt>generator/generate_feed.py</dt>
+    <dt>generate_feed.py</dt>
     <dd>Generate RSS feed for a single podcast.</dd>
-    <dt>generator/batch_generate_feed.py</dt>
+    <dt>batch_generate_feed.py</dt>
     <dd>Generate RSS feeds for all known podcasts.</dd>
-    <dt>webserver/server.py</dt>
+    <dt>server.py</dt>
     <dd>Run web server which generates podcast feeds as they're requested.</dd>
+    <dt>utils/mod_rewrite.py</dt>
+    <dd>Generate configuration for Apache mod_rewrite, which can be used to redirect to the generated feeds (useful when
+    running <code>batch_generate_feed.py</code> as a background task and serving the generated RSS files using Apache,
+     not <code>server.py</code>)</dd>
 </dl>
 
 Use the `--help` flag to see available options for any script.
@@ -76,16 +83,26 @@ Use the `--help` flag to see available options for any script.
 
 ### Generating the feed for a podcast ###
 
-First, episodes for this podcast are fetched. The `episode_source` is responsible for this.
+First, the show is matched with one of the shows in `show_source`. It will fetch basic information about the show,
+like the show name. In the case of generating the feed for one single podcast, the `show_source` doesn't do much –
+its primary purpose is to iterate through all shows.
+
+Next, metadata for the show is fetched by all registered `metadata_sources.show` classes. This is done by querying each
+metadata source for whether it has metadata for this show or not. If it has, it is asked to populate the show with new
+metadata. The order in which the metadata sources are asked, is defined in `generator/metadata_sources/__init__.py`.
+Later sources override information from the earlier ones.
+
+Now, episodes for this podcast are fetched. The `episode_source` is responsible for this.
 It also writes basic metadata for all episodes.
 
-Secondly, `metadata_sources` may act on a subset of the episodes and add or overwrite the existing metadata with new data.
-Each metadata source has a method for figuring out if this is a relevant episode for this source. If it is, then the
-metadata source is asked to edit the XML item for that episode.
+Secondly, registered `metadata_sources/episode` classes may act on a subset of the episodes and add or overwrite the existing metadata with
+new data, much like the `metadata_sources/show`. Furthermore, each metadata source has a method for figuring out if this
+is a relevant episode for this source. If it is, then the metadata source is asked to edit the Episode object.
 
-**Only one** metadata source may supply metadata for any given episode. The first one that is deemed relevant for an
-episode is the one that is chosen. The order in which the metadata sources appear in
-`generator/metadata_sources/__init__.py` is thus of big importance.
+Both in the case of shows and episodes, multiple metadata sources may act on a single show/episode. This way, one
+metadata source may provide only the link to the podcast image, while another source provides the textual description.
+Still, if multiple sources provide the same attribute, later metadata sources will override metadata from earlier sources. The order in which the metadata sources appear
+in `generator/metadata_sources/__init__.py` is thus of big importance.
 
-Note that it is perfectly acceptable for no metadata source to match an episode – in such cases, the default metadata
-from the `episode_source` is used.
+Note that it is perfectly acceptable for no metadata source to match an episode or show – in such cases, the default
+metadata from the `episode_source` or `show_source` is used, respectively.
