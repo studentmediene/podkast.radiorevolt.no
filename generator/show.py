@@ -168,7 +168,7 @@ class Show:
                     with self.print_lock:
                         exc_type, exc_value, exc_traceback = sys.exc_info()
                         cause = traceback.extract_tb(exc_traceback, 2)[1][0]
-                        print("NOTE: Skipping episode named {name} (URL: \"{url}\", caused by {cause})"
+                        print("NOTE: Skipping episode named {name}\n    URL: \"{url}\"\n    Caused by {cause}\n"
                               .format(name=episode.title, url=episode.sound_url, cause=cause),
                               file=sys.stderr)
 
