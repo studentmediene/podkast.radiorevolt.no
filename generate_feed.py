@@ -1,6 +1,7 @@
 import argparse
 import sys
 
+# Give helpful message if settings isn't available
 try:
     from generator import settings
 except ImportError:
@@ -39,12 +40,11 @@ def main():
     pretty_xml = args.pretty
     quiet = args.quiet
 
-    settings.FIND_EPISODE_DURATIONS = durations
-    if quiet is not None:
-        settings.QUIET = quiet
-
-    program = PodcastFeedGenerator()
-    program.pretty_xml = pretty_xml
+    program = PodcastFeedGenerator(
+        pretty_xml=pretty_xml,
+        calculate_durations=durations,
+        quiet=quiet,
+    )
     try:
         feed = program.generate_feed(show)
         print(feed.decode("utf-8"))
