@@ -27,6 +27,8 @@ class Show:
             long_description: str =None,
             author: str =None,
             explicit: bool =None,
+            owner_name: str =None,
+            owner_email: str =None
     ):
         """Initialize a new show with the provided data.
 
@@ -57,16 +59,19 @@ class Show:
             author (str): Name of the author. Defaults to the title (that is, the show name).
             explicit (bool | None): True if this show is explicit, False if this show is clean, None if it's undecided
                 (default).
+            owner_name (str): Name of the owner, which will be contacted by iTunes in case of problems. Defaults to
+                value in settings.py.
+            owner_email (str): Email of the owner, which will be contacted by iTunes in case of problems. Defaults to
+                value in settings.py.
         """
         self.title = title
         """str: Name of the show."""
         self.show_id = show_id
         """int: DigAS ID for the show."""
 
-        self.short_description = short_description if short_description is not None \
-            else SETTINGS.DEFAULT_SHORT_FEED_DESCRIPTION
+        self.short_description = short_description or SETTINGS.DEFAULT_SHORT_FEED_DESCRIPTION
         """str: Short description (couple words) describing the show."""
-        self.long_description = long_description if long_description is not None else short_description
+        self.long_description = long_description or self.short_description
         """str: Long description, which is used when you hover the i icon in iTunes."""
         self.image = image
         """str: URL for image which will be used for this show. It must be PNG or JPEG, and it must
@@ -80,20 +85,24 @@ class Show:
         self.language = language
         """str: Language of this show. Use one of the two-letter values found in
     http://www.loc.gov/standards/iso639-2/php/code_list.php."""
-        self.show_url = show_url if show_url is not None else SETTINGS.DEFAULT_WEBSITE
+        self.show_url = show_url or SETTINGS.DEFAULT_WEBSITE
         """str: This show's website."""
-        self.editorial_email = editorial_email if editorial_email is not None else SETTINGS.DEFAULT_EDITORIAL_EMAIL
+        self.editorial_email = editorial_email or SETTINGS.DEFAULT_EDITORIAL_EMAIL
         """str: Email for whoever is responsible for the content."""
-        self.technical_email = technical_email if technical_email is not None else SETTINGS.DEFAULT_TECHNICAL_EMAIL
+        self.technical_email = technical_email or SETTINGS.DEFAULT_TECHNICAL_EMAIL
         """str: Email for whoever is responsible for the technical aspect of the feed, for instance the webmaster."""
         self.copyright = copyright_
         """str: Information about this show's copyright."""
         self.old = old
         """bool: Set to True if there won't be published more podcast episodes for this feed."""
-        self.author = author if author is not None else title
+        self.author = author or title
         """str: Name of the author/artist."""
         self.explicit = explicit
         """bool | None: True if this show is explicit, False if this show is clean, None if it's undecided"""
+        self.owner_name = owner_name or SETTINGS.OWNER_NAME
+        """str: Name of the owner, which will be contacted by iTunes in case of problems."""
+        self.owner_email = owner_email or SETTINGS.OWNER_EMAIL
+        """str: Email of the owner, which will be contacted by iTunes in case of problems."""
 
         self.feed = None
         """FeedGenerator: Reference to the FeedGenerator associated with this show."""
@@ -131,6 +140,7 @@ class Show:
         feed.podcast.itunes_author(self.author)
         if self.explicit is not None:
             feed.podcast.itunes_explicit(self.explicit)
+        feed.podcast.itunes_owner(name=self.owner_name, email=self.owner_email)
 
         self.feed = feed
 

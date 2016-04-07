@@ -7,6 +7,10 @@ DEBUG = False
 DEFAULT_EDITORIAL_EMAIL = "editor@example.org"
 # Default email address for who to contact regarding technical aspects of the podcast feed.
 DEFAULT_TECHNICAL_EMAIL = "it@example.org"
+# Name and email for the podcast owner, which will be contacted by iTunes for questions, problems etc.
+# regarding the podcasts
+OWNER_NAME = "Example Radio"
+OWNER_EMAIL = "it@example.org"
 
 # Default short description to use on shows with no description.
 DEFAULT_SHORT_FEED_DESCRIPTION = "Podcast from Example Radio"
