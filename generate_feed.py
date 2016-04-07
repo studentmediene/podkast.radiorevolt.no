@@ -27,7 +27,7 @@ def parse_cli_arguments() -> argparse.Namespace:
     parser.add_argument("--quiet", "-q", action="store_true",
                         help="Disable progress messages.")
     parser.add_argument("--pretty", "-p", action="store_true",
-                        help="Generate pretty, human-readable XML instead of hard-to-read XML.")
+                        help="Generate pretty, human-readable XML instead of hard-to-read, minified XML.")
 
     return parser.parse_args()
 
