@@ -1,6 +1,7 @@
 import argparse
 import sys
 
+# Give helpful message if settings isn't available
 try:
     from generator import settings
 except ImportError:
@@ -18,15 +19,16 @@ def parse_cli_arguments() -> argparse.Namespace:
     parser.add_argument("show_id", type=int, help="DigAS ID for the show which shall have its podcast feed generated.")
     durations = parser.add_mutually_exclusive_group()
     durations.add_argument("--durations", action="store_true",
-                           help="Include episode durations in the feed. "
-                           "This will take a lot of time the first time, because episodes must be downloaded before"
-                           " their duration can be calculated.")
-    durations.add_argument("--no-durations", action="store_true",
-                           help="Do not include episode durations in the feed. Use when time is of essence.")
+                           help="Calculate episode durations for episodes with no duration info yet. This takes a LOT "
+                           "of time, since the episode MP3 files must be downloaded to the server. Default behaviour "
+                           "is to include duration information for episodes with existing duration data, but exclude it"
+                           " for episodes which don't have it. Ideally, you should use this option for a background "
+                           "task which can spend a lot of time calculating durations. Those durations can then be used"
+                           " when the feed is requested by a user without this flag set.")
     parser.add_argument("--quiet", "-q", action="store_true",
                         help="Disable progress messages.")
     parser.add_argument("--pretty", "-p", action="store_true",
-                        help="Generate pretty, human-readable XML instead of hard-to-read XML.")
+                        help="Generate pretty, human-readable XML instead of hard-to-read, minified XML.")
 
     return parser.parse_args()
 
@@ -35,18 +37,14 @@ def main():
     args = parse_cli_arguments()
     show = args.show_id
     durations = args.durations
-    no_durations = args.no_durations
     pretty_xml = args.pretty
     quiet = args.quiet
 
-    # Check if one of the durations flags are provided.
-    if durations or no_durations:
-        settings.FIND_EPISODE_DURATIONS = durations
-    if quiet is not None:
-        settings.QUIET = quiet
-
-    program = PodcastFeedGenerator()
-    program.pretty_xml = pretty_xml
+    program = PodcastFeedGenerator(
+        pretty_xml=pretty_xml,
+        calculate_durations=durations,
+        quiet=quiet,
+    )
     try:
         feed = program.generate_feed(show)
         print(feed.decode("utf-8"))

@@ -145,19 +145,22 @@ class Episode:
         if self.sound_url in self._durations.keys():
             return self._durations[self.sound_url]
         else:
-            # Nope, find and save the duration for this episode
-            duration = self.get_duration()
+            # Nope, find and save the duration for this episode - but only if we're allowed to
+            if SETTINGS.FIND_EPISODE_DURATIONS:
+                duration = self.get_duration()
 
-            hours = (duration.days*24) + (duration.seconds // (60*60))
-            minutes = (duration.seconds % (60*60)) // 60
-            seconds = duration.seconds % 60
-            duration_string = "{hours:02d}:{minutes:02d}:{seconds:02d}"\
-                .format(hours=hours, minutes=minutes, seconds=seconds)
+                hours = (duration.days*24) + (duration.seconds // (60*60))
+                minutes = (duration.seconds % (60*60)) // 60
+                seconds = duration.seconds % 60
+                duration_string = "{hours:02d}:{minutes:02d}:{seconds:02d}"\
+                    .format(hours=hours, minutes=minutes, seconds=seconds)
 
-            with self._duration_file_lock:
-                self._durations[self.sound_url] = duration_string
-                self.save_durations()
-            return duration_string
+                with self._duration_file_lock:
+                    self._durations[self.sound_url] = duration_string
+                    self.save_durations()
+                return duration_string
+            else:
+                return None
 
     @property
     def date_string(self) -> str:
@@ -225,7 +228,7 @@ class Episode:
         fe.link({'href': self.article_url})
         fe.published(self.date)
 
-        if SETTINGS.FIND_EPISODE_DURATIONS:
+        if self.duration is not None:
             fe.podcast.itunes_duration(self.duration)
 
         if self.image is not None:

@@ -17,13 +17,11 @@ DEFAULT_SHORT_FEED_DESCRIPTION = "Podcast from Example Radio"
 # Default website to use on shows with no website.
 DEFAULT_WEBSITE = "http://example.org"
 
-# Set to True to enable calculation of episode durations by default, False to disable.
-# TODO: Implement behaviour where calculated episode durations are always used, but don't calculate new ones \
-# unless we're a background task
-FIND_EPISODE_DURATIONS = True
+# Determines whether new episode duration should be calculated by default. Modified by command line options.
+FIND_EPISODE_DURATIONS = False
 
-# Don't change
-QUIET = False
+# Determines whether progress information should be printed. Modified by command line options.
+QUIET = True
 
 
 # SHOW SOURCE SETTINGS

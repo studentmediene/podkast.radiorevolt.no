@@ -13,9 +13,12 @@ import sys
 
 class PodcastFeedGenerator:
 
-    def __init__(self, pretty_xml = False):
+    def __init__(self, pretty_xml=False, calculate_durations=False, quiet=False):
         self.show_source = ShowSource()
         self.pretty_xml = pretty_xml
+
+        SETTINGS.FIND_EPISODE_DURATIONS = calculate_durations
+        SETTINGS.QUIET = quiet
 
     @cached_property
     def episode_metadata_sources(self):
