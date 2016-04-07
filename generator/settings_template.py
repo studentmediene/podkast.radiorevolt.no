@@ -52,15 +52,26 @@ EPISODE_SOURCE = {
 METADATA_SOURCE = {
 
     # CHIMERA SETTINGS
-    # TODO: Implement metadata source for Chimera
     'CHIMERA': {
         # Base URL for CHIMERA RADIO API (without trailing slash). Example: "http://example.org/radio/api"
         'API_URL': "URL",
 
-        # Episodes from this date or newer will get metadata from Chimera.
+        # Episodes from this date until END_DATE will get metadata from Chimera.
         # Remember that it is set to UTC timezone, not CET or CEST.
         # datetime.datetime(year, month, day, hour, minute, tzinfo=pytz.utc) or None
-        'START_DATE': datetime.datetime(2016, 4, 12, 0, 0, tzinfo=pytz.utc)
+        'START_DATE': datetime.datetime(2016, 4, 12, 0, 0, tzinfo=pytz.utc),
+
+        # Episodes before this date and time but after START_DATE will get metadata from Chimera.
+        # Set to None to set no boundary.
+        # datetime.datetime(year, month, day, hour, minute, tzinfo=pytz.utc) or None
+        'END_DATE': None,
+
+        # Add the URL of episodes you want to bypass Chimera to this set. Do this with episodes that you want to publish
+        # even though they aren't found in Chimera.
+        'BYPASS': {
+            "URL of episode to bypass",
+            "another URL for an episode to bypass"
+        },
     },
 
     # RADIOREVOLT.NO SETTINGS
@@ -71,7 +82,7 @@ METADATA_SOURCE = {
 
         # Episodes from this date or newer will get metadata from RadioRevolt.no.
         # datetime.date(year, month, day) or None
-        'START_DATE': datetime.date(2000, 1, 1)
+        'START_DATE': datetime.date(2000, 1, 1),
     },
 
 }

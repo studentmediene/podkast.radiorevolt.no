@@ -7,6 +7,7 @@ import requests
 from markdown import Markdown
 import urllib.parse
 from cached_property import cached_property
+from sys import stderr
 
 SETTINGS = METADATA_SOURCE['CHIMERA']
 
@@ -16,7 +17,18 @@ class Chimera(EpisodeMetadataSource):
         EpisodeMetadataSource.__init__(self)
         self._episodes_by_chimera_id = dict()
         self._start_date = SETTINGS['START_DATE']
+        self._end_date = SETTINGS['END_DATE']
+        self._bypass = SETTINGS['BYPASS']
         self.markdown = Markdown(output="html5")
+        # Check if the dates are correct
+        if self._start_date and self._end_date and self._end_date <= self._start_date:
+            print("WARNING: Chimera EpisodeMetadataSource: END_DATE is set _before_ START_DATE in "
+                  "generator/settings.py.\n"
+                  "This results in this metadata source not matching any episodes.\n"
+                  "Please remove Chimera from EPISODE_METADATA_SOURCES in generator/metadata_sources/__init__.py "
+                  "if that's what you intended. Otherwise, define a valid range in generator/settings.py for which "
+                  "Chimera episode metadata will be used.", file=stderr)
+
 
     def _get_episodes(self, digas_id):
         chimera_id = self._shows_by_digas_id[digas_id]
@@ -44,17 +56,28 @@ class Chimera(EpisodeMetadataSource):
         return {episode['podcast_url']: episode for episode in episodes}
 
     def accepts(self, episode) -> bool:
-        """Return True if date is after our start date, the show is in Chimera and the episode is in Chimera."""
-        return episode.date > self._start_date \
-               and episode.show.show_id in self._shows_by_digas_id \
-               and episode.sound_url in self._get_episodes(episode.show.show_id)
+        """Return True if the episode isn't ignored and is published within the interval in which Chimera is active.
+
+        Start and end date for Chimera is set in settings.py, together with a set with episodes which will be bypassed
+        this source."""
+        if episode.sound_url in self._bypass:
+            return False
+
+        if self._start_date and self._end_date:
+            return self._start_date <= episode.date <= self._end_date
+        elif self._start_date:
+            return self._start_date <= episode.date
+        elif self._end_date:
+            return episode.date <= self._end_date
+        else:
+            return True
 
     def populate(self, episode) -> None:
         try:
             metadata = self._get_episodes(episode.show.show_id)[episode.sound_url]
-        except KeyError:
-            # episode not in Chimera
-            return
+        except KeyError as e:
+            # episode or show not in Chimera - that could mean the article isn't published yet, so hide the episode
+            raise SkipEpisode from e
         if not metadata['is_published']:
             raise SkipEpisode
 

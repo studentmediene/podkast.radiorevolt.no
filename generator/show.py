@@ -5,6 +5,7 @@ from .metadata_sources import EpisodeMetadataSource
 from .metadata_sources.skip_episode import SkipEpisode
 from threading import Thread, BoundedSemaphore, RLock
 import sys
+import traceback
 
 
 MAX_CONCURRENT_EPISODE_FEED_WRITERS = 100
@@ -156,14 +157,27 @@ class Show:
         feed_access_lock = RLock()
         self.progress_n = len(episode_source.episode_list)
         for episode in episode_source.episode_list:
-            # Let each metadata source provide metadata, if they have it
-            for source in metadata_sources:
-                if source.accepts(episode):
-                    source.populate(episode)
+            try:
+                # Let each metadata source provide metadata, if they have it
+                for source in metadata_sources:
+                    if source.accepts(episode):
+                        source.populate(episode)
+            except SkipEpisode as e:
+                # Don't add this episode to the feed
+                if not SETTINGS.QUIET:
+                    with self.print_lock:
+                        exc_type, exc_value, exc_traceback = sys.exc_info()
+                        cause = traceback.extract_tb(exc_traceback, 2)[1][0]
+                        print("NOTE: Skipping episode named {name} (URL: \"{url}\", caused by {cause})"
+                              .format(name=episode.title, url=episode.sound_url, cause=cause),
+                              file=sys.stderr)
+
+                self._progress_increment()
+                continue
             # Add this episode to the feed
             episode.add_to_feed(self.feed)
             thread = Thread(target=self._write_episode_to_feed,
-                            kwargs={'episode': episode, 'feed_access_lock': feed_access_lock, 'fg': self.feed})
+                            kwargs={'episode': episode})
             thread.start()
             threads.append(thread)
 
@@ -171,14 +185,12 @@ class Show:
         for thread in threads:
             thread.join()
 
-    def _write_episode_to_feed(self, episode, feed_access_lock, fg):
+    def _write_episode_to_feed(self, episode):
         with self.write_feed_constraint:
-            try:
-                episode.populate_feed_entry()
-            except SkipEpisode:
-                # Don't include this episode
-                with feed_access_lock:
-                    episode.remove_from_feed(fg)
+            episode.populate_feed_entry()
+        self._progress_increment()
+
+    def _progress_increment(self):
         if not SETTINGS.QUIET:
             with self.print_lock:
                 self.progress_i += 1
@@ -186,4 +198,3 @@ class Show:
                     "Processed episode {0} of {1}".format(self.progress_i, self.progress_n),
                     file=sys.stderr, end="\r"
                 )
-
