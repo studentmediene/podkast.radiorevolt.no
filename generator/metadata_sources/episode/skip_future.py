@@ -5,11 +5,12 @@ import pytz
 
 
 class SkipFutureEpisodes(EpisodeMetadataSource):
-    def __init__(self):
-        EpisodeMetadataSource.__init__(self)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
     def accepts(self, episode) -> bool:
-        return episode.date > datetime.now(pytz.utc)
+        return super().accepts(episode)\
+               and episode.date > datetime.now(pytz.utc)
 
     def populate(self, episode) -> None:
         raise SkipEpisode

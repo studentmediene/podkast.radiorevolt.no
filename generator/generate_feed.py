@@ -23,12 +23,24 @@ class PodcastFeedGenerator:
     @cached_property
     def episode_metadata_sources(self):
         # Instantiate them
-        return [source() for source in metadata_sources.EPISODE_METADATA_SOURCES]
+        return [
+            source(
+                SETTINGS.METADATA_SOURCE.get(source.__name__, dict()),
+                SETTINGS.BYPASS_EPISODE.get(source.__name__, set())
+            )
+            for source in metadata_sources.EPISODE_METADATA_SOURCES
+        ]
 
     @cached_property
     def show_metadata_sources(self):
         # Instantiate them
-        return [source() for source in metadata_sources.SHOW_METADATA_SOURCES]
+        return [
+            source(
+                SETTINGS.METADATA_SOURCE.get(source.__name__, dict()),
+                SETTINGS.BYPASS_SHOW.get(source.__name__, set())
+            )
+            for source in metadata_sources.SHOW_METADATA_SOURCES
+        ]
 
     def generate_feed(self, show_id: int) -> bytes:
         """Generate RSS feed for the show represented by the given show_id.
