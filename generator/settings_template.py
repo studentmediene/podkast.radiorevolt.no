@@ -20,8 +20,8 @@ DEFAULT_WEBSITE = "http://example.org"
 # Determines whether new episode duration should be calculated by default. Modified by command line options.
 FIND_EPISODE_DURATIONS = False
 
-# Don't change
-QUIET = False
+# Determines whether progress information should be printed. Modified by command line options.
+QUIET = True
 
 
 # SHOW SOURCE SETTINGS
