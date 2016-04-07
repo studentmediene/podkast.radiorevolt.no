@@ -42,7 +42,7 @@ def main():
     # Check if one of the durations flags are provided.
     if durations or no_durations:
         settings.FIND_EPISODE_DURATIONS = durations
-    if quiet:
+    if quiet is not None:
         settings.QUIET = quiet
 
     program = PodcastFeedGenerator()
