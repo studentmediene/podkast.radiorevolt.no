@@ -31,7 +31,7 @@ class ManualChanges(ShowMetadataSource):
 
     def accepts(self, show) -> bool:
         try:
-            return self._get_key(show) in self.data
+            return super().accepts(show) and self._get_key(show) in self.data
         except TypeError:
             return False
 

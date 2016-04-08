@@ -1,0 +1,15 @@
+{
+  "episode podcast URL":
+  {
+    "IMPORTANT": "Those are ALL the properties you can set, but please don't actually use them all! You need only overwrite a few fields, since data for the rest is found automatically by other metadata sources. Properties you omit will not be touched. Start with an empty plate and add only the properties not fetched from elsewhere.",
+    "title": "Name of the episode.",
+    "date": "The date this episode is published. Format (±HHMM is the timezone offset from UTC): YYYY-MM-DD HH:MM:SS ±HHMM",
+    "short_description": "Short description (couple words) describing the episode.",
+    "long_description": "Long description, which is used when you hover the i icon in iTunes.",
+    "image": "URL for image which will be used for this episode (in place of the default show image). It must be PNG or JPEG, and it must be between 1400x1400 and 3000x3000 pixels in resolution.",
+    "article_url": "URL to this episode's article.",
+    "author": "Name of the author.",
+    "author_email": "Email address of the author. Defaults to the show's editorial_email.",
+    "explicit": "(remove quotes) true if this episode is not appropiate for children, false if this show is appropiate, null if it's undecided. Setting this overrides the show's explicit value for this episode only."
+  }
+}
