@@ -1,4 +1,5 @@
 from .. import ShowMetadataSource
+from ..base_manual_changes import BaseManualChanges
 from ...settings import METADATA_SOURCE
 from cached_property import cached_property
 import json
@@ -6,34 +7,24 @@ import os.path
 import sys
 
 
-class ManualChanges(ShowMetadataSource):
-
+class ManualChanges(BaseManualChanges, ShowMetadataSource):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+    @cached_property
+    def _is_episode_source(self):
+        return False
+
+    @cached_property
+    def _config_file_settings_key(self):
+        return "SHOW_CONFIG"
 
     @staticmethod
     def _get_key(show):
         return str(show.show_id)
 
-    @cached_property
-    def data(self):
-        try:
-            return json.load(open(os.path.join(os.path.dirname(__file__), "manual_changes.json")))
-        except IOError as e:
-            print("WARNING: ManualChanges is added as a metadata source for shows, but the configuration file "
-                  "generator/metadata_sources/show/manual_changes.json could not be loaded. \nDetails:", e,
-                  file=sys.stderr)
-            return None
-        except ValueError as e:
-            print("WARNING: There is an error in generator/metadata_sources/show/manual_changes.json.\nDetails:",
-                  e, file=sys.stderr)
-            return None
-
     def accepts(self, show) -> bool:
-        try:
-            return super().accepts(show) and self._get_key(show) in self.data
-        except TypeError:
-            return False
+        return super().accepts(show)
 
     def populate(self, show) -> None:
         metadata = self.data[self._get_key(show)]
@@ -53,3 +44,8 @@ class ManualChanges(ShowMetadataSource):
         show.show_url = metadata.get("show_url", show.show_url)
         show.language = metadata.get("language", show.language)
         show.copyright = metadata.get("copyright", show.copyright)
+
+        recognized_keys = {"title", "short_description", "long_description", "category", "sub_category", "image",
+                           "author", "editorial_email", "technical_email", "old", "explicit", "show_url",
+                           "language", "copyright"}
+        self.check_for_unrecognized_keys(metadata, recognized_keys, self._get_key(show))

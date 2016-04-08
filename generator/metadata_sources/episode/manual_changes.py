@@ -1,4 +1,5 @@
 from .. import EpisodeMetadataSource
+from ..base_manual_changes import BaseManualChanges
 from cached_property import cached_property
 import json
 import os.path
@@ -6,40 +7,24 @@ import sys
 from datetime import datetime
 
 
-class ManualChanges(EpisodeMetadataSource):
+class ManualChanges(BaseManualChanges, EpisodeMetadataSource):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    @cached_property
+    def _is_episode_source(self):
+        return True
+
+    @cached_property
+    def _config_file_settings_key(self):
+        return "EPISODE_CONFIG"
+
+    def accepts(self, episode) -> bool:
+        return super().accepts(episode)
 
     @staticmethod
     def _get_key(episode):
         return str(episode.sound_url)
-
-    @cached_property
-    def _config_file(self):
-        return self.settings['EPISODE_CONFIG']
-
-    @cached_property
-    def data(self):
-        try:
-            return json.load(open(self._config_file))
-        except IOError as e:
-            print("WARNING: ManualChanges is added as a metadata source for episodes, but the configuration file "
-                  "{file} could not be loaded. \nDetails: {e}".format(file=self._config_file, e=e), file=sys.stderr)
-            return None
-        except ValueError as e:
-            print("WARNING: There is an error in {file}.\nDetails: {e}".format(file=self._config_file, e=e),
-                  file=sys.stderr)
-            return None
-        except KeyError:
-            path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "settings.py"))
-            print("WARNING: No configuration file is configured for episode/ManualChanges.\n"
-                  "Ensure the setting EPISODE_CONFIG is set for METADATA_SOURCE['ManualChanges'] "
-                  "in {path}.".format(path=path),
-                  file=sys.stderr)
-
-    def accepts(self, episode) -> bool:
-        try:
-            return super().accepts(episode) and self._get_key(episode) in self.data
-        except TypeError:
-            return False
 
     def populate(self, episode) -> None:
         metadata = self.data[self._get_key(episode)]
@@ -63,8 +48,4 @@ class ManualChanges(EpisodeMetadataSource):
 
         recognized_keys = {"title", "date", "short_description", "long_description", "image", "author",
                            "author_email", "explicit", "article_url"}
-        unrecognized_keys = set(metadata.keys()) - recognized_keys
-        if unrecognized_keys:
-            print("WARNING episode/ManualChanges: Some attributes for {episode} were not recognized, namely {keys}."
-                  .format(episode=episode.title, keys=unrecognized_keys),
-                  file=sys.stderr)
+        self.check_for_unrecognized_keys(metadata, recognized_keys, self._get_key(episode))
