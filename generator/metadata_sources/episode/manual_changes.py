@@ -60,4 +60,11 @@ class ManualChanges(EpisodeMetadataSource):
         episode.author_email = metadata.get("author_email", episode.author_email)
         episode.explicit = metadata.get("explicit", episode.explicit)
         episode.article_url = metadata.get("article_url", episode.article_url)
-        # TODO: Issue a warning if there are unrecognized keys in metadata
+
+        recognized_keys = {"title", "date", "short_description", "long_description", "image", "author",
+                           "author_email", "explicit", "article_url"}
+        unrecognized_keys = set(metadata.keys()) - recognized_keys
+        if unrecognized_keys:
+            print("WARNING episode/ManualChanges: Some attributes for {episode} were not recognized, namely {keys}."
+                  .format(episode=episode.title, keys=unrecognized_keys),
+                  file=sys.stderr)
