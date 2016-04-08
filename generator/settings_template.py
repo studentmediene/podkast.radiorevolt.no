@@ -1,4 +1,4 @@
-import datetime, pytz
+import datetime, pytz, os.path
 
 # Set to True to enable debugging mode, False to disable. Do not leave on in production!
 DEBUG = False
@@ -79,6 +79,15 @@ METADATA_SOURCE = {
 
         'START_DATE': datetime.date(2000, 1, 1),
     },
+    'ManualChanges': {
+        # Path to the configuration file used by ManualChanges for episodes.
+        # Default is metadata_sources/episode/manual_changes.json (relative to this directory).
+        'EPISODE_CONFIG': os.path.join(os.path.dirname(__file__), "metadata_sources", "episode", "manual_changes.json"),
+
+        # Path to the configuration file used by ManualChanges for shows.
+        # Default is metadata_sources/show/manual_changes.json (relative to this directory).
+        'SHOW_CONFIG': os.path.join(os.path.dirname(__file__), "metadata_sources", "show", "manual_changes.json"),
+    }
 
 }
 

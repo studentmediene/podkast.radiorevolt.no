@@ -50,7 +50,8 @@ class Episode:
             return cls._temp_file_id
 
     def __init__(self, sound_url: str, title: str,  show, date: datetime.datetime, article_url: str=None, author: str=None,
-                 author_email: str=None, short_description: str=None, long_description: str=None, image: str=None):
+                 author_email: str=None, short_description: str=None, long_description: str=None, image: str=None,
+                 explicit: bool=None):
         """
         Initialize this episode with the given data.
 
@@ -71,6 +72,8 @@ class Episode:
                 HTML themselves. Defaults to short_description.
             image (str): URL to image for this episode. Must be between 1400x1400 and 3000x3000 pixels, and PNG or JPG.
                 Defaults to using the feed's image.
+            explicit (bool): True if this episode is inappropiate to children, False if it is appropiate, None if it is
+                neither (default).
         """
         # Mandatory parameters
         self.sound_url = sound_url
@@ -114,6 +117,9 @@ class Episode:
 
         self.image = image
         """str: URL to image for this episode. Must be between 1400x1400 and 3000x3000 pixels, and PNG or JPG."""
+
+        self.explicit = explicit
+        """bool: True if this episode is inappropiate to children, False if it is appropiate, None if it is neither."""
 
         # Internal properties
         self.__size = None
@@ -233,6 +239,9 @@ class Episode:
 
         if self.image is not None:
             fe.podcast.itunes_image(self.image)
+
+        if self.explicit is not None:
+            fe.podcast.itunes_explicit(self.explicit)
 
     def remove_from_feed(self, fg: FeedGenerator) -> None:
         """Remove this episode from the given feed."""
