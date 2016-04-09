@@ -23,9 +23,13 @@ class Episode:
     # Create the required table(s) if they don't exist already.
     # (Do it here to ensure it's only done once)
 
-    _create_table = sqlite3.connect(os.path.join(os.path.dirname(__file__), "episode_durations.db"))
-    _create_table.execute("create table if not exists durations (id text primary key, duration text)")
-    _create_table.close()
+    _create_table_durations = sqlite3.connect(os.path.join(os.path.dirname(__file__), "episode_durations.db"))
+    _create_table_durations.execute("create table if not exists durations (id text primary key, duration text)")
+    _create_table_durations.close()
+
+    _create_table_size = sqlite3.connect(os.path.join(os.path.dirname(__file__), "episode_sizes.db"))
+    _create_table_size.execute("create table if not exists sizes (id text primary key, filesize integer)")
+    _create_table_size.close()
 
     _download_constrain = threading.BoundedSemaphore(MAX_CONCURRENT_EPISODE_DOWNLOADS)
 
@@ -108,7 +112,27 @@ class Episode:
     @cached_property
     def size(self) -> int:
         """Number of bytes this episode is. Read-only."""
-        return self._get_size()
+        db = None
+        try:
+            # Create new database connection (a new one each time, since it is bound to one thread)
+            db = sqlite3.connect(os.path.join(os.path.dirname(__file__), "episode_sizes.db"))
+            # Try to fetch this episode's filesize
+            c = db.execute("SELECT filesize FROM sizes WHERE id=?", (self.sound_url,))
+            value = c.fetchone()
+            c.close()
+            # Did we get it?
+            if value:
+                return str(value[0])
+            else:
+                # Nope, calculate and save it for later times
+                size = self._get_size()
+                db.execute("INSERT INTO sizes (id, filesize) VALUES (:id, :filesize)",
+                           {"id": self.sound_url, "filesize": size})
+                db.commit()
+                return size
+        finally:
+            if db:
+                db.close()
 
     def _get_size(self) -> int:
         head = requests.head(self.sound_url, allow_redirects=True)
