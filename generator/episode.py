@@ -7,7 +7,7 @@ import os
 import json
 import email.utils
 from tinytag.tinytag import TinyTag
-import sys
+import tempfile
 from cached_property import cached_property
 
 # Number of threads that can download episodes at the same time.
@@ -24,9 +24,6 @@ class Episode:
     _duration_file_name = os.path.join(os.path.dirname(__file__), "episode_durations.txt")
     _durations = None
 
-    _temp_file_id = 0
-    _temp_file_lock = threading.RLock()
-
     _download_constrain = threading.BoundedSemaphore(MAX_CONCURRENT_EPISODE_DOWNLOADS)
 
     @classmethod
@@ -42,12 +39,6 @@ class Episode:
         with cls._duration_file_lock:
             with open(cls._duration_file_name, mode="w") as fp:
                 json.dump(cls._durations, fp)
-
-    @classmethod
-    def _get_temp_id(cls):
-        with cls._temp_file_lock:
-            cls._temp_file_id += 1
-            return cls._temp_file_id
 
     def __init__(self, sound_url: str, title: str,  show, date: datetime.datetime, article_url: str=None, author: str=None,
                  author_email: str=None, short_description: str=None, long_description: str=None, image: str=None,
@@ -178,11 +169,11 @@ class Episode:
         with self._download_constrain:
             # Start fetching mp3 file
             r = requests.get(self.sound_url, stream=True)
-            # Find unique filename for mp3 file (it must be downloaded so it can be opened by TinyTag)
-            filename = str(self._get_temp_id()) + ".temporary.mp3"
             # Save the mp3 file (streaming it so we won't run out of memory)
+            filename = None
             try:
-                with open(filename, 'wb') as fd:
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as fd:
+                    filename = fd.name
                     for chunk in r.iter_content(chunk_size=CHUNK_SIZE):
                         fd.write(chunk)
                         del chunk
@@ -193,7 +184,8 @@ class Episode:
             finally:
                 # Remove temporary file
                 try:
-                    os.remove(filename)
+                    if filename:
+                        os.remove(filename)
                 except FileNotFoundError:
                     pass
 
