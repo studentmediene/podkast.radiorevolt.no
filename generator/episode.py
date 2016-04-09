@@ -5,7 +5,6 @@ from . import settings as SETTINGS
 import threading
 import os
 import json
-import email.utils
 from tinytag.tinytag import TinyTag
 import tempfile
 from cached_property import cached_property
@@ -158,11 +157,6 @@ class Episode:
                 return duration_string
             else:
                 return None
-
-    @property
-    def date_string(self) -> str:
-        """String representing the date this episode was published."""
-        return email.utils.format_datetime(self.date)
 
     def get_duration(self) -> datetime.timedelta:
         """Download episode and find its duration."""
