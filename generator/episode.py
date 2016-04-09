@@ -5,10 +5,10 @@ from . import settings as SETTINGS
 import threading
 import os
 import json
-import email.utils
 from tinytag.tinytag import TinyTag
 import tempfile
 from cached_property import cached_property
+import sqlite3
 
 # Number of threads that can download episodes at the same time.
 MAX_CONCURRENT_EPISODE_DOWNLOADS = 10
@@ -20,25 +20,14 @@ CHUNK_SIZE = (max_megabytes // MAX_CONCURRENT_EPISODE_DOWNLOADS) * (1024 ** 2)
 
 class Episode:
     """Class representing a single podcast episode."""
-    _duration_file_lock = threading.RLock()
-    _duration_file_name = os.path.join(os.path.dirname(__file__), "episode_durations.txt")
-    _durations = None
+    # Create the required table(s) if they don't exist already.
+    # (Do it here to ensure it's only done once)
+
+    _create_table = sqlite3.connect(os.path.join(os.path.dirname(__file__), "episode_durations.db"))
+    _create_table.execute("create table if not exists durations (id text primary key, duration text)")
+    _create_table.close()
 
     _download_constrain = threading.BoundedSemaphore(MAX_CONCURRENT_EPISODE_DOWNLOADS)
-
-    @classmethod
-    def load_durations(cls):
-        """Load file with earlier calculated duration values into memory."""
-        with cls._duration_file_lock:
-            with open(cls._duration_file_name) as fp:
-                cls._durations = json.load(fp)
-
-    @classmethod
-    def save_durations(cls):
-        """Save file with calculated duration values, so we won't need to calculate them again."""
-        with cls._duration_file_lock:
-            with open(cls._duration_file_name, mode="w") as fp:
-                json.dump(cls._durations, fp)
 
     def __init__(self, sound_url: str, title: str,  show, date: datetime.datetime, article_url: str=None, author: str=None,
                  author_email: str=None, short_description: str=None, long_description: str=None, image: str=None,
@@ -125,44 +114,46 @@ class Episode:
         head = requests.head(self.sound_url, allow_redirects=True)
         return head.headers['content-length']
 
-    @property
+    @cached_property
     def duration(self) -> str:
         """String representing how long this episodes lasts, in format HH:MM:SS. Read-only."""
-        with self._duration_file_lock:
-            # Check if we've loaded durations from file
-            if self._durations is None:
-                # Not yet, try to load from file
-                try:
-                    self.load_durations()
-                except FileNotFoundError:
-                    # Create empty file so we can load from it later
-                    Episode._durations = dict()
-                    self.save_durations()
-        # Check if there's an entry for this file now that self.durations is a dict
-        if self.sound_url in self._durations.keys():
-            return self._durations[self.sound_url]
-        else:
-            # Nope, find and save the duration for this episode - but only if we're allowed to
-            if SETTINGS.FIND_EPISODE_DURATIONS:
-                duration = self.get_duration()
+        db = None
+        try:
+            # Create new database connection (we do it here because a connection can only be used in the thread it's
+            # created in).
+            db = sqlite3.connect(os.path.join(os.path.dirname(__file__), "episode_durations.db"))
+            # Fetch any saved duration, if it exists
+            c = db.execute("SELECT duration FROM durations WHERE id=?", (self.sound_url,))
+            value = c.fetchone()
+            c.close()
 
-                hours = (duration.days*24) + (duration.seconds // (60*60))
-                minutes = (duration.seconds % (60*60)) // 60
-                seconds = duration.seconds % 60
-                duration_string = "{hours:02d}:{minutes:02d}:{seconds:02d}"\
-                    .format(hours=hours, minutes=minutes, seconds=seconds)
-
-                with self._duration_file_lock:
-                    self._durations[self.sound_url] = duration_string
-                    self.save_durations()
-                return duration_string
+            # Was there a duration saved for this episode?
+            if value:
+                # Yes, use it
+                return value[0]
             else:
-                return None
+                # Nope, find and save the duration for this episode - but only if we're allowed to
+                if SETTINGS.FIND_EPISODE_DURATIONS:
+                    duration = self.get_duration()
 
-    @property
-    def date_string(self) -> str:
-        """String representing the date this episode was published."""
-        return email.utils.format_datetime(self.date)
+                    # Convert to string conforming to iTunes' format
+                    hours = (duration.days*24) + (duration.seconds // (60*60))
+                    minutes = (duration.seconds % (60*60)) // 60
+                    seconds = duration.seconds % 60
+                    duration_string = "{hours:02d}:{minutes:02d}:{seconds:02d}"\
+                        .format(hours=hours, minutes=minutes, seconds=seconds)
+
+                    # Persist this string in the database
+                    db.execute("INSERT INTO durations (id, duration) VALUES (:id, :duration)",
+                               {"id": self.sound_url, "duration": duration_string})
+                    db.commit()
+                    return duration_string
+                else:
+                    # Not allowed, so return None (makes it so there is no itunes:duration tag for this episode)
+                    return None
+        finally:
+            if db:
+                db.close()
 
     def get_duration(self) -> datetime.timedelta:
         """Download episode and find its duration."""
