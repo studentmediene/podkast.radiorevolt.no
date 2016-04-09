@@ -177,3 +177,5 @@ pip-selfcheck.json
 **/episode_durations.txt
 # Cache episode durations.
 **/episode_durations.db
+# Cache episode sizes
+**/episode_sizes.db
