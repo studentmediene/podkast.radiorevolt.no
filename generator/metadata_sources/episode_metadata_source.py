@@ -72,3 +72,14 @@ class EpisodeMetadataSource(metaclass=ABCMeta):
             SkipEpisode: When this episode shouldn't be included in the feed.
         """
         pass
+
+    def prepare_batch(self) -> None:
+        """Called to signal that information about all available episodes should be downloaded.
+
+        This method should download information about all episodes, so that subsequent calls to
+        accept and populate don't cause a network roundtrip. This is done to save time when
+        batch generating feeds.
+
+        The default implementation does nothing.
+        """
+        pass
