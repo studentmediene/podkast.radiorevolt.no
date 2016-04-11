@@ -11,7 +11,9 @@ def save_feed_to_file(feed, target_file):
 
 
 def parse_cli_arguments():
-    parser = argparse.ArgumentParser(description="Write feeds for multiple podcasts.")
+    parser = argparse.ArgumentParser(description="Write feeds for multiple podcasts.",
+                                     epilog="See generate_feed.py for generating a single feed. "
+                                     "See calculate_durations.py for calculating episode durations.")
     parser.add_argument("--create-directory", "-d", action="store_true",
                         help="Create target_dir if it doesn't exist already.")
     parser.add_argument("target_dir", type=os.path.abspath, default=".",
@@ -22,10 +24,6 @@ def parse_cli_arguments():
     parser.add_argument("shows", nargs="*", type=int,
                         help="DigAS IDs for the shows you want to generate feed for. "
                         "Leave it out to generate for all known shows.")
-    parser.add_argument("--durations", action="store_true",
-                        help="NOT RECOMMENDED: Download episodes and find their durations. "
-                        "This takes a TON of time; run calculate_durations.py as a background script instead (so it "
-                             "doesn't stop feed generation.")
     parser.add_argument("--quiet", "-q", action="store_true",
                         help="Disable progress messages and notices.")
     parser.add_argument("--pretty", "-p", action="store_true",
@@ -40,7 +38,7 @@ def main():
     target_dir = args.target_dir
     naming_scheme = args.naming_scheme
     arg_shows = args.shows
-    calculate_durations = args.durations
+    calculate_durations = False
     quiet = args.quiet
     pretty = args.pretty
     create_dir = args.create_directory
