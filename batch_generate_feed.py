@@ -12,8 +12,13 @@ def save_feed_to_file(feed, target_file):
 
 def parse_cli_arguments():
     parser = argparse.ArgumentParser(description="Write feeds for multiple podcasts.",
-                                     epilog="See generate_feed.py for generating a single feed. "
-                                     "See calculate_durations.py for calculating episode durations.")
+                                     epilog="See generate_feed.py for generating a single feed and "
+                                     "calculate_durations.py for calculating episode durations.")
+    parser.add_argument("--quiet", "-q", action="store_true",
+                        help="Disable progress messages and notices.")
+    parser.add_argument("--pretty", "-p", action="store_true",
+                        help="Write pretty, human-readable XML-files instead of "
+                        "hard to read, minified XML.")
     parser.add_argument("--create-directory", "-d", action="store_true",
                         help="Create target_dir if it doesn't exist already.")
     parser.add_argument("--exclude", "-x", action="store_true",
@@ -26,11 +31,6 @@ def parse_cli_arguments():
     parser.add_argument("shows", nargs="*", type=int,
                         help="DigAS IDs for the shows you want to generate feed for. "
                         "Leave it out to generate for all known shows.")
-    parser.add_argument("--quiet", "-q", action="store_true",
-                        help="Disable progress messages and notices.")
-    parser.add_argument("--pretty", "-p", action="store_true",
-                        help="Write pretty, human-readable XML-files instead of "
-                        "hard to read, minified XML.")
 
     return parser, parser.parse_args()
 
