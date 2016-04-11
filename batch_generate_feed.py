@@ -16,6 +16,8 @@ def parse_cli_arguments():
                                      "See calculate_durations.py for calculating episode durations.")
     parser.add_argument("--create-directory", "-d", action="store_true",
                         help="Create target_dir if it doesn't exist already.")
+    parser.add_argument("--exclude", "-x", action="store_true",
+                        help="Generate feeds for all shows EXCEPT the ones named on the command line.")
     parser.add_argument("target_dir", type=os.path.abspath, default=".",
                         help="Directory which the feeds should be saved in.")
     parser.add_argument("naming_scheme", type=str,
@@ -42,19 +44,26 @@ def main():
     quiet = args.quiet
     pretty = args.pretty
     create_dir = args.create_directory
+    exclude = args.exclude
 
     generator = PodcastFeedGenerator(pretty, calculate_durations, quiet)
     all_shows = generator.show_source.shows
     all_shows_set = set(all_shows.keys())
     arg_shows_set = set(arg_shows)
-    chosen_shows = all_shows_set.intersection(arg_shows_set)
-    if len(arg_shows_set) != len(chosen_shows):
-        # Some shows were dropped
-        dropped_shows = arg_shows_set - all_shows_set
-        parser.error("ERROR: One or more of the given shows were not recognized, namely {shows}."
+    if exclude:
+        chosen_shows = all_shows_set - arg_shows_set
+    else:
+        chosen_shows = all_shows_set.intersection(arg_shows_set)
+
+    dropped_shows = arg_shows_set - all_shows_set
+    if dropped_shows:
+        parser.error("One or more of the given shows were not recognized, namely {shows}."
                      .format(shows=dropped_shows))
-    elif not chosen_shows:
+    elif not arg_shows_set:
+        # No arguments given, assume all shows
         chosen_shows = all_shows_set
+    elif not chosen_shows:
+        parser.error("No shows matched.")
 
     if not os.path.isdir(target_dir):
         if create_dir:
