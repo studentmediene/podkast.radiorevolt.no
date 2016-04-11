@@ -5,6 +5,7 @@ from .show_source import ShowSource
 from . import NoEpisodesError, NoSuchShowError
 from .metadata_sources.skip_show import SkipShow
 from . import settings as SETTINGS
+from .episode_source import EpisodeSource
 
 from cached_property import cached_property
 
@@ -42,7 +43,7 @@ class PodcastFeedGenerator:
             for source in metadata_sources.SHOW_METADATA_SOURCES
         ]
 
-    def generate_feed(self, show_id: int) -> bytes:
+    def generate_feed(self, show_id: int, force: bool =True) -> bytes:
         """Generate RSS feed for the show represented by the given show_id.
 
         Args:
@@ -56,7 +57,7 @@ class PodcastFeedGenerator:
         except KeyError as e:
             raise NoSuchShowError from e
 
-        return self._generate_feed(show, skip_empty=False, enable_skip_show=False)
+        return self._generate_feed(show, skip_empty=not force, enable_skip_show=not force)
 
 
     def _generate_feed(self, show: Show, skip_empty: bool =True, enable_skip_show: bool =True) -> bytes:
@@ -93,22 +94,33 @@ class PodcastFeedGenerator:
         # Generate!
         return feed.rss_str(pretty=self.pretty_xml)
 
-    def generate_all_feeds_sequence(self) -> list:
+    def generate_all_feeds_sequence(self) -> dict:
         """Generate RSS feeds for all known shows, one at a time."""
         # Prepare for progress bar
         num_shows = len(self.show_source.shows)
         i = 0
 
-        feeds = list()
-        for show in self.show_source.shows:
+        # Ensure we only download list of episodes once
+        if not SETTINGS.QUIET:
+            print("Downloading list of episodes", file=sys.stderr)
+        EpisodeSource.populate_all_episodes_list()
+        if not SETTINGS.QUIET:
+            print("Downloading metadata, this could take a while...", file=sys.stderr)
+        for source in self.episode_metadata_sources:
+            source.prepare_batch()
+        for source in self.show_metadata_sources:
+            source.prepare_batch()
+
+        feeds = dict()
+        for show in self.show_source.shows.values():
             if not SETTINGS.QUIET:
                 # Update progress bar
                 i += 1
-                print("{0: <30} ({1:03}/{2:03})".format(show.title, i, num_shows),
+                print("{0: <60} ({1:03}/{2:03})".format(show.title, i, num_shows),
                       file=sys.stderr)
             try:
                 # Do the job
-                feeds.append(self._generate_feed(show))
+                feeds[show.show_id] = self._generate_feed(show)
             except (NoEpisodesError, SkipShow):
                 # Skip this show
                 pass

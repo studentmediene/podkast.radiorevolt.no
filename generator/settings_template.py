@@ -1,4 +1,4 @@
-import datetime, pytz, os.path
+import datetime, pytz, os.path, threading
 
 # Set to True to enable debugging mode, False to disable. Do not leave on in production!
 DEBUG = False
@@ -22,6 +22,8 @@ FIND_EPISODE_DURATIONS = False
 
 # Determines whether progress information should be printed. Modified by command line options.
 QUIET = True
+# Do not modify
+CANCEL = threading.Event()
 
 
 # SHOW SOURCE SETTINGS

@@ -25,6 +25,7 @@ class ShowSource:
             auth=requests.auth.HTTPDigestAuth(SETTINGS['RADIO_REST_API_USERNAME'], SETTINGS['RADIO_REST_API_PASSWORD']),
         )
         r.raise_for_status()
+        r.encoding = "ISO 8859-1"
         show_list = r.json()
 
         # Convert to dictionary with id as key

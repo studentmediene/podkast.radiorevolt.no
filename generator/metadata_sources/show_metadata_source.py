@@ -51,3 +51,14 @@ class ShowMetadataSource(metaclass=ABCMeta):
                 in the metadata source, so make your changes before raising SkipShow).
         """
         pass
+
+    def prepare_batch(self) -> None:
+        """Called to signal that information about all available shows should be downloaded.
+
+        This method should download information about all shows, so that subsequent calls to
+        accept and populate don't cause a network roundtrip. This is done to save time when
+        generating all feeds.
+
+        The default implementation does nothing.
+        """
+        pass

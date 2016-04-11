@@ -152,7 +152,8 @@ class Show:
         # Are the metadata sources of the right type?
         for source in metadata_sources:
             assert isinstance(source, EpisodeMetadataSource), "%r is not a subclass of EpisodeMetadataSource." % source
-
+        if not SETTINGS.QUIET:
+            print("Processing episodes...", file=sys.stderr, end="\r")
         threads = list()
         feed_access_lock = RLock()
         self.progress_n = len(episode_source.episode_list)
@@ -182,8 +183,15 @@ class Show:
             threads.append(thread)
 
         # Wait for everyone to finish
-        for thread in threads:
-            thread.join()
+        try:
+            for thread in threads:
+                thread.join()
+        except KeyboardInterrupt:
+            SETTINGS.CANCEL.set()
+            with self.print_lock:
+                print("Exiting and cleaning up, please be patient...", file=sys.stderr)
+            for thread in threads:
+                thread.join()
 
     def _write_episode_to_feed(self, episode):
         with self.write_feed_constraint:

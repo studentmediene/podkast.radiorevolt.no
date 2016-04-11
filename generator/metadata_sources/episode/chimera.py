@@ -51,9 +51,13 @@ class Chimera(EpisodeMetadataSource):
         if not metadata['is_published']:
             raise SkipEpisode
 
-        date = datetime.strptime(metadata['public_from'], "%Y-%m-%dT%H:%M:%SZ")
-        date = pytz.utc.localize(date)
-        episode.date = date
+        try:
+            date = datetime.strptime(metadata['public_from'], "%Y-%m-%dT%H:%M:%SZ")
+            date = pytz.utc.localize(date)
+            episode.date = date
+        except ValueError:
+            # published date can be ill-formed
+            pass
 
         episode.title = metadata['headline']
 

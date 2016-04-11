@@ -138,7 +138,7 @@ class Episode:
         head = requests.head(self.sound_url, allow_redirects=True)
         return head.headers['content-length']
 
-    @cached_property
+    @property
     def duration(self) -> str:
         """String representing how long this episodes lasts, in format HH:MM:SS. Read-only."""
         db = None
@@ -181,7 +181,11 @@ class Episode:
 
     def get_duration(self) -> datetime.timedelta:
         """Download episode and find its duration."""
-        with self._download_constrain:
+
+        while not self._download_constrain.acquire(timeout=10):
+            SETTINGS.check_for_cancel()
+        try:
+            SETTINGS.check_for_cancel()
             # Start fetching mp3 file
             r = requests.get(self.sound_url, stream=True)
             # Save the mp3 file (streaming it so we won't run out of memory)
@@ -192,7 +196,7 @@ class Episode:
                     for chunk in r.iter_content(chunk_size=CHUNK_SIZE):
                         fd.write(chunk)
                         del chunk
-
+                        SETTINGS.check_for_cancel()
                 # Read its metadata and determine duration
                 tag = TinyTag.get(filename)
                 return datetime.timedelta(seconds=tag.duration)
@@ -203,6 +207,8 @@ class Episode:
                         os.remove(filename)
                 except FileNotFoundError:
                     pass
+        finally:
+            self._download_constrain.release()
 
     def add_to_feed(self, fg: FeedGenerator) -> FeedEntry:
         """Add this episode to the given feed, but don't fill in any details yet.
@@ -241,8 +247,9 @@ class Episode:
         fe.link({'href': self.article_url})
         fe.published(self.date)
 
-        if self.duration is not None:
-            fe.podcast.itunes_duration(self.duration)
+        duration = self.duration
+        if duration is not None:
+            fe.podcast.itunes_duration(duration)
 
         if self.image is not None:
             fe.podcast.itunes_image(self.image)
