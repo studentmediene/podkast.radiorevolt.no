@@ -17,6 +17,12 @@ def parse_cli_arguments():
                                      "which don't have it yet.")
     parser.add_argument("--quiet", "-q", action="store_true",
                         help="Disable progress information and notices.")
+    parser.add_argument("--exclude", "-x", action="store_true",
+                        help="Calculate durations for all shows EXCEPT the ones named on the "
+                             "command line.")
+    parser.add_argument("shows", nargs="*", type=int,
+                        help="DigAS IDs for the shows you want to calculate durations for. "
+                             "Defaults to all shows.")
     return parser, parser.parse_args()
 
 
@@ -26,12 +32,35 @@ done_episodes = 0
 def main():
     parser, args = parse_cli_arguments()
     quiet = args.quiet
+    exclude = args.exclude
+    args_shows = args.shows
+    args_shows_set = set(args_shows)
 
     generator = PodcastFeedGenerator(quiet=quiet, calculate_durations=False)
+
+    # Find which shows to use
     all_shows = generator.show_source.shows
+    all_shows_set = set(all_shows.keys())
+    if exclude:
+        chosen_shows = all_shows_set - args_shows_set
+    else:
+        chosen_shows = args_shows_set
+    if not args_shows_set:
+        # Default to all shows
+        chosen_shows = all_shows_set
+
+    # Were any arguments not recognized?
+    dropped_shows = args_shows_set - all_shows_set
+    if dropped_shows:
+        parser.error("One or more of the given shows were not recognized, namely {shows}."
+                     .format(shows=dropped_shows))
+
+    if not quiet:
+        print_err("Collecting episodes...")
+
     all_episodes = list()
     EpisodeSource.populate_all_episodes_list()
-    for show in all_shows.values():
+    for show in [all_shows[show_id] for show_id in chosen_shows]:
         try:
             episodes = EpisodeSource(show)
             episodes.populate_episodes()
@@ -42,7 +71,7 @@ def main():
     episodes_without_duration = [episode for episode in all_episodes if episode.duration is None]
 
     if not episodes_without_duration:
-        parser.exit(message="All episodes have duration information." if not quiet else None)
+        parser.exit(message="All episodes have duration information.\n" if not quiet else None)
 
     settings.FIND_EPISODE_DURATIONS = True
     num_episodes = len(episodes_without_duration)

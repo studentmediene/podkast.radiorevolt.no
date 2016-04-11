@@ -11,9 +11,18 @@ def save_feed_to_file(feed, target_file):
 
 
 def parse_cli_arguments():
-    parser = argparse.ArgumentParser(description="Write feeds for multiple podcasts.")
+    parser = argparse.ArgumentParser(description="Write feeds for multiple podcasts.",
+                                     epilog="See generate_feed.py for generating a single feed and "
+                                     "calculate_durations.py for calculating episode durations.")
+    parser.add_argument("--quiet", "-q", action="store_true",
+                        help="Disable progress messages and notices.")
+    parser.add_argument("--pretty", "-p", action="store_true",
+                        help="Write pretty, human-readable XML-files instead of "
+                        "hard to read, minified XML.")
     parser.add_argument("--create-directory", "-d", action="store_true",
                         help="Create target_dir if it doesn't exist already.")
+    parser.add_argument("--exclude", "-x", action="store_true",
+                        help="Generate feeds for all shows EXCEPT the ones named on the command line.")
     parser.add_argument("target_dir", type=os.path.abspath, default=".",
                         help="Directory which the feeds should be saved in.")
     parser.add_argument("naming_scheme", type=str,
@@ -22,15 +31,6 @@ def parse_cli_arguments():
     parser.add_argument("shows", nargs="*", type=int,
                         help="DigAS IDs for the shows you want to generate feed for. "
                         "Leave it out to generate for all known shows.")
-    parser.add_argument("--durations", action="store_true",
-                        help="NOT RECOMMENDED: Download episodes and find their durations. "
-                        "This takes a TON of time; run calculate_durations.py as a background script instead (so it "
-                             "doesn't stop feed generation.")
-    parser.add_argument("--quiet", "-q", action="store_true",
-                        help="Disable progress messages and notices.")
-    parser.add_argument("--pretty", "-p", action="store_true",
-                        help="Write pretty, human-readable XML-files instead of "
-                        "hard to read, minified XML.")
 
     return parser, parser.parse_args()
 
@@ -40,23 +40,30 @@ def main():
     target_dir = args.target_dir
     naming_scheme = args.naming_scheme
     arg_shows = args.shows
-    calculate_durations = args.durations
+    calculate_durations = False
     quiet = args.quiet
     pretty = args.pretty
     create_dir = args.create_directory
+    exclude = args.exclude
 
     generator = PodcastFeedGenerator(pretty, calculate_durations, quiet)
     all_shows = generator.show_source.shows
     all_shows_set = set(all_shows.keys())
     arg_shows_set = set(arg_shows)
-    chosen_shows = all_shows_set.intersection(arg_shows_set)
-    if len(arg_shows_set) != len(chosen_shows):
-        # Some shows were dropped
-        dropped_shows = arg_shows_set - all_shows_set
-        parser.error("ERROR: One or more of the given shows were not recognized, namely {shows}."
+    if exclude:
+        chosen_shows = all_shows_set - arg_shows_set
+    else:
+        chosen_shows = all_shows_set.intersection(arg_shows_set)
+
+    dropped_shows = arg_shows_set - all_shows_set
+    if dropped_shows:
+        parser.error("One or more of the given shows were not recognized, namely {shows}."
                      .format(shows=dropped_shows))
-    elif not chosen_shows:
+    elif not arg_shows_set:
+        # No arguments given, assume all shows
         chosen_shows = all_shows_set
+    elif not chosen_shows:
+        parser.error("No shows matched.")
 
     if not os.path.isdir(target_dir):
         if create_dir:
@@ -68,10 +75,11 @@ def main():
         parser.error("naming_scheme must contain %t, %i, %T or a combination in order to generate unique filenames for "
                      "each show.")
 
-    chosen_shows_dict = {show_id: all_shows[show_id].title for show_id in chosen_shows}
+    chosen_shows_dict = {show_id: all_shows[show_id] for show_id in chosen_shows}
 
     filenames = dict()
-    for show_id, show_title in chosen_shows_dict.items():
+    for show_id, show in chosen_shows_dict.items():
+        show_title = show.title
         # Find the filename
         # Use list of tuples to ensure the last item is actually replaced last
         replacements = [("%T", show_title), ("%t", show_title.lower()), ("%i", str(show_id)), ("%%", "%")]
@@ -83,8 +91,7 @@ def main():
             filename = filename.replace("\\", "_")
         filenames[show_id] = os.path.join(target_dir, os.path.normcase(filename))
 
-    # Run everything in one single process, reusing resources
-    feeds = generator.generate_all_feeds_sequence()
+    feeds = generator.generate_feeds_sequence(chosen_shows_dict.values())
     # Save to files
     if not quiet:
         print("Writing feeds to files...")
