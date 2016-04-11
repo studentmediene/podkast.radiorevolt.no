@@ -11,7 +11,7 @@ def save_feed_to_file(feed, target_file):
 
 
 def parse_cli_arguments():
-    parser = argparse.ArgumentParser(description="Write feeds for multiple podcasts")
+    parser = argparse.ArgumentParser(description="Write feeds for multiple podcasts.")
     parser.add_argument("--create-directory", "-d", action="store_true",
                         help="Create target_dir if it doesn't exist already.")
     parser.add_argument("target_dir", type=os.path.abspath, default=".",
@@ -23,13 +23,14 @@ def parse_cli_arguments():
                         help="DigAS IDs for the shows you want to generate feed for. "
                         "Leave it out to generate for all known shows.")
     parser.add_argument("--durations", action="store_true",
-                        help="Download episodes and find their durations. "
-                        "This could take a ton of time.")
+                        help="NOT RECOMMENDED: Download episodes and find their durations. "
+                        "This takes a TON of time; run calculate_durations.py as a background script instead (so it "
+                             "doesn't stop feed generation.")
     parser.add_argument("--quiet", "-q", action="store_true",
-                        help="Don't display progress information and other notices.")
+                        help="Disable progress messages and notices.")
     parser.add_argument("--pretty", "-p", action="store_true",
                         help="Write pretty, human-readable XML-files instead of "
-                        "machine-generated, minified XML.")
+                        "hard to read, minified XML.")
 
     return parser, parser.parse_args()
 
@@ -44,7 +45,8 @@ def main():
     pretty = args.pretty
     create_dir = args.create_directory
 
-    all_shows = PodcastFeedGenerator(pretty, calculate_durations, quiet).show_source.shows
+    generator = PodcastFeedGenerator(pretty, calculate_durations, quiet)
+    all_shows = generator.show_source.shows
     all_shows_set = set(all_shows.keys())
     arg_shows_set = set(arg_shows)
     chosen_shows = all_shows_set.intersection(arg_shows_set)
@@ -82,8 +84,7 @@ def main():
         filenames[show_id] = os.path.join(target_dir, os.path.normcase(filename))
 
     # Run everything in one single process, reusing resources
-    g = PodcastFeedGenerator(pretty, calculate_durations, quiet)
-    feeds = g.generate_all_feeds_sequence()
+    feeds = generator.generate_all_feeds_sequence()
     # Save to files
     if not quiet:
         print("Writing feeds to files...")
