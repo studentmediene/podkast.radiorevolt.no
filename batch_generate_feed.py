@@ -66,10 +66,11 @@ def main():
         parser.error("naming_scheme must contain %t, %i, %T or a combination in order to generate unique filenames for "
                      "each show.")
 
-    chosen_shows_dict = {show_id: all_shows[show_id].title for show_id in chosen_shows}
+    chosen_shows_dict = {show_id: all_shows[show_id] for show_id in chosen_shows}
 
     filenames = dict()
-    for show_id, show_title in chosen_shows_dict.items():
+    for show_id, show in chosen_shows_dict.items():
+        show_title = show.title
         # Find the filename
         # Use list of tuples to ensure the last item is actually replaced last
         replacements = [("%T", show_title), ("%t", show_title.lower()), ("%i", str(show_id)), ("%%", "%")]
@@ -81,8 +82,7 @@ def main():
             filename = filename.replace("\\", "_")
         filenames[show_id] = os.path.join(target_dir, os.path.normcase(filename))
 
-    # Run everything in one single process, reusing resources
-    feeds = generator.generate_all_feeds_sequence()
+    feeds = generator.generate_feeds_sequence(chosen_shows_dict.values())
     # Save to files
     if not quiet:
         print("Writing feeds to files...")

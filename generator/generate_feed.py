@@ -95,9 +95,12 @@ class PodcastFeedGenerator:
         return feed.rss_str(pretty=self.pretty_xml)
 
     def generate_all_feeds_sequence(self) -> dict:
+        return self.generate_feeds_sequence(self.show_source.shows.values())
+
+    def generate_feeds_sequence(self, shows) -> dict:
         """Generate RSS feeds for all known shows, one at a time."""
         # Prepare for progress bar
-        num_shows = len(self.show_source.shows)
+        num_shows = len(shows)
         i = 0
 
         # Ensure we only download list of episodes once
@@ -112,7 +115,7 @@ class PodcastFeedGenerator:
             source.prepare_batch()
 
         feeds = dict()
-        for show in self.show_source.shows.values():
+        for show in shows:
             if not SETTINGS.QUIET:
                 # Update progress bar
                 i += 1
