@@ -41,8 +41,8 @@ DEFAULT_WEBSITE = "http://example.org"
 
 # URL redirection service
 # This works by defining two mapping functions: one for podcast sound urls, one for article urls.
-# The mapping function must take exactly one argument, which is the original url, and return a string with the
-# absolute url which should be used in the original urls' place.
+# The mapping function must take exactly two arguments: the original url and the Episode object.
+# It must return a string with the absolute url which should be used in the original urls' place.
 # Note that this just changes the URLs in the feed; the actual redirection service must be implemented outside of
 # generator (the webserver implements this).
 # Setting it to None disables the URL redirection.

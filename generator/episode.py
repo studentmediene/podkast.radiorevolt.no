@@ -242,12 +242,12 @@ class Episode:
             raise RuntimeError("populate_feed_entry was called before this episode was added to a feed.")
 
         if SETTINGS.URL_REDIRECTION_SOUND_URL:
-            sound_url = SETTINGS.URL_REDIRECTION_SOUND_URL(self.sound_url)
+            sound_url = SETTINGS.URL_REDIRECTION_SOUND_URL(self.sound_url, self)
         else:
             sound_url = self.sound_url
 
         if SETTINGS.URL_REDIRECTION_ARTICLE_URL:
-            article_url = SETTINGS.URL_REDIRECTION_ARTICLE_URL(self.article_url)
+            article_url = SETTINGS.URL_REDIRECTION_ARTICLE_URL(self.article_url, self)
         else:
             article_url = self.article_url
 
