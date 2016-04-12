@@ -74,6 +74,8 @@ class PodcastFeedGenerator:
         """
 
         # Populate show with more metadata
+        if not SETTINGS.QUIET:
+            print("Finding show metadata...", end="\r", file=sys.stderr)
         self._populate_show_metadata(show, enable_skip_show)
 
         # Start generating feed

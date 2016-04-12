@@ -153,7 +153,7 @@ class Show:
         for source in metadata_sources:
             assert isinstance(source, EpisodeMetadataSource), "%r is not a subclass of EpisodeMetadataSource." % source
         if not SETTINGS.QUIET:
-            print("Processing episodes...", file=sys.stderr, end="\r")
+            print("Processing episodes...            ", file=sys.stderr, end="\r")
         threads = list()
         feed_access_lock = RLock()
         self.progress_n = len(episode_source.episode_list)
@@ -203,6 +203,6 @@ class Show:
             with self.print_lock:
                 self.progress_i += 1
                 print(
-                    "Processed episode {0} of {1}".format(self.progress_i, self.progress_n),
+                    "Processed episode {0} of {1}                    ".format(self.progress_i, self.progress_n),
                     file=sys.stderr, end="\r"
                 )
