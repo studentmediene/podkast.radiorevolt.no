@@ -240,15 +240,26 @@ class Episode:
         You will need to call add_to_feed first."""
         if self._feed_entry is None:
             raise RuntimeError("populate_feed_entry was called before this episode was added to a feed.")
+
+        if SETTINGS.URL_REDIRECTION_SOUND_URL:
+            sound_url = SETTINGS.URL_REDIRECTION_SOUND_URL(self.sound_url)
+        else:
+            sound_url = self.sound_url
+
+        if SETTINGS.URL_REDIRECTION_ARTICLE_URL:
+            article_url = SETTINGS.URL_REDIRECTION_ARTICLE_URL(self.article_url)
+        else:
+            article_url = self.article_url
+
         fe = self._feed_entry
         fe.id(self.sound_url)
-        fe.guid(self.sound_url)
+        fe.guid(self.sound_url)  # Don't use URL redirection service for GUID
         fe.title(self.title)
         fe.description(self.short_description)
         fe.content(self.long_description, type="CDATA")
-        fe.enclosure(self.sound_url, self.size, "audio/mpeg")
+        fe.enclosure(sound_url, self.size, "audio/mpeg")
         fe.author({'name': self.author, 'email': self.author_email})
-        fe.link({'href': self.article_url})
+        fe.link({'href': article_url})
         fe.published(self.date)
 
         duration = self.duration

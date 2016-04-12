@@ -17,6 +17,16 @@ DEFAULT_SHORT_FEED_DESCRIPTION = "Podcast from Example Radio"
 # Default website to use on shows with no website.
 DEFAULT_WEBSITE = "http://example.org"
 
+# URL redirection service
+# This works by defining two mapping functions: one for podcast sound urls, one for article urls.
+# The mapping function must take exactly one argument, which is the original url, and return a string with the
+# absolute url which should be used in the original urls' place.
+# Note that this just changes the URLs in the feed; the actual redirection service must be implemented outside of
+# generator (the webserver implements this).
+# Setting it to None disables the URL redirection.
+URL_REDIRECTION_SOUND_URL = None
+URL_REDIRECTION_ARTICLE_URL = None
+
 # Determines whether new episode duration should be calculated by default. Modified by command line options.
 FIND_EPISODE_DURATIONS = False
 
