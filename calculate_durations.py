@@ -14,7 +14,8 @@ def print_err(*args, **kwargs):
 
 def parse_cli_arguments():
     parser = argparse.ArgumentParser(description="Write episode durations for episodes "
-                                     "which don't have it yet.")
+                                     "which don't have it yet. Those can then be used by generate_feed.py and "
+                                     "batch_generate_feed.py so the listeners know how long the episodes are.")
     parser.add_argument("--quiet", "-q", action="store_true",
                         help="Disable progress information and notices.")
     parser.add_argument("--exclude", "-x", action="store_true",

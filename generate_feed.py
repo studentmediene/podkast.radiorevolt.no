@@ -13,7 +13,8 @@ from generator import NoSuchShowError
 
 
 def parse_cli_arguments() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Output RSS podcast feed for a single podcast.",
+    parser = argparse.ArgumentParser(description="Output RSS podcast feed for a single podcast. It is printed to "
+                                                 "standard output.",
                                      epilog="See batch_generate_feed.py if you want to generate feeds for more"
                                             " than one podcast at a time. See calculate_durations.py if you want to "
                                             "find podcast durations for all episodes.")
