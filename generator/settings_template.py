@@ -1,5 +1,27 @@
 import datetime, pytz, os.path, threading
 
+__all__ = [
+    "DEBUG",
+    "DEFAULT_EDITORIAL_EMAIL",
+    "DEFAULT_TECHNICAL_EMAIL",
+    "OWNER_NAME",
+    "OWNER_EMAIL",
+    "DEFAULT_SHORT_FEED_DESCRIPTION",
+    "DEFAULT_WEBSITE",
+    "URL_REDIRECTION_SOUND_URL",
+    "URL_REDIRECTION_ARTICLE_URL",
+    "FIND_EPISODE_DURATIONS",
+    "QUIET",
+    "CANCEL",
+    "SHOW_SOURCE",
+    "EPISODE_SOURCE",
+    "METADATA_SOURCE",
+    "BYPASS_EPISODE",
+    "BYPASS_SHOW",
+]
+# Remove the hash symbol and space from the beginning of the following line
+# from .settings_template import *
+
 # Set to True to enable debugging mode, False to disable. Do not leave on in production!
 DEBUG = False
 
