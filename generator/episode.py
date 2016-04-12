@@ -159,7 +159,8 @@ class Episode:
                 # Nope, find and save the duration for this episode - but only if we're allowed to
                 if SETTINGS.FIND_EPISODE_DURATIONS:
                     duration = self.get_duration()
-
+                    if duration is None:
+                        return None
                     # Convert to string conforming to iTunes' format
                     hours = (duration.days*24) + (duration.seconds // (60*60))
                     minutes = (duration.seconds % (60*60)) // 60
@@ -183,9 +184,11 @@ class Episode:
         """Download episode and find its duration."""
 
         while not self._download_constrain.acquire(timeout=10):
-            SETTINGS.check_for_cancel()
+            if SETTINGS.CANCEL.is_set():
+                return None
         try:
-            SETTINGS.check_for_cancel()
+            if SETTINGS.CANCEL.is_set():
+                return None
             # Start fetching mp3 file
             r = requests.get(self.sound_url, stream=True)
             # Save the mp3 file (streaming it so we won't run out of memory)
@@ -196,7 +199,8 @@ class Episode:
                     for chunk in r.iter_content(chunk_size=CHUNK_SIZE):
                         fd.write(chunk)
                         del chunk
-                        SETTINGS.check_for_cancel()
+                        if SETTINGS.CANCEL.is_set():
+                            return None
                 # Read its metadata and determine duration
                 tag = TinyTag.get(filename)
                 return datetime.timedelta(seconds=tag.duration)

@@ -96,9 +96,7 @@ def main():
     except KeyboardInterrupt:
         if not quiet:
             with print_lock:
-                print_err("Exiting and cleaning up. Please wait, this could take a minute...")
-                # Let the user see the message before we spew out exception traces...
-                sleep(2)
+                print_err("Exiting and cleaning up. Please wait, this could take around one and a half minute...")
         settings.CANCEL.set()
         for thread in threads:
             try:
@@ -110,7 +108,7 @@ def main():
 
 def fetch_duration(episode, print_lock, quiet, total, constrain):
     e = episode.duration
-    if not quiet:
+    if not quiet and not settings.CANCEL.is_set():
         print_progress(episode, print_lock, total)
     constrain.release()
 
