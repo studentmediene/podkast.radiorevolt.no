@@ -23,11 +23,11 @@ class Episode:
     # Create the required table(s) if they don't exist already.
     # (Do it here to ensure it's only done once)
 
-    _create_table_durations = sqlite3.connect(os.path.join(os.path.dirname(__file__), "episode_durations.db"))
+    _create_table_durations = sqlite3.connect(SETTINGS.EPISODE_DURATIONS_DB)
     _create_table_durations.execute("create table if not exists durations (id text primary key, duration text)")
     _create_table_durations.close()
 
-    _create_table_size = sqlite3.connect(os.path.join(os.path.dirname(__file__), "episode_sizes.db"))
+    _create_table_size = sqlite3.connect(SETTINGS.EPISODE_SIZES_DB)
     _create_table_size.execute("create table if not exists sizes (id text primary key, filesize integer)")
     _create_table_size.close()
 
@@ -115,7 +115,7 @@ class Episode:
         db = None
         try:
             # Create new database connection (a new one each time, since it is bound to one thread)
-            db = sqlite3.connect(os.path.join(os.path.dirname(__file__), "episode_sizes.db"))
+            db = sqlite3.connect(SETTINGS.EPISODE_SIZES_DB)
             # Try to fetch this episode's filesize
             c = db.execute("SELECT filesize FROM sizes WHERE id=?", (self.sound_url,))
             value = c.fetchone()
@@ -145,7 +145,7 @@ class Episode:
         try:
             # Create new database connection (we do it here because a connection can only be used in the thread it's
             # created in).
-            db = sqlite3.connect(os.path.join(os.path.dirname(__file__), "episode_durations.db"))
+            db = sqlite3.connect(SETTINGS.EPISODE_DURATIONS_DB)
             # Fetch any saved duration, if it exists
             c = db.execute("SELECT duration FROM durations WHERE id=?", (self.sound_url,))
             value = c.fetchone()

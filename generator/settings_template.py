@@ -74,11 +74,24 @@ SHOW_SOURCE = {
 
 # EPISODE SOURCE SETTINGS
 
+current_folder = os.path.dirname(__file__)
+
 EPISODE_SOURCE = {
     # Base URL for the Radio Rest API (without trailing slash). Example: "http://example.org/v1"
     # Reuse value from SHOW_SOURCE
     'RADIO_REST_API_URL': SHOW_SOURCE['RADIO_REST_API_URL'],
 }
+
+# EPISODE SETTINGS
+
+# Where to store the database file for caching episode durations. A new file will be created if it doesn't exist.
+# Defaults to episode_durations.db in this folder, but you might want to place it somewhere else so you can
+# restrict the program's permissions to edit its sources.
+EPISODE_DURATIONS_DB = os.path.join(current_folder, "episode_durations.db")
+
+# Where to store the database file for caching episode sizes. A new file will be created if it doesn't exist.
+# Defaults to episode_sizes.db in this folder. The above notes about security applies to this as well.
+EPISODE_SIZES_DB = os.path.join(current_folder, "episode_sizes.db")
 
 
 # METADATA SOURCE SETTINGS - key must match the class name.
