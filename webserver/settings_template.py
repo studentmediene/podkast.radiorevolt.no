@@ -3,8 +3,12 @@
 
 __all__ = [
     "OFFICIAL_WEBSITE",
-    "SHOW_CUSTOM_URL"
+    "SHOW_CUSTOM_URL",
+    "DEBUG",
 ]
+
+# Set to True to enable debug mode. DO NOT LEAVE ON IN PRODUCTION!
+DEBUG = False
 
 
 # Website which you will be redirected to if you access / on the server.

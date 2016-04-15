@@ -3,7 +3,9 @@ from generator.no_such_show_error import NoSuchShowError
 from . import settings
 from .redirect import get_original_sound, get_original_article
 from flask import Flask, abort, make_response, redirect, url_for
+
 app = Flask(__name__)
+app.debug = settings.DEBUG
 
 
 def find_show(gen: PodcastFeedGenerator, show):
@@ -21,7 +23,7 @@ def find_show(gen: PodcastFeedGenerator, show):
 
 
 def url_for_feed(show):
-    return url_for("output_feed", show=show.show_id, name=show.title)
+    return url_for("output_feed", show_id=show.show_id, name=show.title, _external=True)
 
 
 @app.route('/podkast/<show_id>/<name>')
@@ -35,12 +37,16 @@ def output_feed(show_id, name):
     if name != show.title or show_id != str(show.show_id):
         return redirect(url_for_feed(show))
 
-    resp = make_response(gen.generate_feed(show_id))
+    feed = gen.generate_feed(show.show_id).decode("utf-8")
+    feed = feed.replace("\n",
+                        '\n<?xml-stylesheet type="text/xsl" href="' + url_for('static', filename="style.xsl") + '"?>\n',
+                        1)
+    resp = make_response(feed)
     resp.headers['Content-Type'] = 'application/xml'
     return resp
 
 
-@app.route('/podkast/<show>')
+@app.route('/podkast/<show>/')
 def redirect_feed(show):
     try:
         return redirect(url_for_feed(find_show(PodcastFeedGenerator(), show)))
@@ -58,7 +64,7 @@ def api_url_show(show):
 
 @app.route('/api/url/')
 def api_url_help():
-    return "<pre>/api/url/&lt;show_id&gt;</pre>"
+    return "<pre>Format:\n/api/url/&lt;show_id&gt;</pre>"
 
 
 @app.route('/api/')
@@ -66,7 +72,8 @@ def api_help():
     alternatives = [
         ("Podkast URLer:", "/api/url/")
     ]
-    return "<pre>API for podcast-feed-gen\n" + ("\n".join(["{0:<30}{1}".format(i[0], i[1]) for i in alternatives])) \
+    return "<pre>API for podcast-feed-gen\nFormat:\n" + \
+           ("\n".join(["{0:<20}{1}".format(i[0], i[1]) for i in alternatives])) \
            + "</pre>"
 
 
