@@ -22,14 +22,7 @@ This project uses Python v3.4 only, and is written so that the podcast feeds can
 
 ## How to set up ##
 
-1. [Use virtualenv!](https://iamzed.com/2009/05/07/a-primer-on-virtualenv/)
-
-   ```bash
-   virtualenv -p python3.4 venv
-   . venv/bin/activate
-   ```
-
-2. Install the following packages (assuming Ubuntu/Debian):
+1. Install the following packages (assuming Ubuntu/Debian):
 
     * libxml2
     * libxml2-dev
@@ -37,7 +30,22 @@ This project uses Python v3.4 only, and is written so that the podcast feeds can
     * libxslt1-dev
     * python3-lxml
 
-3. Install build dependencies for python and its lxml-bindings by running `sudo apt-get build-dep python3-lxml` (still assuming Ubuntu/Debian)
+    Additionally, install the following packages if you're planning on using the webserver:
+
+    * postgresql
+    * python3-dev
+    * libpq-dev
+
+    More generally, you need to satisfy the dependencies of the packages listed in the requirement files (see below).
+
+2. Install build dependencies for python and its lxml-bindings by running `sudo apt-get build-dep python3-lxml` (still assuming Ubuntu/Debian)
+
+3. [Use virtualenv!](https://iamzed.com/2009/05/07/a-primer-on-virtualenv/)
+
+   ```bash
+   virtualenv -p python3.4 venv
+   . venv/bin/activate
+   ```
 
 4. Install dependencies by running one of the two commands below. You must decide if you want to run a Python web server for serving freshly generated podcast feeds, or generate podcast feeds periodically and serve the generated feeds with some other HTTP server.
     <dl>
@@ -60,12 +68,11 @@ This project uses Python v3.4 only, and is written so that the podcast feeds can
     <dd>Generate RSS feeds for all known podcasts.</dd>
     <dt>calculate_durations.py</dt>
     <dd>Write duration information for episodes which don't have it (time consuming!).</dd>
-    <dt>server.py</dt>
+    <dt style="text-decoration: line-through">server.py</dt>
     <dd>Run web server which generates podcast feeds as they're requested.</dd>
-    <dt>utils/mod_rewrite.py</dt>
-    <dd>Generate configuration for Apache mod_rewrite, which can be used to redirect to the generated feeds (useful when
-    running <code>batch_generate_feed.py</code> as a background task and serving the generated RSS files using Apache,
-     not <code>server.py</code>)</dd>
+    <dt style="text-decoration: line-through">redirect_server.py</dt>
+    <dd>Simple server intended to redirect from our earlier podcast URLs (heavily customized for Radio Revolt)</dd>
+
 </dl>
 
 Use the `--help` flag to see available options for any script.
