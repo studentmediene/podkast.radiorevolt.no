@@ -23,35 +23,36 @@ def find_show(gen: PodcastFeedGenerator, show):
 
 
 def url_for_feed(show):
-    return url_for("output_feed", show_id=show.show_id, name=show.title, _external=True)
+    return url_for("output_feed", show_id=show.show_id, _external=True)
 
 
-@app.route('/podkast/<show_id>/<name>')
-def output_feed(show_id, name):
+@app.route('/<show_id>')
+def output_feed(show_id):
     gen = PodcastFeedGenerator(quiet=True)
     try:
         show = find_show(gen, show_id)
     except NoSuchShowError:
-        abort(404)
+        # Perhaps this is an old-style url?
+        gen = PodcastFeedGenerator(quiet=True)
+        show = show_id.strip().lower()
+        for potential_show, show_id in settings.SHOW_CUSTOM_URL.items():
+            potential_show = potential_show.lower()
+            if potential_show == show:
+                return redirect(url_for_feed(gen.show_source.shows[show_id]), 302)
+        else:
+            abort(404)
 
-    if name != show.title or show_id != str(show.show_id):
+    if not show_id == str(show.show_id):
         return redirect(url_for_feed(show))
 
     feed = gen.generate_feed(show.show_id).decode("utf-8")
+    # Inject stylesheet processor instruction
     feed = feed.replace("\n",
                         '\n<?xml-stylesheet type="text/xsl" href="' + url_for('static', filename="style.xsl") + '"?>\n',
                         1)
     resp = make_response(feed)
     resp.headers['Content-Type'] = 'application/xml'
     return resp
-
-
-@app.route('/podkast/<show>/')
-def redirect_feed(show):
-    try:
-        return redirect(url_for_feed(find_show(PodcastFeedGenerator(), show)))
-    except NoSuchShowError:
-        abort(404)
 
 
 @app.route('/api/url/<show>')
@@ -96,15 +97,3 @@ def redirect_article(article):
 @app.route('/')
 def redirect_homepage():
     return redirect(settings.OFFICIAL_WEBSITE)
-
-
-@app.route('/<show>')
-def redirect_show(show):
-    gen = PodcastFeedGenerator(quiet=True)
-    show = show.strip().lower()
-    for potential_show, show_id in settings.SHOW_CUSTOM_URL.items():
-        potential_show = potential_show.lower()
-        if potential_show == show:
-            return redirect(url_for_feed(gen.show_source.shows[show_id]), 301)
-    else:
-        abort(404)
