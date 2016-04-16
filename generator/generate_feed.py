@@ -132,6 +132,19 @@ class PodcastFeedGenerator:
 
         return feeds
 
+    def get_show_id_by_name(self, name):
+        name = name.lower()
+        shows = self.show_source.get_show_names
+        shows_lower = {name.lower(): show for name, show in shows.items()}
+        shows_nospace = {name.replace(" ", ""): show for name, show in shows.items()}
+        shows_lower_nospace = {name.replace(" ", ""): show for name, show in shows_lower.items()}
+        for list_ in [shows, shows_lower, shows_nospace, shows_lower_nospace]:
+            if name in list_:
+                return list_[name].show_id
+        else:
+            raise NoSuchShowError
+
+
     def _populate_show_metadata(self, show, enable_skip_show: bool=True):
         for source in self.show_metadata_sources:
             if source.accepts(show):

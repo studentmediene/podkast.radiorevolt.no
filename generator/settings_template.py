@@ -18,6 +18,8 @@ __all__ = [
     "METADATA_SOURCE",
     "BYPASS_EPISODE",
     "BYPASS_SHOW",
+    "EPISODE_DURATIONS_DB",
+    "EPISODE_SIZES_DB",
 ]
 # Remove the hash symbol and space from the beginning of the following line
 # from .settings_template import *

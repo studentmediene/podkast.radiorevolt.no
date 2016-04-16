@@ -32,4 +32,4 @@ class ShowSource:
         """Get dictionary with show_id as key and show name as value.
 
         Useful when searching for a show by its name."""
-        return {show.title: show for show in self.shows}
+        return {show.title: show for show in self.shows.values()}

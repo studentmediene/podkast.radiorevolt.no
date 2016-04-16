@@ -105,6 +105,6 @@ def redirect_show(show):
     for potential_show, show_id in settings.SHOW_CUSTOM_URL.items():
         potential_show = potential_show.lower()
         if potential_show == show:
-            return redirect(url_for("output_feed", show=show_id), 301)
+            return redirect(url_for_feed(gen.show_source.shows[show_id]), 301)
     else:
         abort(404)
