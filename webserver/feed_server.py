@@ -23,18 +23,22 @@ def find_show(gen: PodcastFeedGenerator, show):
 
 
 def url_for_feed(show):
-    return url_for("output_feed", show_id=show.show_id, _external=True)
+    return url_for("output_feed", show_name=get_feed_slug(show), _external=True)
 
 
-@app.route('/<show_id>')
-def output_feed(show_id):
+def get_feed_slug(show):
+    return show.title.lower().replace(" ", "")
+
+
+@app.route('/<show_name>')
+def output_feed(show_name):
     gen = PodcastFeedGenerator(quiet=True)
     try:
-        show = find_show(gen, show_id)
+        show = find_show(gen, show_name)
     except NoSuchShowError:
         # Perhaps this is an old-style url?
         gen = PodcastFeedGenerator(quiet=True)
-        show = show_id.strip().lower()
+        show = show_name.strip().lower()
         for potential_show, show_id in settings.SHOW_CUSTOM_URL.items():
             potential_show = potential_show.lower()
             if potential_show == show:
@@ -42,7 +46,7 @@ def output_feed(show_id):
         else:
             abort(404)
 
-    if not show_id == str(show.show_id):
+    if not show_name == get_feed_slug(show):
         return redirect(url_for_feed(show))
 
     feed = gen.generate_feed(show.show_id).decode("utf-8")
