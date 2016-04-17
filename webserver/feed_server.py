@@ -3,6 +3,7 @@ from generator.no_such_show_error import NoSuchShowError
 from . import settings
 from .redirect import get_original_sound, get_original_article
 from flask import Flask, abort, make_response, redirect, url_for, request
+import re
 
 app = Flask(__name__)
 app.debug = settings.DEBUG
@@ -43,8 +44,10 @@ def url_for_feed(show):
     return url_for("output_feed", show_name=get_feed_slug(show), _external=True)
 
 
+remove_non_word = re.compile(r"[^\w\d]")
+
 def get_feed_slug(show):
-    return show.title.lower().replace(" ", "")
+    return remove_non_word.sub("", show.title.lower())
 
 
 @app.before_request
