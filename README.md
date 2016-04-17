@@ -87,6 +87,35 @@ Use the `--help` flag to see available options for any script.
     <dd>Settings for the web server.</dd>
 </dl>
 
+## Testing ##
+
+We use `py.test` to run our tests. The test files are located in the same package as the module they test (bad, I know).
+
+### Podcast feed generation ###
+
+While the virtualenv is activated, run
+```bash
+py.test generator/
+```
+to run unit tests for the parts of the system that generate podcast feeds. **Code is covered by unit tests only
+exceptionally**. We should definitively have many more unit tests!!
+
+The reason you're not advised to run just `py.test` without arguments, is that it would run all the tests found in the
+virtualenv folder as well (for example Flask, py.test and so on).
+
+### Podcast feed URLs
+
+Run
+```bash
+py.test webserver/
+```
+This will test all the URLs which may be in use by podcatchers around the country, given the long history our podcasts
+have. **You MUST run this AT LEAST whenever a program changes its name or a new `ShowMetadataSource` is introduced.**
+Ideally, you would set up a script to alert you if any of the tests fail, and run that script daily.
+
+You MUST also maintain `webserver/test_rr_url.py`, by adding a show's new URL when they change name (while keeping the
+old URL there, so you can test if the `SHOW_CUSTOM_URL` settings in `webserver/settings.py` and/or
+`webserver/settings_template.py` function properly).
 
 ## Details: How it works ##
 

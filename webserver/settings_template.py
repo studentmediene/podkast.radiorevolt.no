@@ -14,6 +14,7 @@ DEBUG = False
 # Website which you will be redirected to if you access / on the server.
 OFFICIAL_WEBSITE = "http://radio.example.org"
 
+
 # Define custom URLs for some shows
 # The URL to match is the key (without slashes).
 # The new URL (without slashes) or the DigAS ID is the value.
@@ -22,6 +23,9 @@ OFFICIAL_WEBSITE = "http://radio.example.org"
 # This way, old links will continue to work even after the name change.
 # WARNING: Make sure you don't create a cycle (ie. "example": "example" or "example": "example2", "example2": "example")
 # Such endless loops result in a 500 Internal Server Error when triggered.
+
+# !!!VERY IMPORTANT!!!: You MUST update test_rr_url.py and run py.test before moving any changes to production!!!
+# This way, you can be absolutely sure that you don't break anyone's feed.
 SHOW_CUSTOM_URL = {
     # The following entries are specific for Radio Revolt. Remove them if you're not from Radio Revolt.
     # Compatibility with existing podcast URLs (not all are needed, but they're listed here so we know about them)
