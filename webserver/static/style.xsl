@@ -118,14 +118,18 @@
                 <div class="lined">
                     <div class="limited">
                         <p>
-                            <strong>Dette er en podkast</strong>. Ved å bruke podkaster, kan du få nye episoder lastet ned automatisk
-                            til mobilen din. Alt du trenger er en <strong>podkast-app</strong>! Har du iPhone kan du bruke iTunes,
-                            har du Android anbefaler vi <a href="https://play.google.com/store/apps/details?id=fm.player">Player FM</a>
-                            og har du Windows Phone kan du bruke podkast-appen som er innebygd.
+                            <strong>Dette er en podkast</strong>. Ved hjelp av en podkastapp kan du få nye episoder
+                            lastet ned automatisk til mobilen din når du er på Wi-Fi, sånn at du kan høre på dem
+                            når det passer deg best.
+                        </p>
+                        <p>Som podkastapp anbefaler vi:<br/>
+                            <strong>Iphone:</strong> iTunes<br/>
+                            <strong>Android:</strong> <a href="https://play.google.com/store/apps/details?id=fm.player"> Player FM</a><br/>
+                            <strong>Windows Phone:</strong> den innebygde podkastappen
                         </p>
 
                         <p>
-                            Kopier nettadressen nedenfor og legg den til i podkast-appen din.
+                            Kopier nettadressen nedenfor og legg den til i podkastappen din.
                         </p>
                         <p>
                             <input class="input" type="text" id="input"><xsl:attribute name="value"><xsl:value-of select="rss/channel/link"/></xsl:attribute></input>
