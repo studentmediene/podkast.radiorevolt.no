@@ -78,6 +78,7 @@ def output_feed(show_name):
     return resp
 
 
+# TODO: Create unit tests for the API
 @app.route('/api/url/<show>')
 def api_url_show(show):
     try:
@@ -100,7 +101,8 @@ def api_help():
            ("\n".join(["{0:<20}{1}".format(i[0], i[1]) for i in alternatives])) \
            + "</pre>"
 
-
+# TODO: Implement routing podcast enclosures and article links (see issue #19)
+"""
 @app.route('/episode/<episode>')
 def redirect_episode(episode):
     try:
@@ -115,7 +117,7 @@ def redirect_article(article):
         return redirect(get_original_article(article))
     except ValueError:
         abort(404)
-
+"""
 
 @app.route('/')
 def redirect_homepage():
