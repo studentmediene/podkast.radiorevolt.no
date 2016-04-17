@@ -2,7 +2,7 @@ from generator.generate_feed import PodcastFeedGenerator
 from generator.no_such_show_error import NoSuchShowError
 from . import settings
 from .redirect import get_original_sound, get_original_article
-from flask import Flask, abort, make_response, redirect, url_for
+from flask import Flask, abort, make_response, redirect, url_for, request
 
 app = Flask(__name__)
 app.debug = settings.DEBUG
@@ -40,6 +40,12 @@ def url_for_feed(show):
 
 def get_feed_slug(show):
     return show.title.lower().replace(" ", "")
+
+
+@app.before_request
+def ignore_get():
+    if request.base_url != request.url:
+        return redirect(request.base_url, 301)
 
 
 @app.route('/<show_name>')
