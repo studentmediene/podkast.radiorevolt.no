@@ -15,9 +15,16 @@ DEBUG = False
 OFFICIAL_WEBSITE = "http://radio.example.org"
 
 # Define custom URLs for some shows
-# The URL to match is the key, and the DigAS ID is the value.
+# The URL to match is the key (without slashes).
+# The new URL (without slashes) or the DigAS ID is the value.
+# NOTE: None of those are case-sensitive.
+# NOTE: When a program changes its name, add an entry with the old name without spaces and the new name without spaces.
+# This way, old links will continue to work even after the name change.
+# WARNING: Make sure you don't create a cycle (ie. "example": "example" or "example": "example2", "example2": "example")
+# Such endless loops are NOT detected automatically, and they will cause the program to fail.
 SHOW_CUSTOM_URL = {
     # The following entries are specific for Radio Revolt. Remove them if you're not from Radio Revolt.
+    # Compatibility with existing podcast URLs (not all are needed, but they're listed here so we know about them)
     "perrong-perrong": 2380,
     "teknikertimen": 2465,
     "ctrl-alt-del-podkast": 1615,
@@ -43,7 +50,6 @@ SHOW_CUSTOM_URL = {
     "uillustrert-vitenskap": 1957,
     "triks-i-ludo": 2245,
     "Soulmat": 2445,
-    "Postkåkk": 2445,
     "Kara_sahara_podkast": 2424,
     "Exphil-losen": 2425,
     "urtefitte": 2383,
@@ -70,4 +76,6 @@ SHOW_CUSTOM_URL = {
     "horror-night-english": 2350,
     "gastromat": 2003,
     "aspik": 2251,
+    # Program name changes
+    "postkåkk": "soulmat",
 }
