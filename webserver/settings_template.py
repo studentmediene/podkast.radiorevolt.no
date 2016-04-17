@@ -59,7 +59,7 @@ SHOW_CUSTOM_URL = {
     "byraaforeningen": 2345,
     "patirshda": 1520,
     "horror-night": 2338,
-    "alle-podkaster": None,
+    #"alle-podkaster": None,
     "ReaktorRR": 2607,
     "tweed": 2410,
     "Garasjen": 2511,
