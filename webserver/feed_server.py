@@ -8,18 +8,30 @@ app = Flask(__name__)
 app.debug = settings.DEBUG
 
 
-def find_show(gen: PodcastFeedGenerator, show):
+def find_show(gen: PodcastFeedGenerator, show, strict=True):
     """Get the Show object for the given show_id or show title."""
-    try:
+    show_id = None
+    if not strict:
         # Assuming show is show_id
-        show_id = int(show)
-    except ValueError:
+        try:
+            show_id = int(show)
+        except ValueError:
+            pass
+    if not show_id:
         # Assuming show is show name
-        show_id = gen.get_show_id_by_name(show)
-    try:
-        return gen.show_source.shows[show_id]
-    except KeyError as e:
-        raise NoSuchShowError from e
+        try:
+            show_id = gen.get_show_id_by_name(show)
+        except (KeyError, NoSuchShowError) as e:
+            # Perhaps this is an old-style url?
+            gen = PodcastFeedGenerator(quiet=True)
+            show = show.strip().lower()
+            for potential_show, show_id in settings.SHOW_CUSTOM_URL.items():
+                potential_show = potential_show.lower()
+                if potential_show == show:
+                    return find_show(gen, show_id, False)
+            else:
+                raise NoSuchShowError from e
+    return gen.show_source.shows[show_id]
 
 
 def url_for_feed(show):
@@ -36,15 +48,7 @@ def output_feed(show_name):
     try:
         show = find_show(gen, show_name)
     except NoSuchShowError:
-        # Perhaps this is an old-style url?
-        gen = PodcastFeedGenerator(quiet=True)
-        show = show_name.strip().lower()
-        for potential_show, show_id in settings.SHOW_CUSTOM_URL.items():
-            potential_show = potential_show.lower()
-            if potential_show == show:
-                return redirect(url_for_feed(gen.show_source.shows[show_id]), 302)
-        else:
-            abort(404)
+        abort(404)
 
     if not show_name == get_feed_slug(show):
         return redirect(url_for_feed(show))
