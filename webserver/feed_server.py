@@ -71,6 +71,7 @@ def output_feed(show_name):
                         1)
     resp = make_response(feed)
     resp.headers['Content-Type'] = 'application/xml'
+    resp.headers['Cache-Control'] = 'public, max-age=3600'
     return resp
 
 
