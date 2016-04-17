@@ -46,8 +46,13 @@ def url_for_feed(show):
 
 remove_non_word = re.compile(r"[^\w\d]")
 
+
 def get_feed_slug(show):
-    return remove_non_word.sub("", show.title.lower())
+    return get_readable_slug_from(show.title)
+
+
+def get_readable_slug_from(show_name):
+    return remove_non_word.sub("", show_name.lower())
 
 
 @app.before_request
@@ -82,20 +87,31 @@ def output_feed(show_name):
 @app.route('/api/url/<show>')
 def api_url_show(show):
     try:
-        return url_for_feed(find_show(PodcastFeedGenerator(), show))
+        return url_for_feed(find_show(PodcastFeedGenerator(), show, False))
     except NoSuchShowError:
         abort(404)
 
 
 @app.route('/api/url/')
 def api_url_help():
-    return "<pre>Format:\n/api/url/&lt;show_id&gt;</pre>"
+    return "<pre>Format:\n/api/url/&lt;show&gt;</pre>"
+
+
+@app.route('/api/slug/')
+def api_slug_help():
+    return "<pre>Format:\n/api/slug/&lt;show name&gt;</pre>"
+
+
+@app.route('/api/slug/<show_name>')
+def api_slug_name(show_name):
+    return url_for('output_feed', show_name=get_readable_slug_from(show_name), _external=True)
 
 
 @app.route('/api/')
 def api_help():
     alternatives = [
-        ("Podkast URLer:", "/api/url/")
+        ("Podkast URLs:", "/api/url/"),
+        ("Predict URL from show name:", "/api/slug/")
     ]
     return "<pre>API for podcast-feed-gen\nFormat:\n" + \
            ("\n".join(["{0:<20}{1}".format(i[0], i[1]) for i in alternatives])) \
