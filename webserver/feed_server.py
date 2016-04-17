@@ -65,7 +65,7 @@ def output_feed(show_name):
         return redirect(url_for_feed(show))
 
     feed = gen.generate_feed(show.show_id).decode("utf-8")
-    # Inject stylesheet processor instruction
+    # Inject stylesheet processor instruction by replacing the very first line break
     feed = feed.replace("\n",
                         '\n<?xml-stylesheet type="text/xsl" href="' + url_for('static', filename="style.xsl") + '"?>\n',
                         1)
