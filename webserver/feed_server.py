@@ -8,8 +8,13 @@ app = Flask(__name__)
 app.debug = settings.DEBUG
 
 
-def find_show(gen: PodcastFeedGenerator, show, strict=True):
+MAX_RECURSION_DEPTH = 20
+
+
+def find_show(gen: PodcastFeedGenerator, show, strict=True, recursion_depth=0):
     """Get the Show object for the given show_id or show title."""
+    if recursion_depth >= MAX_RECURSION_DEPTH:
+        raise RuntimeError("Endless loop encountered in SHOW_CUSTOM_URL when searching for {show}.".format(show=show))
     show_id = None
     if not strict:
         # Assuming show is show_id
@@ -28,7 +33,7 @@ def find_show(gen: PodcastFeedGenerator, show, strict=True):
             for potential_show, show_id in settings.SHOW_CUSTOM_URL.items():
                 potential_show = potential_show.lower()
                 if potential_show == show:
-                    return find_show(gen, show_id, False)
+                    return find_show(gen, show_id, False, recursion_depth + 1)
             else:
                 raise NoSuchShowError from e
     return gen.show_source.shows[show_id]
