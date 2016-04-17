@@ -131,7 +131,7 @@
                             <input class="input" type="text" id="input"><xsl:attribute name="value"><xsl:value-of select="rss/channel/link"/></xsl:attribute></input>
                             <script>
                                 var input = document.getElementById('input');
-                                input.value = window.location;
+                                input.value = window.location.href.replace("%C3%A5", "å").replace("%C3%A6", "æ").replace("%C3%B8", "ø");
                                 var focused = false;
                                 if (input) {
                                 input.onblur = function() { focused = false; };
