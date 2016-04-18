@@ -44,7 +44,7 @@ def url_for_feed(show):
     return url_for("output_feed", show_name=get_feed_slug(show), _external=True)
 
 
-remove_non_word = re.compile(r"[^\w\d]")
+remove_non_word = re.compile(r"[^\w\d]|_")
 
 
 def get_feed_slug(show):
