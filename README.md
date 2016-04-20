@@ -60,6 +60,77 @@ This project uses Python v3.4 only, and is written so that the podcast feeds can
 5. Copy `generator/settings_template.py` to `generator/settings.py` and fill in settings.
 6. Do the same with `webserver/settings_template.py` if you intend to use the provided web server.
 
+### Deploying to Apache ###
+
+1. Create a new user.
+
+    ```
+    sudo adduser podcastfeedgen
+    ```
+
+2. Follow the above instructions, maybe using a subdirectory in the new user's home directory .
+
+3. Give the new user access to the data folder.
+
+    ```
+    sudo chown podcastfeedgen:podcastfeedgen data
+    ```
+
+4. Turn debugging off in the configuration files.
+
+5. Ensure the Apache server [has mod_wsgi installed](http://flask.pocoo.org/docs/0.10/deploying/mod_wsgi/#installing-mod-wsgi).
+
+6. Edit `server.wsgi` so the path in there is correct.
+
+7. Create a new file in `/etc/apache2/sites-enabled` (or whatever it is on your system) called `podcast_feed_gen.conf` with content like this:
+
+    ```apache2
+    <VirtualHost *:80>
+        ServerName podcast.example.com
+
+        LoadModule cache_module modules/mod_cache.so
+        <IfModule mod_cache.c>
+            LoadModule cache_disk_module modules/mod_cache_disk.so
+            <IfModule mod_cache_disk.c>
+                CacheRoot "/path/to/cache/dir"
+                CacheEnable disk "/"
+            </IfModule>
+        </IfModule>
+
+
+        Alias /static/ /path/to/podcast-feed-gen/webserver/static/
+
+        <Directory /path/to/podcast-feed-gen/webserver/static>
+        Order deny,allow
+        Allow from all
+        </Directory>
+
+        WSGIPythonHome /path/to/podcast-feed-gen/venv
+
+        WSGIDaemonProcess podcastfeedgen user=podcastfeedgen group=podcastfeedgen
+        WSGIScriptAlias / /path/to/podcast-feed-gen/server.wsgi
+
+        <Directory /path/to/podcast-feed-gen>
+            WSGIProcessGroup podcastfeedgen
+            WSGIApplicationGroup %{GLOBAL}
+            Order deny,allow
+            Allow from all
+        </Directory>
+    </VirtualHost>
+    ```
+
+    Replace `/path/to/podcast-feed-gen` with the actual path to where Podcast-feed-gen is installed, and replace `/path/to/cache/dir` with the actual path to a new, empty directory which shall be used for caching.
+
+8. Run:
+
+    ```
+    sudo a2ensite podcast_feed_gen.conf
+    sudo service apache2 restart
+    ```
+
+9. Make sure that `podcast.example.com` points to your server.
+
+10. There! All happy.
 
 ## Scripts ##
 

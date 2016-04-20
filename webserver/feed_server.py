@@ -87,7 +87,7 @@ def output_feed(show_name):
 @app.route('/api/url/<show>')
 def api_url_show(show):
     try:
-        return url_for_feed(find_show(PodcastFeedGenerator(), show, False))
+        return url_for_feed(find_show(PodcastFeedGenerator(quiet=True), show, False))
     except NoSuchShowError:
         abort(404)
 
