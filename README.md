@@ -82,49 +82,54 @@ This project uses Python v3.4 only, and is written so that the podcast feeds can
 
 6. Edit `server.wsgi` so the path in there is correct.
 
-7. Create a new file in `/etc/apache2/sites-enabled` (or whatever it is on your system) called `podcast_feed_gen.conf` with content like this:
+7. Create a new file in `/etc/apache2/sites-available` (or whatever it is on your system) called `podcast_feed_gen.conf`.
+   Assuming:
 
-    ```apache2
+   1. the repository was cloned to `/opt/podcast-feed-gen`
+   2. modules are available in `/user/lib/apache2/modules`
+   3. the user created in step 1 was called `podcastfeedgen`
+   4. this will be hosted at `podcast.example.com`
+   5. you're running Apache v2.4 or newer
+   4. and `/var/cache/apache2/mod_cache_disk` is an appropriate location for a cache:
+
+   …use this as a template:
+
+    ```Apache
     <VirtualHost *:80>
         ServerName podcast.example.com
 
-        LoadModule cache_module modules/mod_cache.so
+        LoadModule cache_module /usr/lib/apache2/modules/mod_cache.so
         <IfModule mod_cache.c>
-            LoadModule cache_disk_module modules/mod_cache_disk.so
+            LoadModule cache_disk_module /usr/lib/apache2/modules/mod_cache_disk.so
             <IfModule mod_cache_disk.c>
-                CacheRoot "/path/to/cache/dir"
+                CacheRoot "/var/cache/apache2/mod_cache_disk"
                 CacheEnable disk "/"
             </IfModule>
         </IfModule>
 
+        WSGIDaemonProcess podcastfeedgen user=podcastfeedgen group=podcastfeedgen python-path=/opt/podcast-feed-gen/venv/lib/python3.4/site-packages:/opt/podcast-feed-gen
+        WSGIScriptAlias / /opt/podcast-feed-gen/server.wsgi
 
-        Alias /static/ /path/to/podcast-feed-gen/webserver/static/
-
-        <Directory /path/to/podcast-feed-gen/webserver/static>
-        Order deny,allow
-        Allow from all
-        </Directory>
-
-        WSGIPythonHome /path/to/podcast-feed-gen/venv
-
-        WSGIDaemonProcess podcastfeedgen user=podcastfeedgen group=podcastfeedgen
-        WSGIScriptAlias / /path/to/podcast-feed-gen/server.wsgi
-
-        <Directory /path/to/podcast-feed-gen>
+        <Directory /opt/podcast-feed-gen>
             WSGIProcessGroup podcastfeedgen
             WSGIApplicationGroup %{GLOBAL}
-            Order deny,allow
-            Allow from all
+            Require all granted
+        </Directory>
+
+        Alias /static/ /opt/podcast-feed-gen/webserver/static/
+
+        <Directory /opt/podcast-feed-gen/webserver/static>
+        Require all granted
         </Directory>
     </VirtualHost>
-    ```
 
-    Replace `/path/to/podcast-feed-gen` with the actual path to where Podcast-feed-gen is installed, and replace `/path/to/cache/dir` with the actual path to a new, empty directory which shall be used for caching.
+    ```
 
 8. Run:
 
     ```
     sudo a2ensite podcast_feed_gen.conf
+    apachectl configtest
     sudo service apache2 restart
     ```
 
