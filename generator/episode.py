@@ -116,6 +116,7 @@ class Episode:
         try:
             # Create new database connection (a new one each time, since it is bound to one thread)
             db = sqlite3.connect(SETTINGS.EPISODE_SIZES_DB)
+            db.execute("PRAGMA busy_timeout = 30000")
             # Try to fetch this episode's filesize
             c = db.execute("SELECT filesize FROM sizes WHERE id=?", (self.sound_url,))
             value = c.fetchone()
