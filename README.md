@@ -37,6 +37,8 @@ This project uses Python v3.4 only, and is written so that the podcast feeds can
     * postgresql
     * python3-dev
     * libpq-dev
+    * apache2-bin
+    * apache2-dev
 
     More generally, you need to satisfy the dependencies of the packages listed in the requirement files (see below).
 
@@ -68,7 +70,8 @@ This project uses Python v3.4 only, and is written so that the podcast feeds can
     sudo adduser podcastfeedgen
     ```
 
-2. Follow the above instructions, maybe using a subdirectory in the new user's home directory .
+2. Follow the above instructions, installing it into /opt/podcast-feed-gen (just a recommendation) and with a different owner than `podcastfeedgen`. That way,
+   the script is unable to modify itself.
 
 3. Give the new user access to the data folder.
 
@@ -78,16 +81,33 @@ This project uses Python v3.4 only, and is written so that the podcast feeds can
 
 4. Turn debugging off in the configuration files.
 
-5. Ensure the Apache server [has mod_wsgi installed](http://flask.pocoo.org/docs/0.10/deploying/mod_wsgi/#installing-mod-wsgi).
+5. Make sure the Apache webserver for podcast-feed-gen is started on startup. You can use the following [upstart script](http://upstart.ubuntu.com/cookbook/)
+   as a template (courtesy of Trygve Wiig):
+
+   ```sh
+   description	"Front-end serving fresh podcast feeds"
+   author "Thorben Werner Sjøstrøm Dahl <it@example.com>"
+
+   start on filesystem or runlevel[2345]
+   stop on runlevel [016]
+
+   respawn
+   respawn limit 5 10 # stop respawning if crashing too fast
+
+   chdir /<path>/podcast-feed-gen # change as needed
+   exec sudo -u <username> . venv/bin/activate; mod_wsgi-express start-server server.wsgi --host 127.0.0.1 --port <port> --httpd-executable=<path> --url-alias /static ./webserver/static # change as needed
+   ```
+
+   It must be saved as `/etc/init/podcast-feed-gen.conf`.
+
+6. TODO: Describe how to start the server so that only connections from the same server are allowed.
 
 6. Edit `server.wsgi` so the path in there is correct.
 
 7. Create a new file in `/etc/apache2/sites-available` (or whatever it is on your system) called `podcast_feed_gen.conf`.
    Assuming:
 
-   1. the repository was cloned to `/opt/podcast-feed-gen`
-   2. modules are available in `/user/lib/apache2/modules`
-   3. the user created in step 1 was called `podcastfeedgen`
+   1. podcast-feed-gen is running on the same server, on port 8000
    4. this will be hosted at `podcast.example.com`
    5. you're running Apache v2.4 or newer
    4. and `/var/cache/apache2/mod_cache_disk` is an appropriate location for a cache:
@@ -105,22 +125,17 @@ This project uses Python v3.4 only, and is written so that the podcast feeds can
                 CacheRoot "/var/cache/apache2/mod_cache_disk"
                 CacheEnable disk "/"
             </IfModule>
+            # Ignore cache controls from the browser.
+            # This way, we will use the cache even if the user is refreshing the page.
+            CacheIgnoreCacheControl On
         </IfModule>
 
-        WSGIDaemonProcess podcastfeedgen user=podcastfeedgen group=podcastfeedgen python-path=/opt/podcast-feed-gen/venv/lib/python3.4/site-packages:/opt/podcast-feed-gen
-        WSGIScriptAlias / /opt/podcast-feed-gen/server.wsgi
+        LoadModule proxy_module /usr/lib/apache2/modules/mod_proxy.so
+        LoadModule proxy_http_module /usr/lib/apache2/modules/mod_proxy_http.so
 
-        <Directory /opt/podcast-feed-gen>
-            WSGIProcessGroup podcastfeedgen
-            WSGIApplicationGroup %{GLOBAL}
-            Require all granted
-        </Directory>
+        ProxyPass "/" "localhost:8000/"
+        ProxyPassReverse "/" "localhost:8000/"
 
-        Alias /static/ /opt/podcast-feed-gen/webserver/static/
-
-        <Directory /opt/podcast-feed-gen/webserver/static>
-        Require all granted
-        </Directory>
     </VirtualHost>
 
     ```
@@ -133,7 +148,7 @@ This project uses Python v3.4 only, and is written so that the podcast feeds can
     sudo service apache2 restart
     ```
 
-9. Make sure that `podcast.example.com` points to your server.
+9. Make sure that `podcast.example.com` points to your server (DNS).
 
 10. There! All happy.
 
