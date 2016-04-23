@@ -1,5 +1,5 @@
 
-# How to set up #
+# Installing podcast-feed-gen #
 
 ## Getting it up and running ##
 

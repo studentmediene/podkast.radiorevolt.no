@@ -1,6 +1,6 @@
 # How to #
 
-## Adding a new program/show ##
+## Add a new program/show ##
 
 1. Add the new show to DigAS using DigAS Admin.
 
@@ -17,7 +17,7 @@
 6. Alter and improve this guide if something was unclear, poorly explained or you encountered a problem which others might want to know the solution for.
 
 
-## Changing a program's name ##
+## Change a program's name ##
 
 1. Identify the current URL used to access the show. You may use `/api/slug/DIGAS PROGRAM NAME HERE` on the podcast website to find it.
 
@@ -47,7 +47,7 @@
 
 
 
-## Upgrading/deploying new version ##
+## Upgrade/deploy a new version ##
 
 1. Change directory so you're in the folder where podcast-feed-gen is installed.
 
