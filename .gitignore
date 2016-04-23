@@ -176,6 +176,7 @@ pip-selfcheck.json
 start_server.sh
 podcast_feed_gen.conf
 podcast_feed_gen.service
+run_calculate_durations.sh
 # Used earlier to cache episode durations, but not used since commit 2b6b464. Retained for backwards compatibility.
 **/episode_durations.txt
 # Cache episode durations.
