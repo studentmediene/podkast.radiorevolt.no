@@ -85,7 +85,7 @@
 
 8. Edit the file you just created, and fill in the missing information. (Follow the comments in that file.)
 
-8. Run (replace apache or apache2 with httpd if you're using a Red Hat distro):
+8. Run (replace apache2 with httpd if you're using a Red Hat distro):
 
     ```sh
     # Run the following if you have sites-available on your system:
@@ -137,3 +137,51 @@
        It will run HH:02 and HH:32. The offset 2 was chosen with random.org, to avoid having many tasks run at HH:00.
 
 12. There! All happy.
+
+## Deploying redirection from old podcast server ##
+
+This guide applies to you if you have a server which you used to generate podcast feeds with, but which you want to
+replace with podcast-feed-gen, yet it doesn't occupy the same address. For example, say you have a server which serves
+feeds like `internal.example.com:8080/Podcast/PodcastServlet?rss451` where `451` is the DigAS ID. You have already
+deployed podcast-feed-gen on `podcast.example.com`, but you want to make sure existing subscribers get to enjoy the new
+feeds as well. That problem is a perfect fit for the `generate_redirect_rules.py` script.
+
+It is assumed you are somewhat comfortable editing Apache configuration files, as well as using the Linux command line.
+
+1. You must use a computer on which webserver/requirements.txt is fulfilled. This is because the
+    `generate_redirect_rules.py` script depends on some scripts inside webserver.
+
+2. Activate the virtualenv.
+
+3. Find the old path scheme. In the above example, it would be `/Podcast/PodcastServlet?rss%i`. Run
+    `python generate_redirect_rules.py --help` for the full list of substitutions that are made.
+
+4. Find the new host on which podcast-feed-gen is hosted. In the above example, this would be `podcast.example.com`
+
+5. Now, run the following command (install `xclip` if it's not installed already):
+    ```sh
+    python generate_redirect_rules.py "OLD PATH SCHEME HERE" "NEW HOST HERE" | xclip -selection clipboard
+    ```
+    This will copy the generated rules to the clipboard.
+
+6. Log onto the old host (or preferably its staging cousin).
+
+7. Add a new file in `/etc/apache2/conf-available` or `/etc/apache2/sites-available` (Debian/Ubuntu) or `/etc/httpd/conf.d` (Red Hat/Fedora) and call it
+    something like `redirect_podcasts.conf`. Or, you can use the existing file where the old implementation is hosted.
+
+8. Open it and paste the generated rules.
+
+9. Make adjustments to the rules as needed. For example, you might want to limit the redirects to certain virtual hosts
+    and/or ports.
+
+10. Save the file and exit.
+
+11. On Debian/Ubuntu: run the correct `a2enSOMETHING` command (`a2enconf` if you used conf-available, `a2ensite` if you
+    used sites-available).
+
+12. Check if the configuration is alright by running `apachectl configtest`.
+
+13. Reload the changes by running `sudo service apache2 restart` (Debian/Ubuntu) or
+    `sudo systemctl restart httpd` (Red Hat/Fedora).
+
+14. Confirm that it works, then eat cake.
