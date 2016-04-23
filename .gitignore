@@ -173,6 +173,9 @@ pip-selfcheck.json
 ### Application-specific ###
 # Settings file with potensially sensitive information (this is an open repo, after all)
 **/settings.py
+start_server.sh
+podcast_feed_gen.conf
+podcast_feed_gen.service
 # Used earlier to cache episode durations, but not used since commit 2b6b464. Retained for backwards compatibility.
 **/episode_durations.txt
 # Cache episode durations.

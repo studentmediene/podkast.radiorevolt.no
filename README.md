@@ -6,6 +6,9 @@ The main goal is to **eliminate the need for Feedburner**, since Google might sh
 
 Below you'll find explainations of how the system works, as well as guides on how to add new programs or change the name of existing ones.
 
+Even though this project is specialized for Radio Revolt, it might be usable for others too – you'd need to create
+your own show_source, episode_source and metadata sources though.
+
 
 ## Features ##
 
@@ -21,136 +24,6 @@ Below you'll find explainations of how the system works, as well as guides on ho
 This project uses Python v3.4 only, and is written so that the podcast feeds can be updated regularly (by something like
  a cron job) or generated afresh each time a feed is accessed (potentially with a cache).
 
-
-## How to set up ##
-
-1. Install the following packages (assuming Ubuntu/Debian):
-
-    * libxml2
-    * libxml2-dev
-    * libxslt1.1
-    * libxslt1-dev
-    * python3-lxml
-
-    Additionally, install the following packages if you're planning on using the webserver:
-
-    * postgresql
-    * python3-dev
-    * libpq-dev
-    * apache2-bin
-    * apache2-dev
-
-    More generally, you need to satisfy the dependencies of the packages listed in the requirement files (see below).
-
-2. Install build dependencies for python and its lxml-bindings by running `sudo apt-get build-dep python3-lxml` (still assuming Ubuntu/Debian)
-
-3. [Use virtualenv!](https://iamzed.com/2009/05/07/a-primer-on-virtualenv/)
-
-   ```bash
-   virtualenv -p python3.4 venv
-   . venv/bin/activate
-   ```
-
-4. Install dependencies by running one of the two commands below. You must decide if you want to run a Python web server for serving freshly generated podcast feeds (recommended), or generate podcast feeds periodically and serve the generated feeds with some other HTTP server.
-    <dl>
-        <dt>Run web-server and generate feeds on-the-fly</dt>
-        <dd><code>pip install -r webserver/requirements.txt</code></dd>
-        <dt>Generate feeds periodically</dt>
-        <dd><code>pip install -r generator/requirements.txt</code></dd>
-    </dl>
-
-5. Copy `generator/settings_template.py` to `generator/settings.py` and fill in settings.
-6. Do the same with `webserver/settings_template.py` if you intend to use the provided web server.
-
-### Deploying to Apache ###
-
-1. Create a new user.
-
-    ```
-    sudo adduser podcastfeedgen
-    ```
-
-2. Follow the above instructions, installing it into /opt/podcast-feed-gen (just a recommendation) and with a different owner than `podcastfeedgen`. That way,
-   the script is unable to modify itself.
-
-3. Give the new user access to the data folder.
-
-    ```
-    sudo chown podcastfeedgen:podcastfeedgen data
-    ```
-
-4. Turn debugging off in the configuration files.
-
-5. Make sure the Apache webserver for podcast-feed-gen is started on startup. You can use the following [upstart script](http://upstart.ubuntu.com/cookbook/)
-   as a template (courtesy of Trygve Wiig):
-
-   ```sh
-   description	"Front-end serving fresh podcast feeds"
-   author "Thorben Werner Sjøstrøm Dahl <it@example.com>"
-
-   start on filesystem or runlevel[2345]
-   stop on runlevel [016]
-
-   respawn
-   respawn limit 5 10 # stop respawning if crashing too fast
-
-   chdir /<path>/podcast-feed-gen # change as needed
-   exec sudo -u <username> . venv/bin/activate; mod_wsgi-express start-server server.wsgi --host 127.0.0.1 --port <port> --httpd-executable=<path> --url-alias /static ./webserver/static # change as needed
-   ```
-
-   It must be saved as `/etc/init/podcast-feed-gen.conf`.
-
-6. TODO: Describe how to start the server so that only connections from the same server are allowed.
-
-6. Edit `server.wsgi` so the path in there is correct.
-
-7. Create a new file in `/etc/apache2/sites-available` (or whatever it is on your system) called `podcast_feed_gen.conf`.
-   Assuming:
-
-   1. podcast-feed-gen is running on the same server, on port 8000
-   4. this will be hosted at `podcast.example.com`
-   5. you're running Apache v2.4 or newer
-   4. and `/var/cache/apache2/mod_cache_disk` is an appropriate location for a cache:
-
-   …use this as a template:
-
-    ```Apache
-    <VirtualHost *:80>
-        ServerName podcast.example.com
-
-        LoadModule cache_module /usr/lib/apache2/modules/mod_cache.so
-        <IfModule mod_cache.c>
-            LoadModule cache_disk_module /usr/lib/apache2/modules/mod_cache_disk.so
-            <IfModule mod_cache_disk.c>
-                CacheRoot "/var/cache/apache2/mod_cache_disk"
-                CacheEnable disk "/"
-            </IfModule>
-            # Ignore cache controls from the browser.
-            # This way, we will use the cache even if the user is refreshing the page.
-            CacheIgnoreCacheControl On
-        </IfModule>
-
-        LoadModule proxy_module /usr/lib/apache2/modules/mod_proxy.so
-        LoadModule proxy_http_module /usr/lib/apache2/modules/mod_proxy_http.so
-
-        ProxyPass "/" "localhost:8000/"
-        ProxyPassReverse "/" "localhost:8000/"
-
-    </VirtualHost>
-
-    ```
-
-8. Run:
-
-    ```
-    sudo a2ensite podcast_feed_gen.conf
-    apachectl configtest
-    sudo service apache2 restart
-    ```
-
-9. Make sure that `podcast.example.com` points to your server (DNS).
-
-10. There! All happy.
 
 ## Scripts ##
 
@@ -260,47 +133,3 @@ metadata from the `episode_source` or `show_source` is used, respectively.
 
 9. The response is then handed off to the server. If Apache is running with caching enabled, it will save a copy of the feed and serve that copy the next hour, instead of activating all the machinery above.
 
-## User manual ##
-
-### Adding a new program/show ###
-
-1. Add the new show to DigAS using DigAS Admin.
-
-2. Access `/api/slug/PROGRAM NAME HERE` on the podcast website. It will tell you where to find the feed for the program.
-
-3. Activate virtualenv and open up `webserver/test_rr_url.py` and locate the function `rr_urls()`. Add the slug you got from step 2 to the list of urls to test.
-
-4. Run `py.test webserver/`. If there were no errors, you are free to continue. If there was an error, you must fix it before continuing.
-
-5. You may now link to the feed on `radiorevolt.no` and afterwards publish it on iTunes. (Note: For Chimera, you will need the DigAS ID. Access the Radio REST API at `/programmer/list/` to find it.)
-
-6. Alter and improve this guide if something was unclear, poorly explained or you encountered a problem which others might want to know the solution for.
-
-
-### Changing a program's name ###
-
-1. Identify the current URL used to access the show. You may use `/api/slug/PROGRAM NAME HERE` on the podcast website to find it.
-
-2. Activate virtualenv and open up `webserver/settings.py`. If there is no variable named `SHOW_CUSTOM_URL` there, then you must open `webserver/settings_template.py` instead.
-
-3. Add a new entry to `SHOW_CUSTOM_URL`.
-
-   1. The key must be the URL slug currently in use. For example, if `podcast.example.org/mylittlepodcast` is the URL currently in use, then you must use `mylittlepodcast` as key.
-   2. The value must be the new URL slug. You can find it by accessing `/api/slug/NEW PROGRAM NAME`. Just like the key, you only want to use the slug, not the entire URL.
-       * It is possible to use the DigAS ID instead, this is discouraged however since the ID might change if we ever changed system. The name is more logical to use.
-
-4. Open `webserver/test_rr_url.py` and move the current URL slug to the upper part of the list (or add it if it's not there).
-
-5. Run `py.test webserver/` and fix any errors. Note that the new entry in `SHOW_CUSTOM_URL` isn't actually in use right now, but you'll catch any syntax errors this way.
-
-6. Save, upload and deploy the new settings file.
-
-7. Change the show name in DigAS Admin.
-
-8. Add the new URL slug to the bottom half of the list in `webserver/test_rr_url.py`.
-
-9. Run `py.test webserver/` again. The new entry in `SHOW_CUSTOM_URL` should be in use now, so any errors you see will actually affect users. Fix them and deploy and push the changes. It may be the case that the name change hasn't made it to the Radio API yet, so wait a few minutes before testing again if you encounter an error but you're sure you got it right.
-
-10. Add, commit and push the new version of `webserver/test_rr_url.py` (and any other changed files) to GitHub.
-
-11. Alter and improve this guide if something was poorly explained, you encountered a problem or something similar.
