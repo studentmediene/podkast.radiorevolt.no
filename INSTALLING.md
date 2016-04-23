@@ -73,7 +73,7 @@
        2. Fill in the missing username and path.
        3. Run `sudo cp upstart/podcast_feed_gen.conf /etc/init/podcast-feed-gen.conf`
 
-       [Systemd](http://fedoraproject.org/wiki/Packaging:Systemd):
+       [Systemd](https://wiki.archlinux.org/index.php/systemd):
 
        1. Copy `systemd/podcast_feed_gen_template.service` and save it as `systemd/podcast_feed_gen.service`.
        2. Fill in the missing username and path.
@@ -81,18 +81,18 @@
        3. Run `sudo systemctl enable podcast_feed_gen.service`
 
 7. Copy `apache/podcast_feed_gen_template.conf` and save it at `/etc/apache2/sites-available/podcast_feed_gen.conf`
-   (or `/etc/httpd/conf.d/podcast_feed_gen.conf`).
+   (or `/etc/httpd/conf.d/podcast_feed_gen.conf` if Red Hat).
 
 8. Edit the file you just created, and fill in the missing information. (Follow the comments in that file.)
 
-8. Run (replace apache or apache2 with httpd if you're using a Redhat distro):
+8. Run (replace apache or apache2 with httpd if you're using a Red Hat distro):
 
     ```sh
     # Run the following if you have sites-available on your system:
     sudo a2ensite podcast_feed_gen.conf
     # If the following fails, you know you have a configuration error (but the server is still up)
     apachectl configtest
-    # Start using the new configuration
+    # Start actually using the new configuration
     sudo service apache2 restart
     ```
 
@@ -103,19 +103,37 @@
      **on your local computer** and add a line with your server's IP address followed by a tab and `podcast.example.com`.
 
 10. Check if it works. If it doesn't work, you may need to change how SELinux treats the port you're using with
-    podcast-feed-gen.
-    Check the system logs first, and if that's the problem, run:
+    podcast-feed-gen. Apache isn't allowed to send and listen to every port on the system by default.
+    Check the system logs first, and if this is the problem, grant Apache access to the port podcast-feed-gen runs on:
 
     ```sh
     sudo semanage port -a -t http_port_t -p tcp <port>
     ```
 
-10. Run `python calculate_durations.py`. This will actually take several hours (even days!) depending on how many
+10. Run `python calculate_durations.py` while the virtualenv is activated.
+    This will actually take several hours (even days!) depending on how many
     episodes there are in the archives. Remember that it is bound to your terminal, so it'll exit if you log out
-    of SSH. You should consider running it through `screen` and check in on it the next day.
+    of SSH. You should consider [running it through `screen`](https://www.rackaid.com/blog/linux-screen-tutorial-and-how-to/) and check in on it the next day.
 
-11. When `calculate_durations.py` is done running the first time, add it to crontab so it runs every hour or every 30 minutes.
+    To start it: run `screen`, then navigate to the directory, activate the virtualenv and run the script. Hit
+    `Ctrl+A` followed by `d` to detach yourself while it's running. You may then log off SSH.
 
-    TODO: Be more specific on how to achieve this.
+    To check it: run `screen -r` to reattach yourself. You may then detach again if it's not done, or exit if it's done.
+
+
+11. When `calculate_durations.py` is done running the first time, add it to crontab so it runs every 30 minutes.
+
+    1. Copy `run_calculate_durations_template.sh` and save it as `run_calculate_durations.sh`.
+    2. Edit it and fill in the path to podcast-feed-gen.
+    3. Run:
+
+       ```sh
+       sudo crontab -e
+       ```
+    4. Append the following line, filling in the user (`podcastfeedgen`) and the path to the script.
+       ```
+       2,32 * * * * /usr/bin/sudo -u <user> <path>/run_calculate_durations.sh 2>&1 >/dev/null
+       ```
+       It will run HH:02 and HH:32. The offset 2 was chosen with random.org, to avoid having many tasks run at HH:00.
 
 12. There! All happy.
