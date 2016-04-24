@@ -38,11 +38,14 @@ def find_show(gen: PodcastFeedGenerator, show, strict=True, recursion_depth=0):
                     return find_show(gen, show_id, False, recursion_depth + 1)
             else:
                 raise NoSuchShowError from e
-    return gen.show_source.shows[show_id]
+    try:
+        return gen.show_source.shows[show_id]
+    except KeyError as e:
+        raise NoSuchShowError from e
 
 
 def url_for_feed(show):
-    return url_for("output_feed", show_name=get_feed_slug(show), _external=True)
+    return settings.BASE_URL + url_for("output_feed", show_name=get_feed_slug(show))
 
 
 remove_non_word = re.compile(r"[^\w\d]|_")
@@ -98,7 +101,7 @@ def api_url_show(show):
 
 @app.route('/api/url/')
 def api_url_help():
-    return "<pre>Format:\n/api/url/&lt;show&gt;</pre>"
+    return "<pre>Format:\n/api/url/&lt;DigAS ID or show name&gt;</pre>"
 
 
 @app.route('/api/slug/')
@@ -108,7 +111,7 @@ def api_slug_help():
 
 @app.route('/api/slug/<show_name>')
 def api_slug_name(show_name):
-    return url_for('output_feed', show_name=get_readable_slug_from(show_name), _external=True)
+    return settings.BASE_URL + url_for('output_feed', show_name=get_readable_slug_from(show_name))
 
 
 @app.route('/api/')
