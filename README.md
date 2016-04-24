@@ -4,6 +4,11 @@ Generate podcast feeds that can act as drop-in replacement for the existing podc
 
 The main goal is to **eliminate the need for Feedburner**, since Google might shut it down whenever they feel like it.
 
+Below you'll find explainations of how the system works, as well as guides on how to add new programs or change the name of existing ones.
+
+Even though this project is specialized for Radio Revolt, it might be usable for others too – you'd need to create
+your own show_source, episode_source and metadata sources though.
+
 
 ## Features ##
 
@@ -20,52 +25,22 @@ This project uses Python v3.4 only, and is written so that the podcast feeds can
  a cron job) or generated afresh each time a feed is accessed (potentially with a cache).
 
 
-## How to set up ##
-
-1. [Use virtualenv!](https://iamzed.com/2009/05/07/a-primer-on-virtualenv/)
-
-   ```bash
-   virtualenv -p python3.4 venv
-   . venv/bin/activate
-   ```
-
-2. Install the following packages (assuming Ubuntu/Debian):
-
-    * libxml2
-    * libxml2-dev
-    * libxslt1.1
-    * libxslt1-dev
-    * python3-lxml
-
-3. Install build dependencies for python and its lxml-bindings by running `sudo apt-get build-dep python3-lxml` (still assuming Ubuntu/Debian)
-
-4. Install dependencies by running one of the two commands below. You must decide if you want to run a Python web server for serving freshly generated podcast feeds, or generate podcast feeds periodically and serve the generated feeds with some other HTTP server.
-    <dl>
-        <dt>Run web-server and generate feeds on-the-fly</dt>
-        <dd><code>pip install -r webserver/requirements.txt</code></dd>
-        <dt>Generate feeds periodically</dt>
-        <dd><code>pip install -r generator/requirements.txt</code></dd>
-    </dl>
-
-5. Copy `generator/settings_template.py` to `generator/settings.py` and fill in settings.
-6. Do the same with `webserver/settings_template.py` if you intend to use the provided web server.
-
-
 ## Scripts ##
 
 <dl>
     <dt>generate_feed.py</dt>
-    <dd>Generate RSS feed for a single podcast.</dd>
+    <dd>Output RSS feed for a single podcast.</dd>
     <dt>batch_generate_feed.py</dt>
-    <dd>Generate RSS feeds for all known podcasts.</dd>
+    <dd>Write RSS feeds for all known podcasts.</dd>
     <dt>calculate_durations.py</dt>
     <dd>Write duration information for episodes which don't have it (time consuming!).</dd>
     <dt>server.py</dt>
     <dd>Run web server which generates podcast feeds as they're requested.</dd>
-    <dt>utils/mod_rewrite.py</dt>
-    <dd>Generate configuration for Apache mod_rewrite, which can be used to redirect to the generated feeds (useful when
-    running <code>batch_generate_feed.py</code> as a background task and serving the generated RSS files using Apache,
-     not <code>server.py</code>)</dd>
+    <dt style="text-decoration: line-through">redirect_server.py</dt>
+    <dd>Simple server intended to redirect from our earlier podcast URLs (heavily customized for Radio Revolt)</dd>
+    <dt>utils/feedburner_url_fetcher/get_urls.py</dt>
+    <dd>Special script for generating <code>SHOW_CUSTOM_URL</code> when Feedburner is in use and the source feed follows a format which ends in the DigAS ID. See <code>README.md</code> in the same directory for installation instructions - its environment differs wildly from the usual one.</dd>
+
 </dl>
 
 Use the `--help` flag to see available options for any script.
@@ -80,6 +55,35 @@ Use the `--help` flag to see available options for any script.
     <dd>Settings for the web server.</dd>
 </dl>
 
+## Testing ##
+
+We use `py.test` to run our tests. The test files are located in the same package as the module they test (bad, I know).
+
+### Podcast feed generation ###
+
+While the virtualenv is activated, run
+```bash
+py.test generator/
+```
+to run unit tests for the parts of the system that generate podcast feeds. **Code is covered by unit tests only
+exceptionally**. We should definitively have many more unit tests!!
+
+The reason you're not advised to run just `py.test` without arguments, is that it would run all the tests found in the
+virtualenv folder as well (for example Flask, py.test and so on).
+
+### Podcast feed URLs
+
+Run
+```bash
+py.test webserver/
+```
+This will test all the URLs which may be in use by podcatchers around the country, given the long history our podcasts
+have. **You MUST run this AT LEAST whenever a program changes its name or a new `ShowMetadataSource` is introduced.**
+Ideally, you would set up a script to alert you if any of the tests fail, and run that script daily.
+
+You MUST also maintain `webserver/test_rr_url.py`, by adding a show's new URL when they change name (while keeping the
+old URL there, so you can test if the `SHOW_CUSTOM_URL` settings in `webserver/settings.py` and/or
+`webserver/settings_template.py` function properly).
 
 ## Details: How it works ##
 
@@ -108,3 +112,24 @@ in `generator/metadata_sources/__init__.py` is thus of big importance.
 
 Note that it is perfectly acceptable for no metadata source to match an episode or show – in such cases, the default
 metadata from the `episode_source` or `show_source` is used, respectively.
+
+### Serving a feed on the web server ###
+
+1. The user requests a feed. This request arrives at the server (assuming the application is deployed). If there is no cache available (or it is stale), the Flask webserver is handed the request.
+
+2. If a query string is used (that is, if podcast.example.org/something?t=15 was accessed), the user is redirected to the same page, but without the query string, going back to step 1. _(This is done to prevent attacks that would fill up the cache)_.
+
+3. The URL is parsed, and a search for the program is made. The search is case-insensitive, and will match the program name, except with no special characters or spaces (only words and numbers are used).
+
+4. If the search is _unsuccessful_, the `SHOW_CUSTOM_URL` dictionary is searched for a matching key to find either the correct URL slug (which will parsed like in step 3) or the DigAS ID. _(This is done to allow old URLs to continue working)_
+
+5. Now we have a program. If the URL the user used doesn't match the canonical URL (lowercase, no special characters or spaces), then the user is redirected to the canonical URL and the process begins again from step 1.
+
+6. The feed is generated. See the previous section on what happens as a part of that.
+
+7. A processor instruction is injected into the generated XML feed. This instruction tells the browser to use a special stylesheet to give the feed a nice look. That is why the podcast feed doesn't look like an XML feed in for instance Chrome.
+
+8. The appropriate headers are added. They tell the client that this is XML and that this can be cached for up to 1 hour.
+
+9. The response is then handed off to the server. If Apache is running with caching enabled, it will save a copy of the feed and serve that copy the next hour, instead of activating all the machinery above.
+

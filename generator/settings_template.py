@@ -1,5 +1,29 @@
 import datetime, pytz, os.path, threading
 
+__all__ = [
+    "DEBUG",
+    "DEFAULT_EDITORIAL_EMAIL",
+    "DEFAULT_TECHNICAL_EMAIL",
+    "OWNER_NAME",
+    "OWNER_EMAIL",
+    "DEFAULT_SHORT_FEED_DESCRIPTION",
+    "DEFAULT_WEBSITE",
+    "URL_REDIRECTION_SOUND_URL",
+    "URL_REDIRECTION_ARTICLE_URL",
+    "FIND_EPISODE_DURATIONS",
+    "QUIET",
+    "CANCEL",
+    "SHOW_SOURCE",
+    "EPISODE_SOURCE",
+    "METADATA_SOURCE",
+    "BYPASS_EPISODE",
+    "BYPASS_SHOW",
+    "EPISODE_DURATIONS_DB",
+    "EPISODE_SIZES_DB",
+]
+# Remove the hash symbol and space from the beginning of the following line
+# from .settings_template import *
+
 # Set to True to enable debugging mode, False to disable. Do not leave on in production!
 DEBUG = False
 
@@ -16,6 +40,16 @@ OWNER_EMAIL = "it@example.org"
 DEFAULT_SHORT_FEED_DESCRIPTION = "Podcast from Example Radio"
 # Default website to use on shows with no website.
 DEFAULT_WEBSITE = "http://example.org"
+
+# URL redirection service
+# This works by defining two mapping functions: one for podcast sound urls, one for article urls.
+# The mapping function must take exactly two arguments: the original url and the Episode object.
+# It must return a string with the absolute url which should be used in the original urls' place.
+# Note that this just changes the URLs in the feed; the actual redirection service must be implemented outside of
+# generator (the webserver implements this).
+# Setting it to None disables the URL redirection.
+URL_REDIRECTION_SOUND_URL = None
+URL_REDIRECTION_ARTICLE_URL = None
 
 # Determines whether new episode duration should be calculated by default. Modified by command line options.
 FIND_EPISODE_DURATIONS = False
@@ -42,11 +76,24 @@ SHOW_SOURCE = {
 
 # EPISODE SOURCE SETTINGS
 
+current_folder = os.path.dirname(__file__)
+
 EPISODE_SOURCE = {
     # Base URL for the Radio Rest API (without trailing slash). Example: "http://example.org/v1"
     # Reuse value from SHOW_SOURCE
     'RADIO_REST_API_URL': SHOW_SOURCE['RADIO_REST_API_URL'],
 }
+
+# EPISODE SETTINGS
+
+# Where to store the database file for caching episode durations. A new file will be created if it doesn't exist.
+# Defaults to episode_durations.db in this folder, but you might want to place it somewhere else so you can
+# restrict the program's permissions to edit its sources.
+EPISODE_DURATIONS_DB = os.path.join(current_folder, "..", "data", "episode_durations.db")
+
+# Where to store the database file for caching episode sizes. A new file will be created if it doesn't exist.
+# Defaults to episode_sizes.db in this folder. The above notes about security applies to this as well.
+EPISODE_SIZES_DB = os.path.join(current_folder, "..", "data", "episode_sizes.db")
 
 
 # METADATA SOURCE SETTINGS - key must match the class name.

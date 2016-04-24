@@ -23,11 +23,11 @@ class Episode:
     # Create the required table(s) if they don't exist already.
     # (Do it here to ensure it's only done once)
 
-    _create_table_durations = sqlite3.connect(os.path.join(os.path.dirname(__file__), "episode_durations.db"))
+    _create_table_durations = sqlite3.connect(SETTINGS.EPISODE_DURATIONS_DB)
     _create_table_durations.execute("create table if not exists durations (id text primary key, duration text)")
     _create_table_durations.close()
 
-    _create_table_size = sqlite3.connect(os.path.join(os.path.dirname(__file__), "episode_sizes.db"))
+    _create_table_size = sqlite3.connect(SETTINGS.EPISODE_SIZES_DB)
     _create_table_size.execute("create table if not exists sizes (id text primary key, filesize integer)")
     _create_table_size.close()
 
@@ -115,7 +115,8 @@ class Episode:
         db = None
         try:
             # Create new database connection (a new one each time, since it is bound to one thread)
-            db = sqlite3.connect(os.path.join(os.path.dirname(__file__), "episode_sizes.db"))
+            db = sqlite3.connect(SETTINGS.EPISODE_SIZES_DB)
+            db.execute("PRAGMA busy_timeout = 30000")
             # Try to fetch this episode's filesize
             c = db.execute("SELECT filesize FROM sizes WHERE id=?", (self.sound_url,))
             value = c.fetchone()
@@ -145,7 +146,7 @@ class Episode:
         try:
             # Create new database connection (we do it here because a connection can only be used in the thread it's
             # created in).
-            db = sqlite3.connect(os.path.join(os.path.dirname(__file__), "episode_durations.db"))
+            db = sqlite3.connect(SETTINGS.EPISODE_DURATIONS_DB)
             # Fetch any saved duration, if it exists
             c = db.execute("SELECT duration FROM durations WHERE id=?", (self.sound_url,))
             value = c.fetchone()
@@ -159,7 +160,8 @@ class Episode:
                 # Nope, find and save the duration for this episode - but only if we're allowed to
                 if SETTINGS.FIND_EPISODE_DURATIONS:
                     duration = self.get_duration()
-
+                    if duration is None:
+                        return None
                     # Convert to string conforming to iTunes' format
                     hours = (duration.days*24) + (duration.seconds // (60*60))
                     minutes = (duration.seconds % (60*60)) // 60
@@ -183,9 +185,11 @@ class Episode:
         """Download episode and find its duration."""
 
         while not self._download_constrain.acquire(timeout=10):
-            SETTINGS.check_for_cancel()
+            if SETTINGS.CANCEL.is_set():
+                return None
         try:
-            SETTINGS.check_for_cancel()
+            if SETTINGS.CANCEL.is_set():
+                return None
             # Start fetching mp3 file
             r = requests.get(self.sound_url, stream=True)
             # Save the mp3 file (streaming it so we won't run out of memory)
@@ -196,7 +200,8 @@ class Episode:
                     for chunk in r.iter_content(chunk_size=CHUNK_SIZE):
                         fd.write(chunk)
                         del chunk
-                        SETTINGS.check_for_cancel()
+                        if SETTINGS.CANCEL.is_set():
+                            return None
                 # Read its metadata and determine duration
                 tag = TinyTag.get(filename)
                 return datetime.timedelta(seconds=tag.duration)
@@ -236,15 +241,26 @@ class Episode:
         You will need to call add_to_feed first."""
         if self._feed_entry is None:
             raise RuntimeError("populate_feed_entry was called before this episode was added to a feed.")
+
+        if SETTINGS.URL_REDIRECTION_SOUND_URL:
+            sound_url = SETTINGS.URL_REDIRECTION_SOUND_URL(self.sound_url, self)
+        else:
+            sound_url = self.sound_url
+
+        if SETTINGS.URL_REDIRECTION_ARTICLE_URL:
+            article_url = SETTINGS.URL_REDIRECTION_ARTICLE_URL(self.article_url, self)
+        else:
+            article_url = self.article_url
+
         fe = self._feed_entry
         fe.id(self.sound_url)
-        fe.guid(self.sound_url)
+        fe.guid(self.sound_url)  # Don't use URL redirection service for GUID
         fe.title(self.title)
         fe.description(self.short_description)
         fe.content(self.long_description, type="CDATA")
-        fe.enclosure(self.sound_url, self.size, "audio/mpeg")
+        fe.enclosure(sound_url, self.size, "audio/mpeg")
         fe.author({'name': self.author, 'email': self.author_email})
-        fe.link({'href': self.article_url})
+        fe.link({'href': article_url})
         fe.published(self.date)
 
         duration = self.duration

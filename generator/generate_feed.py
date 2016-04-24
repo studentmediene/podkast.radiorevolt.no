@@ -10,6 +10,7 @@ from .episode_source import EpisodeSource
 from cached_property import cached_property
 
 import sys
+import re
 
 
 class PodcastFeedGenerator:
@@ -17,6 +18,7 @@ class PodcastFeedGenerator:
     def __init__(self, pretty_xml=False, calculate_durations=False, quiet=False):
         self.show_source = ShowSource()
         self.pretty_xml = pretty_xml
+        self.re_remove_chars = re.compile(r"[^\w\d]|_")
 
         SETTINGS.FIND_EPISODE_DURATIONS = calculate_durations
         SETTINGS.QUIET = quiet
@@ -74,6 +76,8 @@ class PodcastFeedGenerator:
         """
 
         # Populate show with more metadata
+        if not SETTINGS.QUIET:
+            print("Finding show metadata...", end="\r", file=sys.stderr)
         self._populate_show_metadata(show, enable_skip_show)
 
         # Start generating feed
@@ -129,6 +133,15 @@ class PodcastFeedGenerator:
                 pass
 
         return feeds
+
+    def get_show_id_by_name(self, name):
+        name = name.lower()
+        shows = self.show_source.get_show_names
+        shows_lower_nospace = {self.re_remove_chars.sub("", name.lower()): show for name, show in shows.items()}
+        try:
+            return shows_lower_nospace[name].show_id
+        except KeyError as e:
+            raise NoSuchShowError from e
 
     def _populate_show_metadata(self, show, enable_skip_show: bool=True):
         for source in self.show_metadata_sources:

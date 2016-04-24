@@ -11,7 +11,7 @@ def save_feed_to_file(feed, target_file):
 
 
 def parse_cli_arguments():
-    parser = argparse.ArgumentParser(description="Write feeds for multiple podcasts.",
+    parser = argparse.ArgumentParser(description="Write feeds for multiple podcasts. Save them to files.",
                                      epilog="See generate_feed.py for generating a single feed and "
                                      "calculate_durations.py for calculating episode durations.")
     parser.add_argument("--quiet", "-q", action="store_true",
