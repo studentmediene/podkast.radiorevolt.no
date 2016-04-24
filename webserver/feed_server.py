@@ -64,7 +64,7 @@ def ignore_get():
 
 @app.route('/<show_name>')
 def output_feed(show_name):
-    gen = PodcastFeedGenerator(quiet=True)
+    gen = PodcastFeedGenerator(quiet=True, pretty_xml=True)  # Make it pretty, so curious people can learn from it
     try:
         show = find_show(gen, show_name)
     except NoSuchShowError:
@@ -198,6 +198,7 @@ def get_redirect_article(original_url, episode):
         # Either the entry was added by someone else between the SELECT and the INSERT, or the uuid was duplicate.
         # Trying again should resolve both issues.
         return get_redirect_article(original_url, episode)
+
 
 @app.before_first_request
 def init_db():
