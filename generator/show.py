@@ -3,12 +3,9 @@ from .episode_source import EpisodeSource
 from feedgen.feed import FeedGenerator
 from .metadata_sources import EpisodeMetadataSource
 from .metadata_sources.skip_episode import SkipEpisode
-from threading import Thread, BoundedSemaphore, RLock
 import sys
 import traceback
 
-
-MAX_CONCURRENT_EPISODE_FEED_WRITERS = 100
 
 class Show:
     def __init__(
@@ -108,8 +105,6 @@ class Show:
         self.feed = None
         """FeedGenerator: Reference to the FeedGenerator associated with this show."""
 
-        self.write_feed_constraint = BoundedSemaphore(MAX_CONCURRENT_EPISODE_FEED_WRITERS)
-        self.print_lock = RLock()
         self.progress_i = 0
         self.progress_n = None
 
@@ -154,8 +149,6 @@ class Show:
             assert isinstance(source, EpisodeMetadataSource), "%r is not a subclass of EpisodeMetadataSource." % source
         if not SETTINGS.QUIET:
             print("Processing episodes...            ", file=sys.stderr, end="\r")
-        threads = list()
-        feed_access_lock = RLock()
         self.progress_n = len(episode_source.episode_list)
         for episode in episode_source.episode_list:
             try:
@@ -166,43 +159,23 @@ class Show:
             except SkipEpisode as e:
                 # Don't add this episode to the feed
                 if not SETTINGS.QUIET:
-                    with self.print_lock:
-                        exc_type, exc_value, exc_traceback = sys.exc_info()
-                        cause = traceback.extract_tb(exc_traceback, 2)[1][0]
-                        print("NOTE: Skipping episode named {name}\n    URL: \"{url}\"\n    Caused by {cause}\n"
-                              .format(name=episode.title, url=episode.sound_url, cause=cause),
-                              file=sys.stderr)
+                    exc_type, exc_value, exc_traceback = sys.exc_info()
+                    cause = traceback.extract_tb(exc_traceback, 2)[1][0]
+                    print("NOTE: Skipping episode named {name}\n    URL: \"{url}\"\n    Caused by {cause}\n"
+                          .format(name=episode.title, url=episode.sound_url, cause=cause),
+                          file=sys.stderr)
 
                 self._progress_increment()
                 continue
             # Add this episode to the feed
             episode.add_to_feed(self.feed)
-            thread = Thread(target=self._write_episode_to_feed,
-                            kwargs={'episode': episode})
-            thread.start()
-            threads.append(thread)
-
-        # Wait for everyone to finish
-        try:
-            for thread in threads:
-                thread.join()
-        except KeyboardInterrupt:
-            SETTINGS.CANCEL.set()
-            with self.print_lock:
-                print("Exiting and cleaning up, please be patient...", file=sys.stderr)
-            for thread in threads:
-                thread.join()
-
-    def _write_episode_to_feed(self, episode):
-        with self.write_feed_constraint:
             episode.populate_feed_entry()
-        self._progress_increment()
+            self._progress_increment()
 
     def _progress_increment(self):
         if not SETTINGS.QUIET:
-            with self.print_lock:
-                self.progress_i += 1
-                print(
-                    "Processed episode {0} of {1}                    ".format(self.progress_i, self.progress_n),
-                    file=sys.stderr, end="\r"
-                )
+            self.progress_i += 1
+            print(
+                "Processed episode {0} of {1}                    ".format(self.progress_i, self.progress_n),
+                file=sys.stderr, end="\r"
+            )
