@@ -147,6 +147,7 @@ class Episode:
             # Create new database connection (we do it here because a connection can only be used in the thread it's
             # created in).
             db = sqlite3.connect(SETTINGS.EPISODE_DURATIONS_DB)
+            db.execute("PRAGMA busy_timeout = 30000")
             # Fetch any saved duration, if it exists
             c = db.execute("SELECT duration FROM durations WHERE id=?", (self.sound_url,))
             value = c.fetchone()
@@ -179,6 +180,7 @@ class Episode:
             else:
                 update = True
         db = sqlite3.connect(SETTINGS.EPISODE_DURATIONS_DB)
+        db.execute("PRAGMA busy_timeout = 30000")
         try:
 
             duration = self._fetch_duration()
