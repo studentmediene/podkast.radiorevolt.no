@@ -183,3 +183,5 @@ run_calculate_durations.sh
 **/episode_durations.db
 # Cache episode sizes
 **/episode_sizes.db
+# Redirect urls
+**/redirects.db

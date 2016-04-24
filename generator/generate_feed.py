@@ -23,6 +23,11 @@ class PodcastFeedGenerator:
         SETTINGS.FIND_EPISODE_DURATIONS = calculate_durations
         SETTINGS.QUIET = quiet
 
+    @staticmethod
+    def register_redirect_services(sound_redirect, article_redirect):
+        SETTINGS.URL_REDIRECTION_SOUND_URL = sound_redirect
+        SETTINGS.URL_REDIRECTION_ARTICLE_URL = article_redirect
+
     @cached_property
     def episode_metadata_sources(self):
         # Instantiate them

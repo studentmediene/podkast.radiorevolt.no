@@ -1,9 +1,10 @@
 from generator.generate_feed import PodcastFeedGenerator
 from generator.no_such_show_error import NoSuchShowError
 from . import settings
-from .redirect import get_original_sound, get_original_article
 from flask import Flask, abort, make_response, redirect, url_for, request
 import re
+import shortuuid
+import sqlite3
 
 app = Flask(__name__)
 app.debug = settings.DEBUG
@@ -72,6 +73,8 @@ def output_feed(show_name):
     if not show_name == get_feed_slug(show):
         return redirect(url_for_feed(show))
 
+    PodcastFeedGenerator.register_redirect_services(get_redirect_sound, get_redirect_article)
+
     feed = gen.generate_feed(show.show_id).decode("utf-8")
     # Inject stylesheet processor instruction by replacing the very first line break
     feed = feed.replace("\n",
@@ -118,24 +121,86 @@ def api_help():
            ("\n".join(["{0:<20}{1}".format(i[0], i[1]) for i in alternatives])) \
            + "</pre>"
 
-# TODO: Implement routing podcast enclosures and article links (see issue #19)
-"""
-@app.route('/episode/<episode>')
-def redirect_episode(episode):
+
+@app.route('/episode/<show>/<episode>')
+def redirect_episode(show, episode):
     try:
-        return redirect(get_original_sound(episode))
+        return redirect(get_original_sound(find_show(PodcastFeedGenerator(quiet=True), show), episode))
     except ValueError:
         abort(404)
 
 
-@app.route('/artikkel/<article>')
-def redirect_article(article):
+@app.route('/artikkel/<show>/<article>')
+def redirect_article(show, article):
     try:
-        return redirect(get_original_article(article))
+        return redirect(get_original_article(find_show(PodcastFeedGenerator(quiet=True), show), article))
     except ValueError:
         abort(404)
-"""
 
 @app.route('/')
 def redirect_homepage():
     return redirect(settings.OFFICIAL_WEBSITE)
+
+
+def get_redirect_db_connection():
+    return
+
+
+def get_original_sound(show, episode):
+    with sqlite3.connect(settings.REDIRECT_DB_FILE) as c:
+        r = c.execute("SELECT original FROM sound WHERE proxy=?", (episode,))
+        row = r.fetchone()
+        if not row:
+            abort(404)
+        else:
+            return row[0]
+
+def get_original_article(show, article):
+    with sqlite3.connect(settings.REDIRECT_DB_FILE) as c:
+        r = c.execute("SELECT original FROM article WHERE proxy=?", (article,))
+        row = r.fetchone()
+        if not row:
+            abort(404)
+        else:
+            return row[0]
+
+
+def get_redirect_sound(original_url, episode):
+    show = episode.show
+    with sqlite3.connect(settings.REDIRECT_DB_FILE) as c:
+        try:
+            r = c.execute("SELECT proxy FROM sound WHERE original=?", (original_url,))
+            row = r.fetchone()
+            if not row:
+                raise KeyError(episode.sound_url)
+            return url_for("redirect_episode", show=get_feed_slug(show), episode=row[0], _external=True)
+        except KeyError:
+            new_uri = shortuuid.uuid()
+            e = c.execute("INSERT INTO sound (original, proxy) VALUES (?, ?)", (original_url, new_uri))
+            return url_for("redirect_episode", show=get_feed_slug(show), episode=new_uri, _external=True)
+
+
+def get_redirect_article(original_url, episode):
+    show = episode.show
+    try:
+        with sqlite3.connect(settings.REDIRECT_DB_FILE) as c:
+            try:
+                r = c.execute("SELECT proxy FROM article WHERE original=?", (original_url,))
+                row = r.fetchone()
+                if not row:
+                    raise KeyError(episode.sound_url)
+                return url_for("redirect_article", show=get_feed_slug(show), article=row[0], _external=True)
+            except KeyError:
+                new_uri = shortuuid.uuid()
+                e = c.execute("INSERT INTO article (original, proxy) VALUES (?, ?)", (original_url, new_uri))
+                return url_for("redirect_article", show=get_feed_slug(show), article=new_uri, _external=True)
+    except sqlite3.IntegrityError:
+        # Either the entry was added by someone else between the SELECT and the INSERT, or the uuid was duplicate.
+        # Trying again should resolve both issues.
+        return get_redirect_article(original_url, episode)
+
+@app.before_first_request
+def init_db():
+    with sqlite3.connect(settings.REDIRECT_DB_FILE) as c:
+        c.execute("CREATE TABLE IF NOT EXISTS sound (original text primary key, proxy text unique)")
+        c.execute("CREATE TABLE IF NOT EXISTS article (original text primary key, proxy text unique)")
