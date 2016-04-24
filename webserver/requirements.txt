@@ -1,4 +1,8 @@
 # Simple webserver framework
 flask
+# Utility for generating unique URLs
+shortuuid
+# Our own webserver
+mod_wsgi
 # We will need to use the generator, so install its dependencies
 -r ../generator/requirements.txt

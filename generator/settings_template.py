@@ -18,6 +18,8 @@ __all__ = [
     "METADATA_SOURCE",
     "BYPASS_EPISODE",
     "BYPASS_SHOW",
+    "EPISODE_DURATIONS_DB",
+    "EPISODE_SIZES_DB",
 ]
 # Remove the hash symbol and space from the beginning of the following line
 # from .settings_template import *
@@ -87,11 +89,11 @@ EPISODE_SOURCE = {
 # Where to store the database file for caching episode durations. A new file will be created if it doesn't exist.
 # Defaults to episode_durations.db in this folder, but you might want to place it somewhere else so you can
 # restrict the program's permissions to edit its sources.
-EPISODE_DURATIONS_DB = os.path.join(current_folder, "episode_durations.db")
+EPISODE_DURATIONS_DB = os.path.join(current_folder, "..", "data", "episode_durations.db")
 
 # Where to store the database file for caching episode sizes. A new file will be created if it doesn't exist.
 # Defaults to episode_sizes.db in this folder. The above notes about security applies to this as well.
-EPISODE_SIZES_DB = os.path.join(current_folder, "episode_sizes.db")
+EPISODE_SIZES_DB = os.path.join(current_folder, "..", "data", "episode_sizes.db")
 
 
 # METADATA SOURCE SETTINGS - key must match the class name.
