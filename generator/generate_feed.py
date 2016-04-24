@@ -15,12 +15,11 @@ import re
 
 class PodcastFeedGenerator:
 
-    def __init__(self, pretty_xml=False, calculate_durations=False, quiet=False):
+    def __init__(self, pretty_xml=False, quiet=False):
         self.show_source = ShowSource()
         self.pretty_xml = pretty_xml
         self.re_remove_chars = re.compile(r"[^\w\d]|_")
 
-        SETTINGS.FIND_EPISODE_DURATIONS = calculate_durations
         SETTINGS.QUIET = quiet
 
     @staticmethod

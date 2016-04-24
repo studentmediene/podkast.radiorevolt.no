@@ -30,15 +30,10 @@ def parse_cli_arguments() -> argparse.Namespace:
 def main():
     args = parse_cli_arguments()
     show = args.show_id
-    durations = False
     pretty_xml = args.pretty
     quiet = args.quiet
 
-    program = PodcastFeedGenerator(
-        pretty_xml=pretty_xml,
-        calculate_durations=durations,
-        quiet=quiet,
-    )
+    program = PodcastFeedGenerator(pretty_xml=pretty_xml, quiet=quiet)
     try:
         feed = program.generate_feed(show)
         print(feed.decode("utf-8"))

@@ -3,9 +3,8 @@ from generator.generate_feed import PodcastFeedGenerator
 from generator.episode_source import EpisodeSource
 from generator import settings
 from generator.no_episodes_error import NoEpisodesError
-from threading import Thread, RLock, active_count, BoundedSemaphore
+from threading import Thread, RLock, BoundedSemaphore
 from sys import stderr
-from time import sleep
 
 
 def print_err(*args, **kwargs):
@@ -37,7 +36,7 @@ def main():
     args_shows = args.shows
     args_shows_set = set(args_shows)
 
-    generator = PodcastFeedGenerator(quiet=quiet, calculate_durations=False)
+    generator = PodcastFeedGenerator(quiet=quiet)
 
     # Find which shows to use
     all_shows = generator.show_source.shows
@@ -74,7 +73,6 @@ def main():
     if not episodes_without_duration:
         parser.exit(message="All episodes have duration information.\n" if not quiet else None)
 
-    settings.FIND_EPISODE_DURATIONS = True
     num_episodes = len(episodes_without_duration)
 
     if not quiet:
@@ -108,7 +106,7 @@ def main():
 
 
 def fetch_duration(episode, print_lock, quiet, total, constrain):
-    e = episode.duration
+    e = episode.calculate_duration()
     _ = episode.size
     if not quiet and not settings.CANCEL.is_set():
         print_progress(episode, print_lock, total)

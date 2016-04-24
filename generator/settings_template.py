@@ -10,7 +10,6 @@ __all__ = [
     "DEFAULT_WEBSITE",
     "URL_REDIRECTION_SOUND_URL",
     "URL_REDIRECTION_ARTICLE_URL",
-    "FIND_EPISODE_DURATIONS",
     "QUIET",
     "CANCEL",
     "SHOW_SOURCE",
@@ -50,9 +49,6 @@ DEFAULT_WEBSITE = "http://example.org"
 # Setting it to None disables the URL redirection.
 URL_REDIRECTION_SOUND_URL = None
 URL_REDIRECTION_ARTICLE_URL = None
-
-# Determines whether new episode duration should be calculated by default. Modified by command line options.
-FIND_EPISODE_DURATIONS = False
 
 # Determines whether progress information should be printed. Modified by command line options.
 QUIET = True

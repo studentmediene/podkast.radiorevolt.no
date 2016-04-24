@@ -141,7 +141,7 @@ class Episode:
 
     @property
     def duration(self) -> str:
-        """String representing how long this episodes lasts, in format HH:MM:SS. Read-only."""
+        """String representing how long this episodes lasts, in format HH:MM:SS. None if not available. Read-only."""
         db = None
         try:
             # Create new database connection (we do it here because a connection can only be used in the thread it's
@@ -157,31 +157,60 @@ class Episode:
                 # Yes, use it
                 return value[0]
             else:
-                # Nope, find and save the duration for this episode - but only if we're allowed to
-                if SETTINGS.FIND_EPISODE_DURATIONS:
-                    duration = self.get_duration()
-                    if duration is None:
-                        return None
-                    # Convert to string conforming to iTunes' format
-                    hours = (duration.days*24) + (duration.seconds // (60*60))
-                    minutes = (duration.seconds % (60*60)) // 60
-                    seconds = duration.seconds % 60
-                    duration_string = "{hours:02d}:{minutes:02d}:{seconds:02d}"\
-                        .format(hours=hours, minutes=minutes, seconds=seconds)
-
-                    # Persist this string in the database
-                    db.execute("INSERT INTO durations (id, duration) VALUES (:id, :duration)",
-                               {"id": self.sound_url, "duration": duration_string})
-                    db.commit()
-                    return duration_string
-                else:
-                    # Not allowed, so return None (makes it so there is no itunes:duration tag for this episode)
-                    return None
+                return None
         finally:
             if db:
                 db.close()
 
-    def get_duration(self) -> datetime.timedelta:
+    def calculate_duration(self, force: bool =False) -> bool:
+        """
+        Find the episode's duration and save it in the database.
+
+        Args:
+            force (bool): Set to True to force a re-download and re-evaluation of the episode's duration.
+
+        Returns:
+            bool: True if the duration was updated, False if it was not.
+        """
+        update = False
+        if self.duration is not None:
+            if not force:
+                return False
+            else:
+                update = True
+        db = sqlite3.connect(SETTINGS.EPISODE_DURATIONS_DB)
+        try:
+
+            duration = self._fetch_duration()
+            if duration is None:
+                return False
+            # Convert to string conforming to iTunes' format
+            hours = (duration.days * 24) + (duration.seconds // (60 * 60))
+            minutes = (duration.seconds % (60 * 60)) // 60
+            seconds = duration.seconds % 60
+            duration_string = "{hours:02d}:{minutes:02d}:{seconds:02d}" \
+                .format(hours=hours, minutes=minutes, seconds=seconds)
+
+            # Persist this string in the database
+            if not update:
+                try:
+                    db.execute("INSERT INTO durations (id, duration) VALUES (:id, :duration)",
+                               {"id": self.sound_url, "duration": duration_string})
+                except sqlite3.IntegrityError:
+                    # There is already an entry for this episode -
+                    # someone else has found the duration while we were busy, so just update it
+                    update = True
+            if update:
+                db.execute("UPDATE durations SET duration=:duration WHERE id=:id",
+                           {"id": self.sound_url, "duration": duration_string})
+
+            db.commit()
+            return True
+        finally:
+            if db:
+                db.close()
+
+    def _fetch_duration(self) -> datetime.timedelta:
         """Download episode and find its duration."""
 
         while not self._download_constrain.acquire(timeout=10):

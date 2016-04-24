@@ -40,13 +40,12 @@ def main():
     target_dir = args.target_dir
     naming_scheme = args.naming_scheme
     arg_shows = args.shows
-    calculate_durations = False
     quiet = args.quiet
     pretty = args.pretty
     create_dir = args.create_directory
     exclude = args.exclude
 
-    generator = PodcastFeedGenerator(pretty, calculate_durations, quiet)
+    generator = PodcastFeedGenerator(pretty, quiet)
     all_shows = generator.show_source.shows
     all_shows_set = set(all_shows.keys())
     arg_shows_set = set(arg_shows)
