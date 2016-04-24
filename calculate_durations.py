@@ -109,6 +109,7 @@ def main():
 
 def fetch_duration(episode, print_lock, quiet, total, constrain):
     e = episode.duration
+    _ = episode.size
     if not quiet and not settings.CANCEL.is_set():
         print_progress(episode, print_lock, total)
     constrain.release()
