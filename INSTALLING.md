@@ -149,7 +149,8 @@ feeds as well. That problem is a perfect fit for the `generate_redirect_rules.py
 It is assumed you are somewhat comfortable editing Apache configuration files, as well as using the Linux command line.
 
 1. You must use a computer on which webserver/requirements.txt is fulfilled. This is because the
-    `generate_redirect_rules.py` script depends on some scripts inside webserver.
+    `generate_redirect_rules.py` script depends on some scripts inside webserver. If you log on using SSH, make sure
+    to use the -X flag to activate X forwarding (required by xclip).
 
 2. Activate the virtualenv.
 
