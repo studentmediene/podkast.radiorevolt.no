@@ -8,6 +8,7 @@ __all__ = [
     "SHOW_CUSTOM_URL",
     "DEBUG",
     "REDIRECT_DB_FILE",
+    "BASE_URL",
 ]
 
 # Set to True to enable debug mode. DO NOT LEAVE ON IN PRODUCTION!
@@ -17,6 +18,8 @@ DEBUG = False
 # Website which you will be redirected to if you access / on the server.
 OFFICIAL_WEBSITE = "http://radio.example.org"
 
+# Root where this site can be accessed from the outside (used to generate correct feed URLs)
+BASE_URL = "http://podcast.example.org"
 
 # Path to the DB file used by the redirection service
 REDIRECT_DB_FILE = path.abspath(path.join(path.dirname(__file__), "..", "data", "redirects.db"))

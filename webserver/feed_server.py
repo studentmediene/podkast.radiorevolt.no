@@ -173,11 +173,11 @@ def get_redirect_sound(original_url, episode):
             row = r.fetchone()
             if not row:
                 raise KeyError(episode.sound_url)
-            return url_for("redirect_episode", show=get_feed_slug(show), episode=row[0], _external=True)
+            return settings.BASE_URL + url_for("redirect_episode", show=get_feed_slug(show), episode=row[0])
         except KeyError:
             new_uri = shortuuid.uuid()
             e = c.execute("INSERT INTO sound (original, proxy) VALUES (?, ?)", (original_url, new_uri))
-            return url_for("redirect_episode", show=get_feed_slug(show), episode=new_uri, _external=True)
+            return settings.BASE_URL + url_for("redirect_episode", show=get_feed_slug(show), episode=new_uri)
 
 
 def get_redirect_article(original_url, episode):
@@ -189,11 +189,11 @@ def get_redirect_article(original_url, episode):
                 row = r.fetchone()
                 if not row:
                     raise KeyError(episode.sound_url)
-                return url_for("redirect_article", show=get_feed_slug(show), article=row[0], _external=True)
+                return settings.BASE_URL + url_for("redirect_article", show=get_feed_slug(show), article=row[0])
             except KeyError:
                 new_uri = shortuuid.uuid()
                 e = c.execute("INSERT INTO article (original, proxy) VALUES (?, ?)", (original_url, new_uri))
-                return url_for("redirect_article", show=get_feed_slug(show), article=new_uri, _external=True)
+                return settings.BASE_URL + url_for("redirect_article", show=get_feed_slug(show), article=new_uri)
     except sqlite3.IntegrityError:
         # Either the entry was added by someone else between the SELECT and the INSERT, or the uuid was duplicate.
         # Trying again should resolve both issues.
