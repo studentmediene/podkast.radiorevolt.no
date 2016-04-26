@@ -8,7 +8,7 @@
                 <!-- This document is adapted from BBC (example: http://www.bbc.co.uk/programmes/p002w6r2/episodes/downloads.rss).
                 We hope it's okay! We did it only because it looked so good. -->
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
-                <title><xsl:value-of select="rss/channel/title"/> Podkast på Radio Revolt</title>
+                <title><xsl:value-of select="rss/channel/title"/> fra Radio Revolt</title>
                 <style>
                     body {
                     background: #313131;
