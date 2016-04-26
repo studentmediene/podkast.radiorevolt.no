@@ -121,7 +121,6 @@ def api_help():
     alternatives = [
         ("Podkast URLs:", "/api/url/"),
         ("Predict URL from show name:", "/api/slug/"),
-        ("testing", )
     ]
     return "<pre>API for podcast-feed-gen\nFormat:\n" + \
            ("\n".join(["{0:<20}{1}".format(i[0], i[1]) for i in alternatives])) \
