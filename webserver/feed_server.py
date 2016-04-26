@@ -5,8 +5,10 @@ from flask import Flask, abort, make_response, redirect, url_for, request
 import re
 import shortuuid
 import sqlite3
+from werkzeug.contrib.fixers import ProxyFix
 
 app = Flask(__name__)
+app.wsgi_app = ProxyFix(app.wsgi_app)
 app.debug = settings.DEBUG
 
 
@@ -45,7 +47,7 @@ def find_show(gen: PodcastFeedGenerator, show, strict=True, recursion_depth=0):
 
 
 def url_for_feed(show):
-    return settings.BASE_URL + url_for("output_feed", show_name=get_feed_slug(show))
+    return url_for("output_feed", show_name=get_feed_slug(show), _external=True)
 
 
 remove_non_word = re.compile(r"[^\w\d]|_")
@@ -111,14 +113,15 @@ def api_slug_help():
 
 @app.route('/api/slug/<show_name>')
 def api_slug_name(show_name):
-    return settings.BASE_URL + url_for('output_feed', show_name=get_readable_slug_from(show_name))
+    return url_for('output_feed', show_name=get_readable_slug_from(show_name), _external=True)
 
 
 @app.route('/api/')
 def api_help():
     alternatives = [
         ("Podkast URLs:", "/api/url/"),
-        ("Predict URL from show name:", "/api/slug/")
+        ("Predict URL from show name:", "/api/slug/"),
+        ("testing", )
     ]
     return "<pre>API for podcast-feed-gen\nFormat:\n" + \
            ("\n".join(["{0:<20}{1}".format(i[0], i[1]) for i in alternatives])) \
@@ -176,11 +179,11 @@ def get_redirect_sound(original_url, episode):
             row = r.fetchone()
             if not row:
                 raise KeyError(episode.sound_url)
-            return settings.BASE_URL + url_for("redirect_episode", show=get_feed_slug(show), episode=row[0])
+            return url_for("redirect_episode", show=get_feed_slug(show), episode=row[0], _external=True)
         except KeyError:
             new_uri = shortuuid.uuid()
             e = c.execute("INSERT INTO sound (original, proxy) VALUES (?, ?)", (original_url, new_uri))
-            return settings.BASE_URL + url_for("redirect_episode", show=get_feed_slug(show), episode=new_uri)
+            return url_for("redirect_episode", show=get_feed_slug(show), episode=new_uri, _external=True)
 
 
 def get_redirect_article(original_url, episode):
@@ -192,11 +195,11 @@ def get_redirect_article(original_url, episode):
                 row = r.fetchone()
                 if not row:
                     raise KeyError(episode.sound_url)
-                return settings.BASE_URL + url_for("redirect_article", show=get_feed_slug(show), article=row[0])
+                return url_for("redirect_article", show=get_feed_slug(show), article=row[0], _external=True)
             except KeyError:
                 new_uri = shortuuid.uuid()
                 e = c.execute("INSERT INTO article (original, proxy) VALUES (?, ?)", (original_url, new_uri))
-                return settings.BASE_URL + url_for("redirect_article", show=get_feed_slug(show), article=new_uri)
+                return url_for("redirect_article", show=get_feed_slug(show), article=new_uri, _external=True)
     except sqlite3.IntegrityError:
         # Either the entry was added by someone else between the SELECT and the INSERT, or the uuid was duplicate.
         # Trying again should resolve both issues.
