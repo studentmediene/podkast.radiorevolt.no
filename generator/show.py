@@ -150,27 +150,40 @@ class Show:
         if not SETTINGS.QUIET:
             print("Processing episodes...            ", file=sys.stderr, end="\r")
         self.progress_n = len(episode_source.episode_list)
-        for episode in episode_source.episode_list:
-            try:
-                # Let each metadata source provide metadata, if they have it
-                for source in metadata_sources:
-                    if source.accepts(episode):
+        if self.progress_n == 1:
+            # add the single episode, but ignore SkipEpisode
+            episode = episode_source.episode_list[0]
+            for source in metadata_sources:
+                if source.accepts(episode):
+                    try:
                         source.populate(episode)
-            except SkipEpisode as e:
-                # Don't add this episode to the feed
-                if not SETTINGS.QUIET:
-                    exc_type, exc_value, exc_traceback = sys.exc_info()
-                    cause = traceback.extract_tb(exc_traceback, 2)[1][0]
-                    print("NOTE: Skipping episode named {name}\n    URL: \"{url}\"\n    Caused by {cause}\n"
-                          .format(name=episode.title, url=episode.sound_url, cause=cause),
-                          file=sys.stderr)
-
-                self._progress_increment()
-                continue
-            # Add this episode to the feed
+                    except SkipEpisode:
+                        pass
             episode.add_to_feed(self.feed)
             episode.populate_feed_entry()
             self._progress_increment()
+        else:
+            for episode in episode_source.episode_list:
+                try:
+                    # Let each metadata source provide metadata, if they have it
+                    for source in metadata_sources:
+                        if source.accepts(episode):
+                            source.populate(episode)
+                except SkipEpisode as e:
+                    # Don't add this episode to the feed
+                    if not SETTINGS.QUIET:
+                        exc_type, exc_value, exc_traceback = sys.exc_info()
+                        cause = traceback.extract_tb(exc_traceback, 2)[1][0]
+                        print("NOTE: Skipping episode named {name}\n    URL: \"{url}\"\n    Caused by {cause}\n"
+                              .format(name=episode.title, url=episode.sound_url, cause=cause),
+                              file=sys.stderr)
+
+                    self._progress_increment()
+                    continue
+                # Add this episode to the feed
+                episode.add_to_feed(self.feed)
+                episode.populate_feed_entry()
+                self._progress_increment()
 
     def _progress_increment(self):
         if not SETTINGS.QUIET:
