@@ -1,5 +1,6 @@
 import pytest
 from . import feed_server, settings
+from .alternate_show_names import ALTERNATE_SHOW_NAMES
 from generator import show_source as source
 import urllib.parse
 
@@ -31,7 +32,7 @@ def test_api_url_help():
 
 
 def get_test_params_for_url():
-    params = list(settings.SHOW_CUSTOM_URL.keys())
+    params = list(ALTERNATE_SHOW_NAMES.keys())
     params = params[:min(len(params), 10)]
     shows = show_ids()
     params.extend(shows[:min(len(shows), 10)])

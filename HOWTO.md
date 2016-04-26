@@ -21,9 +21,9 @@
 
 1. Identify the current URL used to access the show. You may use `/api/slug/DIGAS PROGRAM NAME HERE` on the podcast website to find it.
 
-2. Activate virtualenv and open up `webserver/settings.py`. If there is no variable named `SHOW_CUSTOM_URL` there, then you must open `webserver/settings_template.py` instead.
+2. Activate virtualenv and open up `webserver/alternate_show_names.py`.
 
-3. Add a new entry to `SHOW_CUSTOM_URL`.
+3. Add a new entry to `ALTERNATE_SHOW_NAMES`.
 
    1. The key must be the URL slug currently in use. For example, if `podcast.example.org/mylittlepodcast` is the URL currently in use, then you must use `mylittlepodcast` as key.
    2. The value must be the new URL slug. You can find it by accessing `/api/slug/NEW PROGRAM NAME`. Just like the key, you only want to use the slug, not the entire URL.
@@ -31,7 +31,7 @@
 
 4. Open `webserver/test_rr_url.py` and move the current URL slug to the upper part of the list (or add it if it's not there).
 
-5. Run `py.test webserver/` and fix any errors. Note that the new entry in `SHOW_CUSTOM_URL` isn't actually in use right now, but you'll catch any syntax errors this way.
+5. Run `py.test webserver/` and fix any errors. Note that the new entry in `ALTERNATE_SHOW_NAMES` isn't actually in use right now, but you'll catch any syntax errors this way.
 
 6. Save, upload and deploy the new settings file.
 
@@ -39,7 +39,7 @@
 
 8. Add the new URL slug to the bottom half of the list in `webserver/test_rr_url.py`.
 
-9. Run `py.test webserver/` again. The new entry in `SHOW_CUSTOM_URL` should be in use now, so any errors you see will actually affect users. Fix them and deploy and push the changes. It may be the case that the name change hasn't made it to the Radio API yet, so wait a few minutes before testing again if you encounter an error but you're sure you got it right.
+9. Run `py.test webserver/` again. The new entry in `ALTERNATE_SHOW_NAMES` should be in use now, so any errors you see will actually affect users. Fix them and deploy and push the changes. It may be the case that the name change hasn't made it to the Radio API yet, so wait a few minutes before testing again if you encounter an error but you're sure you got it right.
 
 10. Add, commit and push the new version of `webserver/test_rr_url.py` (and any other changed files) to GitHub.
 

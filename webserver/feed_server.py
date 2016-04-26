@@ -1,6 +1,7 @@
 from generator.generate_feed import PodcastFeedGenerator
 from generator.no_such_show_error import NoSuchShowError
 from . import settings
+from .alternate_show_names import ALTERNATE_SHOW_NAMES
 from flask import Flask, abort, make_response, redirect, url_for, request
 import re
 import shortuuid
@@ -34,7 +35,7 @@ def find_show(gen: PodcastFeedGenerator, show, strict=True, recursion_depth=0):
             # Perhaps this is an old-style url?
             gen = PodcastFeedGenerator(quiet=True)
             show = show.strip().lower()
-            for potential_show, show_id in settings.SHOW_CUSTOM_URL.items():
+            for potential_show, show_id in ALTERNATE_SHOW_NAMES.items():
                 potential_show = potential_show.lower()
                 if potential_show == show:
                     return find_show(gen, show_id, False, recursion_depth + 1)

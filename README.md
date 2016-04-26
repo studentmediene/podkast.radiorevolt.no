@@ -121,7 +121,7 @@ metadata from the `episode_source` or `show_source` is used, respectively.
 
 3. The URL is parsed, and a search for the program is made. The search is case-insensitive, and will match the program name, except with no special characters or spaces (only words and numbers are used).
 
-4. If the search is _unsuccessful_, the `SHOW_CUSTOM_URL` dictionary is searched for a matching key to find either the correct URL slug (which will parsed like in step 3) or the DigAS ID. _(This is done to allow old URLs to continue working)_
+4. If the search is _unsuccessful_, the `ALTERNATE_SHOW_NAMES` dictionary found in `alternate_show_names.py` is searched for a matching key to find either the correct URL slug (which will parsed like in step 3) or the DigAS ID. _(This is done to allow old URLs to continue working)_
 
 5. Now we have a program. If the URL the user used doesn't match the canonical URL (lowercase, no special characters or spaces), then the user is redirected to the canonical URL and the process begins again from step 1.
 
