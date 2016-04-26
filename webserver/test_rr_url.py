@@ -82,6 +82,7 @@ def rr_urls():
         "palmehaven",
         "skammekroken",
         "sportsidiot",
+        "studentlosen",
         "sekt",
         "institusjonen",
         "filmofil",
