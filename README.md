@@ -38,8 +38,8 @@ This project uses Python v3.4 only, and is written so that the podcast feeds can
     <dd>Write duration information for episodes which don't have it (time consuming!).</dd>
     <dt>server.py</dt>
     <dd>Run web server which generates podcast feeds as they're requested.</dd>
-    <dt style="text-decoration: line-through">redirect_server.py</dt>
-    <dd>Simple server intended to redirect from our earlier podcast URLs (heavily customized for Radio Revolt)</dd>
+    <dt>generate_redirect_rules.py</dt>
+    <dd>Create mod_rewrite rules which can be used to redirect from the old podcast host.</dd>
     <dt>utils/feedburner_url_fetcher/get_urls.py</dt>
     <dd>Special script for generating <code>SHOW_CUSTOM_URL</code> when Feedburner is in use and the source feed follows a format which ends in the DigAS ID. See <code>README.md</code> in the same directory for installation instructions - its environment differs wildly from the usual one.</dd>
 
