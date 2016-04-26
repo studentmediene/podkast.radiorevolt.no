@@ -30,6 +30,8 @@ This project uses Python v3.4 only, and is written so that the podcast feeds can
 <dl>
     <dt>generate_feed.py</dt>
     <dd>Output RSS feed for a single podcast.</dd>
+    <dt>generate_all_episodes_feed.py</dt>
+    <dd>Output special RSS feed with all episodes from all shows in a single feed.</dd>
     <dt>batch_generate_feed.py</dt>
     <dd>Write RSS feeds for all known podcasts.</dd>
     <dt>calculate_durations.py</dt>

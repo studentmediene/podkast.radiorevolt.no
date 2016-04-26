@@ -67,3 +67,10 @@ ALTERNATE_SHOW_NAMES = {
     # Program name changes
     "postkåkk": "soulmat",
 }
+
+# Those are alternate names for the special "all episodes" feed
+ALTERNATE_ALL_EPISODES_FEED_NAME = {
+    "alleepisoder",
+    "allepisodes",
+    "*",
+}

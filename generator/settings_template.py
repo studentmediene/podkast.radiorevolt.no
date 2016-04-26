@@ -19,6 +19,7 @@ __all__ = [
     "BYPASS_SHOW",
     "EPISODE_DURATIONS_DB",
     "EPISODE_SIZES_DB",
+    "ALL_EPISODES_FEED_TITLE",
 ]
 # Remove the hash symbol and space from the beginning of the following line
 # from .settings_template import *
@@ -39,6 +40,9 @@ OWNER_EMAIL = "it@example.org"
 DEFAULT_SHORT_FEED_DESCRIPTION = "Podcast from Example Radio"
 # Default website to use on shows with no website.
 DEFAULT_WEBSITE = "http://example.org"
+
+# Default title for the special feed with episodes from all shows
+ALL_EPISODES_FEED_TITLE = "All podcast episodes from Example Radio"
 
 # URL redirection service
 # This works by defining two mapping functions: one for podcast sound urls, one for article urls.

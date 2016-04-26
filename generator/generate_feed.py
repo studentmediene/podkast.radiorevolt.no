@@ -1,3 +1,6 @@
+import traceback
+
+from .metadata_sources.skip_episode import SkipEpisode
 from . import metadata_sources
 from . import episode_source
 from . import Show
@@ -65,7 +68,6 @@ class PodcastFeedGenerator:
 
         return self._generate_feed(show, skip_empty=not force, enable_skip_show=not force)
 
-
     def _generate_feed(self, show: Show, skip_empty: bool =True, enable_skip_show: bool =True) -> bytes:
         """Generate RSS feed for the provided show.
 
@@ -113,14 +115,8 @@ class PodcastFeedGenerator:
 
         # Ensure we only download list of episodes once
         if not SETTINGS.QUIET:
-            print("Downloading list of episodes", file=sys.stderr)
-        EpisodeSource.populate_all_episodes_list()
-        if not SETTINGS.QUIET:
             print("Downloading metadata, this could take a while...", file=sys.stderr)
-        for source in self.episode_metadata_sources:
-            source.prepare_batch()
-        for source in self.show_metadata_sources:
-            source.prepare_batch()
+        self._prepare_for_batch()
 
         feeds = dict()
         for show in shows:
@@ -137,6 +133,13 @@ class PodcastFeedGenerator:
                 pass
 
         return feeds
+
+    def _prepare_for_batch(self):
+        EpisodeSource.populate_all_episodes_list()
+        for source in self.episode_metadata_sources:
+            source.prepare_batch()
+        for source in self.show_metadata_sources:
+            source.prepare_batch()
 
     def get_show_id_by_name(self, name):
         name = name.lower()
@@ -160,3 +163,32 @@ class PodcastFeedGenerator:
                         # We're not skipping this show, just go on...
                         pass
 
+    def generate_feed_with_all_episodes(self, title=None):
+        show = Show(title or SETTINGS.ALL_EPISODES_FEED_TITLE, 0)
+        feed = show.init_feed()
+
+        self._prepare_for_batch()
+        # Get all episodes
+        episodes = [EpisodeSource.episode(self.show_source.shows[ep['program_defnr']], ep)
+                    for ep in EpisodeSource.all_episodes if ep['program_defnr'] != 0]
+        # Populate metadata
+        progress_n = len(episodes)
+        for i, episode in enumerate(episodes):
+            if not SETTINGS.QUIET:
+                print("Populating episode {i} out of {n}".format(i=i, n=progress_n), end="\r", file=sys.stderr)
+            try:
+                for source in self.episode_metadata_sources:
+                    if source.accepts(episode):
+                        source.populate(episode)
+            except SkipEpisode:
+                if not SETTINGS.QUIET:
+                    exc_type, exc_value, exc_traceback = sys.exc_info()
+                    cause = traceback.extract_tb(exc_traceback, 2)[1][0]
+                    print("NOTE: Skipping episode named {name}\n    URL: \"{url}\"\n    Caused by {cause}\n"
+                          .format(name=episode.title, url=episode.sound_url, cause=cause),
+                          file=sys.stderr)
+                continue
+            episode.add_to_feed(feed)
+            episode.populate_feed_entry()
+
+        return feed.rss_str(pretty=self.pretty_xml)

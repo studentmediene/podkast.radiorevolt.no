@@ -86,6 +86,9 @@ def rr_urls():
         "sekt",
         "institusjonen",
         "filmofil",
+        "all",
+        "alleepisoder",
+        "allepisodes",
     ]
 
 

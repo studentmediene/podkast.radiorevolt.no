@@ -78,13 +78,17 @@ class EpisodeSource:
     @cached_property
     def episode_list(self):
         """List of Episode objects."""
-        return [
-            Episode(
-                show=self.show,
-                sound_url=episode_dict['url'],
-                title=episode_dict['title'],
-                long_description=episode_dict['comment'],
-                date=datetime.datetime.strptime(str(episode_dict['dato']) + " 12:00:00 " + time.strftime("%z"),
-                                                "%Y%m%d %H:%M:%S %z"),
-                author=episode_dict['author'],
-            ) for episode_dict in self.episodes]
+        return [self.episode(self.show, episode_dict)
+                for episode_dict in self.episodes]
+
+    @staticmethod
+    def episode(show, episode_dict):
+        return Episode(
+            show=show,
+            sound_url=episode_dict['url'],
+            title=episode_dict['title'],
+            long_description=episode_dict['comment'],
+            date=datetime.datetime.strptime(str(episode_dict['dato']) + " 12:00:00 " + time.strftime("%z"),
+                                            "%Y%m%d %H:%M:%S %z"),
+            author=episode_dict['author'],
+        )

@@ -1,8 +1,8 @@
 from generator.generate_feed import PodcastFeedGenerator
 from generator.no_such_show_error import NoSuchShowError
 from . import settings
-from .alternate_show_names import ALTERNATE_SHOW_NAMES
-from flask import Flask, abort, make_response, redirect, url_for, request
+from .alternate_show_names import ALTERNATE_SHOW_NAMES, ALTERNATE_ALL_EPISODES_FEED_NAME
+from flask import Flask, abort, make_response, redirect, url_for, request, Response
 import re
 import shortuuid
 import sqlite3
@@ -68,13 +68,26 @@ def ignore_get():
         return redirect(request.base_url, 301)
 
 
+@app.route('/all')
+def output_all_feed():
+    gen = PodcastFeedGenerator(quiet=True, pretty_xml=True)
+    gen.register_redirect_services(get_redirect_sound, get_redirect_article)
+
+    feed = gen.generate_feed_with_all_episodes().decode("utf-8")
+    feed = _prepare_feed(feed)
+    return _prepare_feed_response(feed, 10 * 60)
+
+
 @app.route('/<show_name>')
 def output_feed(show_name):
     gen = PodcastFeedGenerator(quiet=True, pretty_xml=True)  # Make it pretty, so curious people can learn from it
     try:
         show = find_show(gen, show_name)
     except NoSuchShowError:
-        abort(404)
+        if show_name.lower() in (name.lower() for name in ALTERNATE_ALL_EPISODES_FEED_NAME):
+            return redirect(url_for("output_all_feed"))
+        else:
+            abort(404)
 
     if not show_name == get_feed_slug(show):
         return redirect(url_for_feed(show))
@@ -82,24 +95,34 @@ def output_feed(show_name):
     PodcastFeedGenerator.register_redirect_services(get_redirect_sound, get_redirect_article)
 
     feed = gen.generate_feed(show.show_id).decode("utf-8")
+    feed = _prepare_feed(feed)
+    return _prepare_feed_response(feed, 60 * 60)
+
+
+def _prepare_feed(feed) -> str:
     # Inject stylesheet processor instruction by replacing the very first line break
-    feed = feed.replace("\n",
+    return feed.replace("\n",
                         '\n<?xml-stylesheet type="text/xsl" href="' + url_for('static', filename="style.xsl") + '"?>\n',
                         1)
+
+
+def _prepare_feed_response(feed, max_age) -> Response:
     resp = make_response(feed)
     resp.headers['Content-Type'] = 'application/xml'
-    resp.cache_control.max_age = 60*60
+    resp.cache_control.max_age = max_age
     resp.cache_control.public = True
     return resp
 
 
-# TODO: Create unit tests for the API
 @app.route('/api/url/<show>')
 def api_url_show(show):
     try:
         return url_for_feed(find_show(PodcastFeedGenerator(quiet=True), show, False))
     except NoSuchShowError:
-        abort(404)
+        if show.lower() in (name.lower() for name in ALTERNATE_ALL_EPISODES_FEED_NAME):
+            return url_for("output_all_feed", _external=True)
+        else:
+            abort(404)
 
 
 @app.route('/api/url/')
