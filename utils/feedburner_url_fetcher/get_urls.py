@@ -74,7 +74,7 @@ def main():
         debug
     )
 
-    print("SHOW_CUSTOM_URL = {")
+    print("ALTERNATE_SHOW_NAMES = {")
     print("\n".join(["    \"%s\": %s," % (url, show_id) for url, show_id in urls.items()]))
     print("}")
     print("Done.", file=stderr)
