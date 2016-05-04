@@ -56,8 +56,8 @@ class Episode:
                 HTML themselves. Defaults to short_description.
             image (str): URL to image for this episode. Must be between 1400x1400 and 3000x3000 pixels, and PNG or JPG.
                 Defaults to using the feed's image.
-            explicit (bool): True if this episode is inappropiate to children, False if it is appropiate, None if it is
-                neither (default).
+            explicit (bool): True if this episode is inappropiate to children, False if it is appropiate, None to use
+                the show's explicit value.
         """
         # Mandatory parameters
         self.sound_url = sound_url
@@ -103,7 +103,8 @@ class Episode:
         """str: URL to image for this episode. Must be between 1400x1400 and 3000x3000 pixels, and PNG or JPG."""
 
         self.explicit = explicit
-        """bool: True if this episode is inappropiate to children, False if it is appropiate, None if it is neither."""
+        """bool: True if this episode is inappropiate to children, False if it is appropiate, None to use show's
+        explicit value."""
 
         # Internal properties
         self.__size = None
