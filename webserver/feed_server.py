@@ -7,6 +7,7 @@ import re
 import shortuuid
 import sqlite3
 from werkzeug.contrib.fixers import ProxyFix
+import urllib.parse
 
 app = Flask(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app)
@@ -151,8 +152,8 @@ def api_help():
            + "</pre>"
 
 
-@app.route('/episode/<show>/<episode>')
-def redirect_episode(show, episode):
+@app.route('/episode/<show>/<episode>/<title>.MP3')
+def redirect_episode(show, episode, title):
     try:
         return redirect(get_original_sound(find_show(PodcastFeedGenerator(quiet=True), show), episode))
     except ValueError:
@@ -202,11 +203,16 @@ def get_redirect_sound(original_url, episode):
             row = r.fetchone()
             if not row:
                 raise KeyError(episode.sound_url)
-            return url_for("redirect_episode", show=get_feed_slug(show), episode=row[0], _external=True)
+            return redirect_url_for(episode, row[0])
         except KeyError:
             new_uri = shortuuid.uuid()
             e = c.execute("INSERT INTO sound (original, proxy) VALUES (?, ?)", (original_url, new_uri))
-            return url_for("redirect_episode", show=get_feed_slug(show), episode=new_uri, _external=True)
+            return redirect_url_for(episode, new_uri)
+
+
+def redirect_url_for(episode, identifier):
+    return url_for("redirect_episode", show=get_feed_slug(episode.show), episode=identifier,
+                   title=urllib.parse.quote(episode.title, safe=""), _external=True)
 
 
 def get_redirect_article(original_url, episode):
