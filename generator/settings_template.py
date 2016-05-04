@@ -20,6 +20,9 @@ __all__ = [
     "EPISODE_DURATIONS_DB",
     "EPISODE_SIZES_DB",
     "ALL_EPISODES_FEED_TITLE",
+    "DEFAULT_CATEGORY",
+    "DEFAULT_EXPLICIT",
+    "DEFAULT_SUB_CATEGORY"
 ]
 # Remove the hash symbol and space from the beginning of the following line
 # from .settings_template import *
@@ -40,6 +43,13 @@ OWNER_EMAIL = "it@example.org"
 DEFAULT_SHORT_FEED_DESCRIPTION = "Podcast from Example Radio"
 # Default website to use on shows with no website.
 DEFAULT_WEBSITE = "http://example.org"
+# Whether shows are inappropriate for children by default (True) or not (False)
+DEFAULT_EXPLICIT = False
+# Default category (see https://help.apple.com/itc/podcasts_connect/#/itc9267a2f12 for alternatives, use the normal
+# alternative without escaping)
+DEFAULT_CATEGORY = "Education"
+# Default sub-category (see https://help.apple.com/itc/podcasts_connect/#/itc9267a2f12 for alternatives)
+DEFAULT_SUB_CATEGORY = "Higher Education"
 
 # Default title for the special feed with episodes from all shows
 ALL_EPISODES_FEED_TITLE = "All podcast episodes from Example Radio"

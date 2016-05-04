@@ -39,11 +39,11 @@ class Show:
                 be between 1400x1400 and 3000x3000 in resolution. Change the URL if the image changes. Defaults to no
                 image.
             category (str): iTunes category for this show. See
-                https://help.apple.com/itc/podcasts_connect/#/itc9267a2f12 for available categories. Defaults to no
-                category.
+                https://help.apple.com/itc/podcasts_connect/#/itc9267a2f12 for available categories. Defaults to value
+                in settings.py.
             sub_category (str): iTunes sub-category for this show. See
-                https://help.apple.com/itc/podcasts_connect/#/itc9267a2f12 for available sub-categories. Defaults to no
-                sub-category.
+                https://help.apple.com/itc/podcasts_connect/#/itc9267a2f12 for available sub-categories. Defaults to
+                value in settings.py.
             language (str): Language of this show. Use one of the two-letter values found in
                 http://www.loc.gov/standards/iso639-2/php/code_list.php. Default value is in settings.py.
             show_url (str): This show's website. Defaults to whatever default is in settings.py.
@@ -55,8 +55,8 @@ class Show:
             long_description (str): Long description, which is used when you hover the i icon in iTunes. Defaults to
                 short_description.
             author (str): Name of the author. Defaults to the title (that is, the show name).
-            explicit (bool | None): True if this show is explicit, False if this show is clean, None if it's undecided
-                (default).
+            explicit (bool): True if this show is inappropriate for children,
+                False it it's appropriate, None to use the default value from settings.py.
             owner_name (str): Name of the owner, which will be contacted by iTunes in case of problems. Defaults to
                 value in settings.py.
             owner_email (str): Email of the owner, which will be contacted by iTunes in case of problems. Defaults to
@@ -74,12 +74,25 @@ class Show:
         self.image = image
         """str: URL for image which will be used for this show. It must be PNG or JPEG, and it must
     be between 1400x1400 and 3000x3000 in resolution. Change the URL if the image changes."""
-        self.category = category
+        self.category = category or SETTINGS.DEFAULT_CATEGORY
         """str: iTunes category for this show. See
     https://help.apple.com/itc/podcasts_connect/#/itc9267a2f12 for available categories."""
-        self.sub_category = sub_category
+
+        if category:
+            # Use the default None value if just the main category was supplied
+            # (but use the supplied value if it's there)
+            actual_sub_category = sub_category
+        else:
+            if sub_category:
+                raise ValueError("You cannot define just a sub-category; you'll either need to specify both category"
+                    " and sub-category or just the main category.")
+            else:
+                actual_sub_category = SETTINGS.DEFAULT_SUB_CATEGORY
+        # Do the assignment outside of the conditionals, so we don't screw up the docstring
+        self.sub_category = actual_sub_category
         """str: iTunes sub-category for this show. See
     https://help.apple.com/itc/podcasts_connect/#/itc9267a2f12 for available sub-categories."""
+
         self.language = language
         """str: Language of this show. Use one of the two-letter values found in
     http://www.loc.gov/standards/iso639-2/php/code_list.php."""
@@ -95,8 +108,8 @@ class Show:
         """bool: Set to True if there won't be published more podcast episodes for this feed."""
         self.author = author or title
         """str: Name of the author/artist."""
-        self.explicit = explicit
-        """bool | None: True if this show is explicit, False if this show is clean, None if it's undecided"""
+        self.explicit = explicit if explicit is not None else SETTINGS.DEFAULT_EXPLICIT
+        """bool: True if this show is explicit, False if this show is clean."""
         self.owner_name = owner_name or SETTINGS.OWNER_NAME
         """str: Name of the owner, which will be contacted by iTunes in case of problems."""
         self.owner_email = owner_email or SETTINGS.OWNER_EMAIL
@@ -135,7 +148,7 @@ class Show:
         feed.podcast.itunes_complete(self.old)
         feed.podcast.itunes_author(self.author)
         if self.explicit is not None:
-            feed.podcast.itunes_explicit(self.explicit)
+            feed.podcast.itunes_explicit("yes" if self.explicit else "no")
         feed.podcast.itunes_owner(name=self.owner_name, email=self.owner_email)
 
         self.feed = feed
