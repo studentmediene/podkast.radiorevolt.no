@@ -74,9 +74,11 @@ class Show:
         self.image = image
         """str: URL for image which will be used for this show. It must be PNG or JPEG, and it must
     be between 1400x1400 and 3000x3000 in resolution. Change the URL if the image changes."""
+
+        self._category = None
+        """str: iTunes category for this show."""
+
         self.category = category or SETTINGS.DEFAULT_CATEGORY
-        """str: iTunes category for this show. See
-    https://help.apple.com/itc/podcasts_connect/#/itc9267a2f12 for available categories."""
 
         if category:
             # Use the default None value if just the main category was supplied
@@ -120,6 +122,20 @@ class Show:
 
         self.progress_i = 0
         self.progress_n = None
+
+    @property
+    def category(self):
+        """str: iTunes category for this show. See
+    https://help.apple.com/itc/podcasts_connect/#/itc9267a2f12 for available categories."""
+        return self._category
+
+    @category.setter
+    def category(self, new_category):
+        # sub_category is invalid if the category is changed, so make it None
+        # Thus, if you set category to something, you'll need to set sub_category _after_ setting category.
+        if new_category != self.category:
+            self.sub_category = None
+        self._category = new_category
 
     def init_feed(self) -> FeedGenerator:
         feed = FeedGenerator()
