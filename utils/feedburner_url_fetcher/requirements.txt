@@ -1,2 +1,2 @@
 spynner
-beautifulsoup4
+beautifulsoup4>=4.4.1

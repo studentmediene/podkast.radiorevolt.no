@@ -9,6 +9,7 @@ Here are setup instructions.
 2. Install the following packages (this time assuming Fedora; how does THAT feel?):
    * python-lxml
    * PyQt4 and PyQt4-devel
+   * Ubuntu-specific: libx11-dev, libxtst-dev, libpng-dev
    * Maybe some more? If you find that you must install more packages, you may take a look at the statistics repo and Setup.md. Please add the dependencies you find here.
 
 1. Run the following:
