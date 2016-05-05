@@ -1,4 +1,4 @@
-# Utility for finding which Feedburner feed corresponds to which DigAS show
+# Utilities for migrating from Feedburner
 
 **This utility depends on some software which does not run on Python3, so you CANNOT use the same virtualenv as the rest of the project.**
 
@@ -25,4 +25,15 @@ Here are setup instructions.
    pip install -r requirements.py
    ```
 
-4. Done! Run get_urls.py to find the thing.
+4. Done!
+
+Get `ALTERNATE_SHOW_NAMES`
+------------------------
+
+Run `get_urls.py`, redirecting the output to a temporary file, and follow the instructions.
+
+
+Get `generator/metadata_sources/show/manual_changes.json`
+---------------------------------------------------------
+
+Run `get_categories.py`, redirecting the output to a temporary file, and follow the instructions.
