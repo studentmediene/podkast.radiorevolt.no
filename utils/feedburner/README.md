@@ -22,7 +22,7 @@ Here are setup instructions.
 
 3. Now we can install dependencies:
    ```
-   pip install -r requirements.py
+   pip install -r requirements.txt
    ```
 
 4. Done!
