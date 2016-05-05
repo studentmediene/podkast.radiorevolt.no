@@ -5,39 +5,18 @@ from __future__ import print_function
 from sys import stderr
 import argparse
 
-import spynner
 from bs4 import BeautifulSoup
-import getpass
+import common_feedburner
 
 BASE_URL = "http://feedburner.google.com"
 BASE_FEED_URL = "http://feeds.feedburner.com/"
 
 
-def get_urls(username, password, base, debug=False):
-    b = spynner.Browser()
-    if debug:
-        b.show()
-    # Load feedburner
-    b.load("http://feedburner.google.com", load_timeout=60)
-    # Log in
-    b.wk_fill('input[name=Email]', username)
-    b.wk_click('#next')
-    b.wait_load()
-    b.wk_fill('input[name=Passwd]', password)
-
-    b.wk_click('#signIn')
-
-    b.wait_load()
-
-    # Get list of feeds
-    b.load("https://feedburner.google.com/fb/a/myfeeds", load_timeout=60)
-
+def get_urls(base, debug=False):
     urls = dict()
-
-    li = BeautifulSoup(b.html)
-    for show in li.select('td.title > a'):
-        url = show.get('href')
-
+    b = common_feedburner.get_logged_in_browser(debug=debug)
+    shows = common_feedburner.get_feed_pages(b)
+    for url in shows:
         b.load(url, load_timeout=60)
 
         sh = BeautifulSoup(b.html)
@@ -66,10 +45,7 @@ def main():
         print("Part of source URLs common for all feeds: ", end="", file=stderr)
         base = raw_input()
 
-    print("Username for the Google Account: ", end="", file=stderr)
     urls = get_urls(
-        raw_input(),
-        getpass.getpass(stream=stderr),
         base,
         debug
     )
