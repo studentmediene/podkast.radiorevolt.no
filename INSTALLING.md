@@ -35,6 +35,14 @@
         <dd><code>pip install -r generator/requirements.txt</code></dd>
     </dl>
 
+    * If you get an error running any of the two commands above, you might need to upgrade pip itself. Run:
+
+        ```sh
+        pip install -U pip
+        ```
+
+    * The installation might appear to freeze when installing lxml. This is normal, so please be patient.
+
 5. Copy `generator/settings_template.py` to `generator/settings.py` and fill in settings.
 6. Do the same with `webserver/settings_template.py` if you intend to use the provided web server.
 
