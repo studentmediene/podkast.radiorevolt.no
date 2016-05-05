@@ -126,7 +126,8 @@ class Show:
     @property
     def category(self):
         """str: iTunes category for this show. See
-    https://help.apple.com/itc/podcasts_connect/#/itc9267a2f12 for available categories."""
+    https://help.apple.com/itc/podcasts_connect/#/itc9267a2f12 for available categories.
+    Note that changing the category will automatically set sub_category to None."""
         return self._category
 
     @category.setter
