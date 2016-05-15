@@ -89,6 +89,7 @@ def rr_urls():
         "all",
         "alleepisoder",
         "allepisodes",
+        "feber",    # example of feed without episodes
     ]
 
 
