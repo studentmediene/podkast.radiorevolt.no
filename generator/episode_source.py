@@ -5,61 +5,50 @@ from .episode import Episode
 import threading
 import datetime
 import time
-from cached_property import cached_property
+
 
 class EpisodeSource:
-    """Class for fetching episodes for a podcast.
+    """Class for fetching episodes for podcasts.
     """
-    shows = None
-    """Dictionary containing all known shows."""
-    all_episodes = None
-    """List of all episodes, regardless of show, sorted with the most recent first."""
 
-    fetch_show_lock = threading.RLock()
-    """Lock ensuring only one thread fetches and parses list of shows."""
-    fetch_episode_lock = threading.RLock()
-    """Lock ensuring only one thread fetches and parses list of all episodes."""
-
-    def __init__(self, show):
+    def __init__(self):
         """
-        Initialize an episode source for the given show.
-
-        :param show: Fetch episodes for this show.
+        Initialize an episode source.
         """
-        self.id = show.show_id
-        """DigAS ID for this show."""
 
-        self.show = show
+        self.all_episodes = None
+        """List of all episodes, regardless of show, sorted with the most recent first."""
 
-        self.episodes = None
-        """List of episodes for this show, sorted with the most recent first."""
+        self.fetch_episode_lock = threading.RLock()
+        """Lock ensuring only one thread fetches and parses list of all episodes."""
 
+        self.episodes_by_show = dict()
+        """Dictionary with Show ID as key, and a list of episodes as value."""
 
     @staticmethod
-    def _get_all_episodes() -> list:
+    def _fetch_all_episodes() -> list:
         """Fetches a list with all the episodes in the database, regardless of show."""
         episode_list = requests.get(
             url=SETTINGS['RADIO_REST_API_URL'] + "/lyd/podcast/"
         ).json()
         return episode_list
 
-    @classmethod
-    def populate_all_episodes_list(cls):
+    def populate_all_episodes_list(self):
         """Fetch all podcast episodes. Saves time when processing multiple shows."""
-        with cls.fetch_episode_lock:
-            if cls.all_episodes is None:
-                cls.all_episodes = cls._get_all_episodes()
+        with self.fetch_episode_lock:
+            if self.all_episodes is None:
+                self.all_episodes = self._fetch_all_episodes()
 
     @staticmethod
-    def _get_episodes_for(show_id: int) -> list:
-        """Returns a list with all the episodes in the database for the given show."""
+    def _fetch_episodes_for(show_id: int) -> list:
+        """Returns a list with all the episodes in the database for the given show ID."""
         episode_list = requests.get(
             url=SETTINGS['RADIO_REST_API_URL'] + "/lyd/podcast/" + str(show_id)
         ).json()
         return episode_list
 
-    def populate_episodes(self):
-        """Populate list of all episodes for this show."""
+    def _get_episode_data(self, show):
+        """Return list of all episodes for this show, using the all_episodes list if appropriate."""
 
         # Determine whether all episodes are downloaded in batch or not
         with self.fetch_episode_lock:
@@ -67,19 +56,26 @@ class EpisodeSource:
 
         if not use_all_episodes:
             # Fetch episodes for this show only
-            self.episodes = self._get_episodes_for(self.id)
+            episodes = self._fetch_episodes_for(show.show_id)
         else:
             # Use the existing list of episodes and find the relevant ones
-            self.episodes = [episode for episode in self.all_episodes if episode['program_defnr'] == self.id]
+            episodes = [episode for episode in self.all_episodes if episode['program_defnr'] == show.show_id]
 
-        if not self.episodes:
-            raise NoEpisodesError(self.id)
+        if not episodes:
+            raise NoEpisodesError(show.show_id)
+        else:
+            return episodes
 
-    @cached_property
-    def episode_list(self):
-        """List of Episode objects."""
-        return [self.episode(self.show, episode_dict)
-                for episode_dict in self.episodes]
+    def episode_list(self, show):
+        """List of Episode objects for the given show."""
+        if show.show_id not in self.episodes_by_show:
+            try:
+                self.episodes_by_show[show.show_id] = [self.episode(show, episode_dict)
+                                                       for episode_dict in self._get_episode_data(show)]
+            except NoEpisodesError as e:
+                self.episodes_by_show[show.show_id] = []
+                raise e
+        return self.episodes_by_show[show.show_id]
 
     @staticmethod
     def episode(show, episode_dict):

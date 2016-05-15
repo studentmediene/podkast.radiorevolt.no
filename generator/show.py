@@ -179,10 +179,10 @@ class Show:
             assert isinstance(source, EpisodeMetadataSource), "%r is not a subclass of EpisodeMetadataSource." % source
         if not SETTINGS.QUIET:
             print("Processing episodes...            ", file=sys.stderr, end="\r")
-        self.progress_n = len(episode_source.episode_list)
+        self.progress_n = len(episode_source.episode_list(self))
         if self.progress_n == 1:
             # add the single episode, but ignore SkipEpisode
-            episode = episode_source.episode_list[0]
+            episode = episode_source.episode_list(self)[0]
             for source in metadata_sources:
                 if source.accepts(episode):
                     try:
@@ -193,7 +193,7 @@ class Show:
             episode.populate_feed_entry()
             self._progress_increment()
         else:
-            for episode in episode_source.episode_list:
+            for episode in episode_source.episode_list(self):
                 try:
                     # Let each metadata source provide metadata, if they have it
                     for source in metadata_sources:

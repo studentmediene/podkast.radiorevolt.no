@@ -2,13 +2,12 @@ import traceback
 
 from .metadata_sources.skip_episode import SkipEpisode
 from . import metadata_sources
-from . import episode_source
+from .episode_source import EpisodeSource
 from . import Show
 from .show_source import ShowSource
 from . import NoEpisodesError, NoSuchShowError
 from .metadata_sources.skip_show import SkipShow
 from . import settings as SETTINGS
-from .episode_source import EpisodeSource
 
 from cached_property import cached_property
 
@@ -68,7 +67,8 @@ class PodcastFeedGenerator:
 
         return self._generate_feed(show, skip_empty=not force, enable_skip_show=not force)
 
-    def _generate_feed(self, show: Show, skip_empty: bool =True, enable_skip_show: bool =True) -> bytes:
+    def _generate_feed(self, show: Show, skip_empty: bool =True, enable_skip_show: bool =True,
+                       episode_source: EpisodeSource =None) -> bytes:
         """Generate RSS feed for the provided show.
 
         This differs from generate_feed in that it accept Show, not show_id, as argument.
@@ -76,6 +76,10 @@ class PodcastFeedGenerator:
         Args:
             show (Show): The show which shall have its podcast feed generated. Its metadata will be filled by metadata
                 sources.
+            skip_empty (bool): Set to true to raise exception if there are no episodes for this show.
+            enable_skip_show (bool): Skip this show if any Show Metadata source raises SkipShow.
+            episode_source (EpisodeSource): The EpisodeSource which will be used.
+                A new one will be created if not given.
 
         Returns:
             str: The RSS podcast feed for the given show.
@@ -90,16 +94,17 @@ class PodcastFeedGenerator:
         feed = show.init_feed()
 
         # Add episodes
-        es = episode_source.EpisodeSource(show)
+        if not episode_source:
+            episode_source = EpisodeSource()
         try:
-            es.populate_episodes()
+            episode_source.episode_list(show)
         except NoEpisodesError as e:
             if skip_empty:
                 raise e
             else:
                 # Go on and generate empty feed
                 pass
-        show.add_episodes_to_feed(es, self.episode_metadata_sources)
+        show.add_episodes_to_feed(episode_source, self.episode_metadata_sources)
 
         # Generate!
         return feed.rss_str(pretty=self.pretty_xml)
@@ -116,7 +121,8 @@ class PodcastFeedGenerator:
         # Ensure we only download list of episodes once
         if not SETTINGS.QUIET:
             print("Downloading metadata, this could take a while...", file=sys.stderr)
-        self._prepare_for_batch()
+        es = EpisodeSource()
+        self._prepare_for_batch(es)
 
         feeds = dict()
         for show in shows:
@@ -127,15 +133,15 @@ class PodcastFeedGenerator:
                       file=sys.stderr)
             try:
                 # Do the job
-                feeds[show.show_id] = self._generate_feed(show)
+                feeds[show.show_id] = self._generate_feed(show, episode_source=es)
             except (NoEpisodesError, SkipShow):
                 # Skip this show
                 pass
 
         return feeds
 
-    def _prepare_for_batch(self):
-        EpisodeSource.populate_all_episodes_list()
+    def _prepare_for_batch(self, es):
+        es.populate_all_episodes_list()
         for source in self.episode_metadata_sources:
             source.prepare_batch()
         for source in self.show_metadata_sources:
@@ -166,11 +172,11 @@ class PodcastFeedGenerator:
     def generate_feed_with_all_episodes(self, title=None):
         show = Show(title or SETTINGS.ALL_EPISODES_FEED_TITLE, 0)
         feed = show.init_feed()
-
-        self._prepare_for_batch()
+        es = EpisodeSource()
+        self._prepare_for_batch(es)
         # Get all episodes
         episodes = [EpisodeSource.episode(self.show_source.shows[ep['program_defnr']], ep)
-                    for ep in EpisodeSource.all_episodes if ep['program_defnr'] != 0]
+                    for ep in es.all_episodes if ep['program_defnr'] != 0]
         # Populate metadata
         progress_n = len(episodes)
         for i, episode in enumerate(episodes):
