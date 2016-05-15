@@ -3,7 +3,7 @@ from abc import ABCMeta, abstractmethod
 
 class ShowMetadataSource(metaclass=ABCMeta):
     """Class which provides metadata for a subset of all shows."""
-    def __init__(self, settings, bypass):
+    def __init__(self, settings, bypass, requests_session):
         """Initialize this show metadata source.
 
         The default implementation populates self.settings and self.bypass with values from the arguments.
@@ -11,11 +11,14 @@ class ShowMetadataSource(metaclass=ABCMeta):
         Args:
             settings (dict): Settings for this metadata source, taken from generator/settings.py.
             bypass (set): Set of show_ids (DigAS ID) which this metadata source should bypass (ie. not accept).
+            requests_session: Requests session which will be used when making requests to other servers.
         """
         self.settings = settings
         """dict: Settings for this metadata source, taken from generator/settings.py."""
         self.bypass = bypass
         """set: Set of show_ids (DigAS ID) which this metadata source should bypass (that is, not accept)."""
+        self.requests = requests_session
+        """Requests session which shall be used when making requests to other servers."""
 
     @abstractmethod
     def accepts(self, show) -> bool:

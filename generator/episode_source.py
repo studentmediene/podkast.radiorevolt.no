@@ -11,9 +11,12 @@ class EpisodeSource:
     """Class for fetching episodes for podcasts.
     """
 
-    def __init__(self):
+    def __init__(self, request_session: requests.Session):
         """
         Initialize an episode source.
+
+        Args:
+            request_session (requests.Session): The Requests session which will be used when fetching data.
         """
 
         self.all_episodes = None
@@ -25,10 +28,12 @@ class EpisodeSource:
         self.episodes_by_show = dict()
         """Dictionary with Show ID as key, and a list of episodes as value."""
 
-    @staticmethod
-    def _fetch_all_episodes() -> list:
+        self.requests = request_session
+        """Requests session to be used when performing requests."""
+
+    def _fetch_all_episodes(self) -> list:
         """Fetches a list with all the episodes in the database, regardless of show."""
-        episode_list = requests.get(
+        episode_list = self.requests.get(
             url=SETTINGS['RADIO_REST_API_URL'] + "/lyd/podcast/"
         ).json()
         return episode_list
@@ -39,10 +44,9 @@ class EpisodeSource:
             if self.all_episodes is None:
                 self.all_episodes = self._fetch_all_episodes()
 
-    @staticmethod
-    def _fetch_episodes_for(show_id: int) -> list:
+    def _fetch_episodes_for(self, show_id: int) -> list:
         """Returns a list with all the episodes in the database for the given show ID."""
-        episode_list = requests.get(
+        episode_list = self.requests.get(
             url=SETTINGS['RADIO_REST_API_URL'] + "/lyd/podcast/" + str(show_id)
         ).json()
         return episode_list
@@ -70,7 +74,7 @@ class EpisodeSource:
         """List of Episode objects for the given show."""
         if show.show_id not in self.episodes_by_show:
             try:
-                self.episodes_by_show[show.show_id] = [self.episode(show, episode_dict)
+                self.episodes_by_show[show.show_id] = [self.episode(show, episode_dict, self.requests)
                                                        for episode_dict in self._get_episode_data(show)]
             except NoEpisodesError as e:
                 self.episodes_by_show[show.show_id] = []
@@ -78,7 +82,7 @@ class EpisodeSource:
         return self.episodes_by_show[show.show_id]
 
     @staticmethod
-    def episode(show, episode_dict):
+    def episode(show, episode_dict, requests_session):
         return Episode(
             show=show,
             sound_url=episode_dict['url'],
@@ -87,4 +91,5 @@ class EpisodeSource:
             date=datetime.datetime.strptime(str(episode_dict['dato']) + " 12:00:00 " + time.strftime("%z"),
                                             "%Y%m%d %H:%M:%S %z"),
             author=episode_dict['author'],
+            requests_session=requests_session
         )

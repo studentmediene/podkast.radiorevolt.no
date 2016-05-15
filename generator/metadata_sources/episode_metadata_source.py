@@ -3,7 +3,7 @@ from abc import ABCMeta, abstractmethod
 
 class EpisodeMetadataSource(metaclass=ABCMeta):
     """Class which provides metadata for a subset of all episodes."""
-    def __init__(self, settings, bypass):
+    def __init__(self, settings, bypass, requests_session):
         """Initialize new episode metadata source.
 
         The default implementation sets self.settings to the value of settings, and self.bypass to the value of bypass.
@@ -11,11 +11,14 @@ class EpisodeMetadataSource(metaclass=ABCMeta):
         Args:
             settings (dict): Settings for this metadata source, taken from generator/settings.py.
             bypass (set): Set of episode URLs which this metadata source should bypass (ie. not accept)
+            requests_session: Requests session which will be used when making requests to other servers.
         """
         self.settings = settings
         """dict: Dictionary with the settings for this episode metadata source (fetched from generator/settings.py)."""
         self.bypass = bypass
         """set: Set of episode.sound_url addresses which this source must bypass (ie. not accept)."""
+        self.requests = requests_session
+        """Requests session which shall be used when making requests to other servers."""
 
     @abstractmethod
     def accepts(self, episode) -> bool:

@@ -25,13 +25,13 @@ class Chimera(EpisodeMetadataSource):
 
     @cached_property
     def _shows_by_digas_id(self):
-        r = requests.get(self.settings['API_URL'] + "/shows/", params={"format": "json"})
+        r = self.requests.get(self.settings['API_URL'] + "/shows/", params={"format": "json"})
         r.raise_for_status()
         shows = r.json()
         return {show['showID']: show['id'] for show in shows}
 
     def _fetch_episodes(self, chimera_id):
-        r = requests.get(
+        r = self.requests.get(
             self.settings['API_URL'] + "/episodes/" + str(chimera_id) + "/",
             params={"format": "json"}
         )

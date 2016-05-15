@@ -33,9 +33,9 @@ class Episode:
 
     _download_constrain = threading.BoundedSemaphore(MAX_CONCURRENT_EPISODE_DOWNLOADS)
 
-    def __init__(self, sound_url: str, title: str,  show, date: datetime.datetime, article_url: str=None, author: str=None,
-                 author_email: str=None, short_description: str=None, long_description: str=None, image: str=None,
-                 explicit: bool=None):
+    def __init__(self, sound_url: str, title: str, show, date: datetime.datetime, requests_session: requests.Session,
+                 article_url: str = None, author: str = None, author_email: str=None, short_description: str=None,
+                 long_description: str = None, image: str = None, explicit: bool=None):
         """
         Initialize this episode with the given data.
 
@@ -44,6 +44,8 @@ class Episode:
             title (str): Name which will identify this episode to the end user. Mandatory.
             show (Show): The Show which this episode belongs to. Used by episode metadata sources. Mandatory.
             date (datetime.datetime): The timezone-aware date and time this episode was published. Mandatory.
+            requests_session (requests.Session): Requests session which will be used when making requests to other
+                servers. Mandatory.
             article_url (str): URL on which the entire description can be read, for example article on dusken.no.
                 Defaults to sound_url.
             author (str): Name of the person who authored this episode. Defaults to the show's author.
@@ -83,6 +85,9 @@ class Episode:
 
         self.show = show
         """Show: The Show which this episode belongs to. Used by episode metadata sources."""
+
+        self.requests = requests_session
+        """requests.Session: The Requests session which shall be used when making requests to other servers."""
 
         # Optional parameters
         self.article_url = article_url if article_url is not None else sound_url
@@ -137,7 +142,7 @@ class Episode:
                 db.close()
 
     def _get_size(self) -> int:
-        head = requests.head(self.sound_url, allow_redirects=True)
+        head = self.requests.head(self.sound_url, allow_redirects=True)
         return head.headers['content-length']
 
     @property
@@ -223,7 +228,7 @@ class Episode:
             if SETTINGS.CANCEL.is_set():
                 return None
             # Start fetching mp3 file
-            r = requests.get(self.sound_url, stream=True)
+            r = self.requests.get(self.sound_url, stream=True)
             # Save the mp3 file (streaming it so we won't run out of memory)
             filename = None
             try:

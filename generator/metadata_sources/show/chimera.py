@@ -15,7 +15,7 @@ class Chimera(ShowMetadataSource):
 
     @cached_property
     def shows(self):
-        r = requests.get(self.settings['API_URL'] + "/shows/", params={"format": "json"})
+        r = self.requests.get(self.settings['API_URL'] + "/shows/", params={"format": "json"})
         r.raise_for_status()
         json = r.json()
         return {show['showID']: show for show in json}

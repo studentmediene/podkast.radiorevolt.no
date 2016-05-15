@@ -8,6 +8,7 @@ from .show_source import ShowSource
 from . import NoEpisodesError, NoSuchShowError
 from .metadata_sources.skip_show import SkipShow
 from . import settings as SETTINGS
+import requests
 
 from cached_property import cached_property
 
@@ -18,7 +19,10 @@ import re
 class PodcastFeedGenerator:
 
     def __init__(self, pretty_xml=False, quiet=False):
-        self.show_source = ShowSource()
+        self.requests = requests.Session()
+        self.requests.headers.update({"User-Agent": "podcast-feed-gen"})
+
+        self.show_source = ShowSource(self.requests)
         self.pretty_xml = pretty_xml
         self.re_remove_chars = re.compile(r"[^\w\d]|_")
 
@@ -35,7 +39,8 @@ class PodcastFeedGenerator:
         return [
             source(
                 SETTINGS.METADATA_SOURCE.get(source.__name__, dict()),
-                SETTINGS.BYPASS_EPISODE.get(source.__name__, set())
+                SETTINGS.BYPASS_EPISODE.get(source.__name__, set()),
+                self.requests
             )
             for source in metadata_sources.EPISODE_METADATA_SOURCES
         ]
@@ -46,7 +51,8 @@ class PodcastFeedGenerator:
         return [
             source(
                 SETTINGS.METADATA_SOURCE.get(source.__name__, dict()),
-                SETTINGS.BYPASS_SHOW.get(source.__name__, set())
+                SETTINGS.BYPASS_SHOW.get(source.__name__, set()),
+                self.requests
             )
             for source in metadata_sources.SHOW_METADATA_SOURCES
         ]
@@ -56,6 +62,8 @@ class PodcastFeedGenerator:
 
         Args:
             show_id (int): DigAS ID for the show.
+            force (bool): Set to False to throw NoEpisodesError if there are no episodes for the given show.
+                Set to True to just generate the feed with no episodes in such cases.
 
         Returns:
             str: The RSS podcast feed for the given show_id.
@@ -95,7 +103,7 @@ class PodcastFeedGenerator:
 
         # Add episodes
         if not episode_source:
-            episode_source = EpisodeSource()
+            episode_source = EpisodeSource(self.requests)
         try:
             episode_source.episode_list(show)
         except NoEpisodesError as e:
@@ -121,7 +129,7 @@ class PodcastFeedGenerator:
         # Ensure we only download list of episodes once
         if not SETTINGS.QUIET:
             print("Downloading metadata, this could take a while...", file=sys.stderr)
-        es = EpisodeSource()
+        es = EpisodeSource(self.requests)
         self._prepare_for_batch(es)
 
         feeds = dict()
@@ -172,10 +180,10 @@ class PodcastFeedGenerator:
     def generate_feed_with_all_episodes(self, title=None):
         show = Show(title or SETTINGS.ALL_EPISODES_FEED_TITLE, 0)
         feed = show.init_feed()
-        es = EpisodeSource()
+        es = EpisodeSource(self.requests)
         self._prepare_for_batch(es)
         # Get all episodes
-        episodes = [EpisodeSource.episode(self.show_source.shows[ep['program_defnr']], ep)
+        episodes = [EpisodeSource.episode(self.show_source.shows[ep['program_defnr']], ep, self.requests)
                     for ep in es.all_episodes if ep['program_defnr'] != 0]
         # Populate metadata
         progress_n = len(episodes)

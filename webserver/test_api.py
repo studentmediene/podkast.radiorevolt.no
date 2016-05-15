@@ -3,6 +3,7 @@ from . import feed_server, settings
 from .alternate_show_names import ALTERNATE_SHOW_NAMES
 from generator import show_source as source
 import urllib.parse
+import requests
 
 app = feed_server.app
 app.config['TESTING'] = True
@@ -11,7 +12,9 @@ tester = app.test_client()
 
 @pytest.fixture
 def show_ids():
-    s = source.ShowSource()
+    requests_session = requests.Session()
+    requests_session.headers.update({"User-Agent": "podcast-feed-gen"})
+    s = source.ShowSource(requests_session)
     shows = s.shows
     return list(shows.keys())
 

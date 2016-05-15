@@ -8,15 +8,19 @@ from cached_property import cached_property
 class ShowSource:
     """Class for fetching shows and information about them"""
 
+    def __init__(self, request_session: requests.Session):
+        """
+        Use the given requests session when fetching data."""
+        self.requests = request_session
+
     @cached_property
     def shows(self):
         """dict: Dictionary with all shows, with their DigAS ID as key and Show instance as value."""
         return self._get_all_shows()
 
-    @staticmethod
-    def _get_all_shows() -> dict:
+    def _get_all_shows(self) -> dict:
         """Returns list of all shows in the database."""
-        r = requests.get(
+        r = self.requests.get(
             url=SETTINGS['RADIO_REST_API_URL'] + "/programmer/list",
             auth=requests.auth.HTTPDigestAuth(SETTINGS['RADIO_REST_API_USERNAME'], SETTINGS['RADIO_REST_API_PASSWORD']),
         )
