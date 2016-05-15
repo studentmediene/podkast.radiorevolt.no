@@ -8,6 +8,7 @@ import shortuuid
 import sqlite3
 from werkzeug.contrib.fixers import ProxyFix
 import urllib.parse
+import os.path
 
 app = Flask(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app)
@@ -152,7 +153,7 @@ def api_help():
            + "</pre>"
 
 
-@app.route('/episode/<show>/<episode>/<title>.MP3')
+@app.route('/episode/<show>/<episode>/<title>')
 def redirect_episode(show, episode, title):
     try:
         return redirect(get_original_sound(find_show(PodcastFeedGenerator(quiet=True), show), episode))
@@ -211,8 +212,9 @@ def get_redirect_sound(original_url, episode):
 
 
 def redirect_url_for(episode, identifier):
+    filename = os.path.basename(urllib.parse.urlparse(episode.sound_url).path)
     return url_for("redirect_episode", show=get_feed_slug(episode.show), episode=identifier,
-                   title=urllib.parse.quote(episode.title, safe=""), _external=True)
+                   title=filename, _external=True)
 
 
 def get_redirect_article(original_url, episode):
