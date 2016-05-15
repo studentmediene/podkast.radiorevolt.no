@@ -160,12 +160,17 @@ class Show:
         feed.link({'href': self.show_url})
         feed.managingEditor(self.editorial_email)
         feed.webMaster(self.technical_email)
+
         if self.copyright is not None:
             feed.rights(self.copyright)
-        feed.podcast.itunes_complete(self.old)
+
+        if SETTINGS.MARK_OLD_AS_COMPLETE:
+            feed.podcast.itunes_complete(self.old)
+        else:
+            feed.podcast.itunes_complete(False)
+
         feed.podcast.itunes_author(self.author)
-        if self.explicit is not None:
-            feed.podcast.itunes_explicit("yes" if self.explicit else "no")
+        feed.podcast.itunes_explicit("yes" if self.explicit else "no")
         feed.podcast.itunes_owner(name=self.owner_name, email=self.owner_email)
 
         self.feed = feed

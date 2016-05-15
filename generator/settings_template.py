@@ -22,13 +22,18 @@ __all__ = [
     "ALL_EPISODES_FEED_TITLE",
     "DEFAULT_CATEGORY",
     "DEFAULT_EXPLICIT",
-    "DEFAULT_SUB_CATEGORY"
+    "DEFAULT_SUB_CATEGORY",
+    "MARK_OLD_AS_COMPLETE",
 ]
 # Remove the hash symbol and space from the beginning of the following line
 # from .settings_template import *
 
 # Set to True to enable debugging mode, False to disable. Do not leave on in production!
 DEBUG = False
+
+# Set to True to mark old podcasts as completed. Doing so means an old podcast can never be started again later, since a
+# completed podcast is supposed to never be updated again. Set to False to never mark a podcast as completed.
+MARK_OLD_AS_COMPLETE = False
 
 # Default email address for who to contact regarding content in a show.
 DEFAULT_EDITORIAL_EMAIL = "editor@example.org"
