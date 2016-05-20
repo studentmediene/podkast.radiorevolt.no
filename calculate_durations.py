@@ -59,12 +59,11 @@ def main():
         print_err("Collecting episodes...")
 
     all_episodes = list()
-    EpisodeSource.populate_all_episodes_list()
+    es = EpisodeSource(generator.requests)
+    es.populate_all_episodes_list()
     for show in [all_shows[show_id] for show_id in chosen_shows]:
         try:
-            episodes = EpisodeSource(show)
-            episodes.populate_episodes()
-            all_episodes.extend(episodes.episode_list)
+            all_episodes.extend(es.episode_list(show))
         except NoEpisodesError:
             pass
 
