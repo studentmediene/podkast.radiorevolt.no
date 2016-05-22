@@ -87,7 +87,7 @@ class LocalImage:
         new_width, new_height = cls._calculate_new_image_size(img, cls.min_image_size, cls.max_image_size)
                                                                         # Skip resizing if there's no change in size
         new_img = cls._create_resized_image(img, new_width, new_height) if (new_width, new_height) != img.size else img
-        new_img.save(new_image, "png")
+        new_img.save(new_image, "png", optimize=True)
 
     @staticmethod
     def _create_resized_image(image: Image.Image, width: int, height: int) -> Image.Image:
