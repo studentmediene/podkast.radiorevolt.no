@@ -77,6 +77,7 @@ class EpisodeSource:
                 self.episodes_by_show[show.show_id] = [self.episode(show, episode_dict, self.requests)
                                                        for episode_dict in self._get_episode_data(show)]
             except NoEpisodesError as e:
+                # TODO: Check if any code depend on an empty list being returned the second time this method is called, refactor and remove the following line.
                 self.episodes_by_show[show.show_id] = []
                 raise e
         return self.episodes_by_show[show.show_id]
