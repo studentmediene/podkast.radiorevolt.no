@@ -16,6 +16,16 @@
     * apache2-bin
     * apache2-dev
 
+    And for image manipulation:
+
+    * libtiff5-dev
+    * libjpeg8-dev
+    * zlib1g-dev
+    * libfreetype6-dev
+    * libwebp-dev
+    * tcl8.5-dev
+    * tk8.5-dev
+
     More generally, you need to satisfy the dependencies of the packages listed in the requirement files (see below).
 
 2. Install build dependencies for python and its lxml-bindings by running `sudo apt-get build-dep python3-lxml` (still assuming Ubuntu/Debian)
@@ -65,8 +75,10 @@
 
 3. Give the new user access to the data folder.
 
-    ```
+    ```sh
     sudo chown podcastfeedgen:podcastfeedgen data
+    # If using the webserver:
+    sudo chown podcastfeedgen:podcastfeedgen webserver/static/logos
     ```
 
 4. Make sure debugging is turned off in the configuration files.
@@ -118,7 +130,7 @@
     sudo semanage port -a -t http_port_t -p tcp <port>
     ```
 
-10. Run `python calculate_durations.py` while the virtualenv is activated.
+10. Run `python calculate_durations.py` and after that `python resize_images.py` while the virtualenv is activated.
     This will actually take several hours (even days!) depending on how many
     episodes there are in the archives. Remember that it is bound to your terminal, so it'll exit if you log out
     of SSH. You should consider [running it through `screen`](https://www.rackaid.com/blog/linux-screen-tutorial-and-how-to/) and check in on it the next day.
@@ -129,20 +141,23 @@
     To check it: run `screen -r` to reattach yourself. You may then detach again if it's not done, or exit if it's done.
 
 
-11. When `calculate_durations.py` is done running the first time, add it to crontab so it runs every 30 minutes.
+11. When `calculate_durations.py` and `resize_images.py` is done running the first time, add it to crontab so it runs every 30 minutes.
 
     1. Copy `run_calculate_durations_template.sh` and save it as `run_calculate_durations.sh`.
-    2. Edit it and fill in the path to podcast-feed-gen.
+    2. Copy `run_resize_images_template.sh` and save it as `run_resize_images.sh`.
+    2. Edit both files and fill in the path to podcast-feed-gen.
     3. Run:
 
        ```sh
        sudo crontab -e
        ```
-    4. Append the following line, filling in the user (`podcastfeedgen`) and the path to the script.
+    4. Append the following lines, filling in the user (`podcastfeedgen`) and the path to the scripts.
        ```
        2,32 * * * * /usr/bin/sudo -u <user> <path>/run_calculate_durations.sh 2>&1 >/dev/null
+       29,59 * * * * /usr/bin/sudo -u <user> <path>/run_resize_images.sh 2>&1 >/dev/null
        ```
-       It will run HH:02 and HH:32. The offset 2 was chosen with random.org, to avoid having many tasks run at HH:00.
+       calculate_durations will run HH:02 and HH:32, and resize_images will run at HH:29 and HH:59.
+       The offsets were chosen with random.org, to avoid having many tasks run at HH:00.
 
 12. There! All happy.
 
@@ -193,4 +208,4 @@ It is assumed you are somewhat comfortable editing Apache configuration files, a
 13. Reload the changes by running `sudo service apache2 restart` (Debian/Ubuntu) or
     `sudo systemctl restart httpd` (Red Hat/Fedora).
 
-14. Confirm that it works, then eat cake.
+14. Confirm that it works, then eat cake to celebrate.

@@ -4,5 +4,7 @@ flask
 shortuuid
 # Our own webserver
 mod_wsgi
+# Image manipulation
+Pillow
 # We will need to use the generator, so install its dependencies
 -r ../generator/requirements.txt

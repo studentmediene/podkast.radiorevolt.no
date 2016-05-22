@@ -96,7 +96,7 @@ class PodcastFeedGenerator:
         # Populate show with more metadata
         if not SETTINGS.QUIET:
             print("Finding show metadata...", end="\r", file=sys.stderr)
-        self._populate_show_metadata(show, enable_skip_show)
+        self.populate_show_metadata(show, enable_skip_show)
 
         # Start generating feed
         feed = show.init_feed()
@@ -164,7 +164,7 @@ class PodcastFeedGenerator:
         except KeyError as e:
             raise NoSuchShowError from e
 
-    def _populate_show_metadata(self, show, enable_skip_show: bool=True):
+    def populate_show_metadata(self, show, enable_skip_show: bool=True):
         for source in self.show_metadata_sources:
             if source.accepts(show):
                 try:

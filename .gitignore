@@ -177,6 +177,7 @@ start_server.sh
 podcast_feed_gen.conf
 podcast_feed_gen.service
 run_calculate_durations.sh
+run_resize_logos.sh
 # Used earlier to cache episode durations, but not used since commit 2b6b464. Retained for backwards compatibility.
 **/episode_durations.txt
 # Cache episode durations.
@@ -185,3 +186,6 @@ run_calculate_durations.sh
 **/episode_sizes.db
 # Redirect urls
 **/redirects.db
+# Local images
+webserver/static/images/*
+!webserver/static/images/.keep
