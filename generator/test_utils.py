@@ -1,3 +1,4 @@
+import requests as original_requests
 from .show import Show
 from .episode import Episode
 import pytest
@@ -16,6 +17,7 @@ __all__ = [
     'episode',
     'now',
     'next_moment',
+    'requests',
     'logger',
     'assert_logging',
 ]
@@ -106,7 +108,7 @@ def show() -> Show:
 def episode():
     """Initialize Episode with the date set to be now."""
     test_show = show()
-    return Episode("http://example.org", "My test sound", test_show, datetime.now(pytz.utc))
+    return Episode("http://example.org", "My test sound", test_show, datetime.now(pytz.utc), requests)
 
 
 @pytest.fixture()
@@ -119,3 +121,9 @@ def now():
 def next_moment():
     """Timezone-aware datetime representing now +1 second."""
     return now() + timedelta(seconds=1)
+
+
+@pytest.fixture()
+def requests():
+    """An instance of requests.Session."""
+    return original_requests.session()

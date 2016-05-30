@@ -1,10 +1,12 @@
+import logging
 from .. import EpisodeMetadataSource
 from ..base_manual_changes import BaseManualChanges
 from cached_property import cached_property
 import json
 import os.path
-import sys
 from datetime import datetime
+
+logger = logging.getLogger(__name__)
 
 
 class ManualChanges(BaseManualChanges, EpisodeMetadataSource):
@@ -34,10 +36,9 @@ class ManualChanges(BaseManualChanges, EpisodeMetadataSource):
             try:
                 episode.date = datetime.strptime(metadata['date'], "%Y-%m-%d %H:%M:%S %z")
             except ValueError:
-                print("WARNING: Date {date} in file {file} could not be parsed, so it was ignored.\n"
-                      "Make sure it's on the following form (±HHMM being timezone offset):\n"
-                      "    YYYY-MM-DD HH:MM:SS ±HHMM".format(date=metadata['date'], file=self._config_file),
-                      file=sys.stderr)
+                logger.warning("Date %s in file %s could not be parsed, so it was ignored. "
+                            "Make sure it's on the following form (±HHMM being timezone offset): "
+                            "YYYY-MM-DD HH:MM:SS ±HHMM", metadata['date'], self._config_file)
         episode.short_description = metadata.get("short_description", episode.short_description)
         episode.long_description = metadata.get("long_description", episode.long_description)
         episode.image = metadata.get("image", episode.image)

@@ -1,3 +1,4 @@
+import logging
 from .. import SkipEpisode, EpisodeMetadataSource
 from datetime import datetime
 from pytz import timezone
@@ -6,7 +7,6 @@ import requests
 from markdown import Markdown
 import urllib.parse
 from cached_property import cached_property
-from sys import stderr
 
 
 class Chimera(EpisodeMetadataSource):
