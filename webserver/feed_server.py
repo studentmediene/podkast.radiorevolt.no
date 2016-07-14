@@ -1,6 +1,7 @@
 from generator.generate_feed import PodcastFeedGenerator
 from generator.no_such_show_error import NoSuchShowError
-from . import settings
+from generator import metadata_sources
+from . import settings, logo
 from .alternate_show_names import ALTERNATE_SHOW_NAMES, ALTERNATE_ALL_EPISODES_FEED_NAME
 from flask import Flask, abort, make_response, redirect, url_for, request, Response
 import re
@@ -82,10 +83,13 @@ def output_all_feed():
 
 @app.route('/<show_name>')
 def output_feed(show_name):
+    # Replace image so it fits iTunes' specifications
+    metadata_sources.SHOW_METADATA_SOURCES.append(logo.ReplaceImageURL)
     gen = PodcastFeedGenerator(quiet=True, pretty_xml=True)  # Make it pretty, so curious people can learn from it
     try:
         show = find_show(gen, show_name)
     except NoSuchShowError:
+        # Are we perhaps supposed to redirect to /all?
         if show_name.lower() in (name.lower() for name in ALTERNATE_ALL_EPISODES_FEED_NAME):
             return redirect(url_for("output_all_feed"))
         else:

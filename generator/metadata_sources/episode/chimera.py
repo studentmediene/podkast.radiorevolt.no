@@ -40,14 +40,14 @@ class Chimera(EpisodeMetadataSource):
         return {episode['podcast_url']: episode for episode in episodes}
 
     def accepts(self, episode) -> bool:
-        return super().accepts(episode)
+        try:
+            return super().accepts(episode) and episode.sound_url in self._get_episodes(episode.show.show_id)
+        except KeyError:
+            # Show not in Chimera
+            return False
 
     def populate(self, episode) -> None:
-        try:
-            metadata = self._get_episodes(episode.show.show_id)[episode.sound_url]
-        except KeyError as e:
-            # episode or show not in Chimera - that could mean the article isn't published yet, so hide the episode
-            raise SkipEpisode from e
+        metadata = self._get_episodes(episode.show.show_id)[episode.sound_url]
         if not metadata['is_published']:
             raise SkipEpisode
 
