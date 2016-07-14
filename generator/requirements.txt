@@ -1,7 +1,7 @@
 # Easily send HTTP requests
 requests~=2.9.1
 # Easily generate podcast feeds
-feedgen~=0.3.2
+podgen
 # Get duration of an MP3 file
 tinytag~=0.13.1
 # Easily cache properties which could take some time to calculate
