@@ -115,7 +115,7 @@ class PodcastFeedGenerator:
         show.add_episodes_to_feed(episode_source, self.episode_metadata_sources)
 
         # Generate!
-        return feed.rss_str(pretty=self.pretty_xml)
+        return feed.rss_str(minimize=not self.pretty_xml)
 
     def generate_all_feeds_sequence(self) -> dict:
         return self.generate_feeds_sequence(self.show_source.shows.values())
@@ -205,4 +205,4 @@ class PodcastFeedGenerator:
             episode.add_to_feed(feed)
             episode.populate_feed_entry()
 
-        return feed.rss_str(pretty=self.pretty_xml)
+        return feed.rss_str(minimize=not self.pretty_xml)

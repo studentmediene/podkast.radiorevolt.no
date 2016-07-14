@@ -1,6 +1,6 @@
 from . import settings as SETTINGS
 from .episode_source import EpisodeSource
-from feedgen.feed import FeedGenerator
+from podgen import Podcast, Person, Episode, Category
 from .metadata_sources import EpisodeMetadataSource
 from .metadata_sources.skip_episode import SkipEpisode
 import sys
@@ -138,40 +138,36 @@ class Show:
             self.sub_category = None
         self._category = new_category
 
-    def init_feed(self) -> FeedGenerator:
-        feed = FeedGenerator()
-        feed.load_extension('podcast', rss=True)
+    def init_feed(self) -> Podcast:
+        feed = Podcast()
 
-        feed.title(self.title)
+        feed.name = self.title
 
-        feed.podcast.itunes_subtitle(self.short_description)
-        feed.description(self.short_description)
-        feed.podcast.itunes_summary(self.long_description)
-        if self.image is not None:
-            feed.podcast.itunes_image(self.image)
+        feed.subtitle = self.short_description
+        feed.description = self.long_description
+        try:
+            feed.image = self.image
+        except ValueError:
+            # faulty image URL
+            pass
 
         if self.category is not None:
-            if self.sub_category is not None:
-                feed.podcast.itunes_category(self.category, self.sub_category)
-            else:
-                feed.podcast.itunes_category(self.category)
+            feed.category = Category(self.category, self.sub_category)
 
-        feed.language(self.language)
-        feed.link({'href': self.show_url})
-        feed.managingEditor(self.editorial_email)
-        feed.webMaster(self.technical_email)
+        feed.language = self.language
+        feed.website = self.show_url
+        feed.authors = [Person(name=self.author, email=self.editorial_email)]
+        feed.web_master = Person(email=self.technical_email)
 
-        if self.copyright is not None:
-            feed.rights(self.copyright)
+        feed.copyright = self.copyright
 
         if SETTINGS.MARK_OLD_AS_COMPLETE:
-            feed.podcast.itunes_complete(self.old)
+            feed.complete = self.old
         else:
-            feed.podcast.itunes_complete(False)
+            feed.complete = False
 
-        feed.podcast.itunes_author(self.author)
-        feed.podcast.itunes_explicit("yes" if self.explicit else "no")
-        feed.podcast.itunes_owner(name=self.owner_name, email=self.owner_email)
+        feed.explicit = self.explicit
+        feed.owner = Person(name=self.owner_name, email=self.owner_email)
 
         self.feed = feed
 

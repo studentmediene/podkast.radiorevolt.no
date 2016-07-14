@@ -1,6 +1,6 @@
 import datetime
 import requests
-from feedgen.feed import FeedGenerator, FeedEntry
+import podgen
 from . import settings as SETTINGS
 import threading
 import os
@@ -9,6 +9,7 @@ from tinytag.tinytag import TinyTag
 import tempfile
 from cached_property import cached_property
 import sqlite3
+import pickle
 
 # Number of threads that can download episodes at the same time.
 MAX_CONCURRENT_EPISODE_DOWNLOADS = 10
@@ -24,7 +25,7 @@ class Episode:
     # (Do it here to ensure it's only done once)
 
     _create_table_durations = sqlite3.connect(SETTINGS.EPISODE_DURATIONS_DB)
-    _create_table_durations.execute("create table if not exists durations (id text primary key, duration text)")
+    _create_table_durations.execute("create table if not exists durations (id text primary key, duration blob)")
     _create_table_durations.close()
 
     _create_table_size = sqlite3.connect(SETTINGS.EPISODE_SIZES_DB)
@@ -162,7 +163,7 @@ class Episode:
             # Was there a duration saved for this episode?
             if value:
                 # Yes, use it
-                return value[0]
+                return pickle.loads(value[0])
             else:
                 return None
         finally:
@@ -192,25 +193,21 @@ class Episode:
             duration = self._fetch_duration()
             if duration is None:
                 return False
-            # Convert to string conforming to iTunes' format
-            hours = (duration.days * 24) + (duration.seconds // (60 * 60))
-            minutes = (duration.seconds % (60 * 60)) // 60
-            seconds = duration.seconds % 60
-            duration_string = "{hours:02d}:{minutes:02d}:{seconds:02d}" \
-                .format(hours=hours, minutes=minutes, seconds=seconds)
+            # Convert to binary data that can be remade into timedelta again
+            pickled_duration = pickle.dumps(duration)
 
-            # Persist this string in the database
+            # Persist this in the database
             if not update:
                 try:
                     db.execute("INSERT INTO durations (id, duration) VALUES (:id, :duration)",
-                               {"id": self.sound_url, "duration": duration_string})
+                               {"id": self.sound_url, "duration": pickled_duration})
                 except sqlite3.IntegrityError:
                     # There is already an entry for this episode -
                     # someone else has found the duration while we were busy, so just update it
                     update = True
             if update:
                 db.execute("UPDATE durations SET duration=:duration WHERE id=:id",
-                           {"id": self.sound_url, "duration": duration_string})
+                           {"id": self.sound_url, "duration": pickled_duration})
 
             db.commit()
             return True
@@ -252,25 +249,25 @@ class Episode:
         finally:
             self._download_constrain.release()
 
-    def add_to_feed(self, fg: FeedGenerator) -> FeedEntry:
+    def add_to_feed(self, fg: podgen.Podcast) -> podgen.Episode:
         """Add this episode to the given feed, but don't fill in any details yet.
 
         Args:
             fg (FeedGenerator): The feed which this episode is to be added to.
 
         Returns:
-            FeedEntry: The new FeedEntry.
+            podgen.Episode: The new Episode.
 
         Raises:
             RuntimeError: if invoked after this episode has already been added to a feed.
     """
         if self._feed_entry is None:
-            fe = fg.add_entry()
+            fe = fg.add_episode()
 
             self._feed_entry = fe
             return fe
         else:
-            raise RuntimeError("This episode is already added to a FeedGenerator")
+            raise RuntimeError("This episode is already added to a Podcast")
 
     def populate_feed_entry(self):
         """Write data to the FeedEntry associated with this episode.
@@ -290,30 +287,24 @@ class Episode:
             article_url = self.article_url
 
         fe = self._feed_entry
-        fe.id(self.sound_url)
-        fe.guid(self.sound_url)  # Don't use URL redirection service for GUID
-        fe.title(self.title)
-        fe.description(self.short_description)
-        fe.content(self.long_description, type="CDATA")
-        fe.enclosure(sound_url, self.size, "audio/mpeg")
-        fe.author({'name': self.author, 'email': self.author_email})
-        fe.link({'href': article_url})
-        fe.published(self.date)
+        fe.id = self.sound_url  # Don't use URL redirection service for GUID
+        fe.title = self.title
+        fe.summary = self.short_description
+        fe.long_summary = self.long_description
+        fe.media = podgen.Media(sound_url, self.size, "audio/mpeg",
+                                self.duration)
+        fe.authors = [podgen.Person(self.author, self.author_email)]
+        fe.link = article_url
+        fe.publication_date = self.date
 
-        duration = self.duration
-        if duration is not None:
-            fe.podcast.itunes_duration(duration)
+        fe.image = self.image
 
-        if self.image is not None:
-            fe.podcast.itunes_image(self.image)
+        fe.explicit = self.explicit
 
-        if self.explicit is not None:
-            fe.podcast.itunes_explicit(self.explicit)
-
-    def remove_from_feed(self, fg: FeedGenerator) -> None:
+    def remove_from_feed(self, fg: podgen.Podcast) -> None:
         """Remove this episode from the given feed."""
         if self._feed_entry is not None:
-            fg.remove_entry(self._feed_entry)
+            fg.episodes.remove(self._feed_entry)
             self._feed_entry = None
         else:
-            raise RuntimeError("This episode is not yet added to any FeedGenerator")
+            raise RuntimeError("This episode is not yet added to any podgen.Podcast")

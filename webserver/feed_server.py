@@ -76,7 +76,7 @@ def output_all_feed():
     gen = PodcastFeedGenerator(quiet=True, pretty_xml=True)
     gen.register_redirect_services(get_redirect_sound, get_redirect_article)
 
-    feed = gen.generate_feed_with_all_episodes().decode("utf-8")
+    feed = gen.generate_feed_with_all_episodes()
     feed = _prepare_feed(feed)
     return _prepare_feed_response(feed, 10 * 60)
 
@@ -100,7 +100,7 @@ def output_feed(show_name):
 
     PodcastFeedGenerator.register_redirect_services(get_redirect_sound, get_redirect_article)
 
-    feed = gen.generate_feed(show.show_id).decode("utf-8")
+    feed = gen.generate_feed(show.show_id)
     feed = _prepare_feed(feed)
     return _prepare_feed_response(feed, 60 * 60)
 
@@ -182,6 +182,8 @@ def get_redirect_db_connection():
 
 
 def get_original_sound(show, episode):
+    # TODO: Use the md5 hash of the URL (so this is deterministic)
+    # TODO: Urlencode using base64.standard_b64encode, allowing
     with sqlite3.connect(settings.REDIRECT_DB_FILE) as c:
         r = c.execute("SELECT original FROM sound WHERE proxy=?", (episode,))
         row = r.fetchone()

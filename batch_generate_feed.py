@@ -6,7 +6,7 @@ import tempfile
 def save_feed_to_file(feed, target_file):
     with tempfile.NamedTemporaryFile(delete=False) as fp:
         tempname = fp.name
-        fp.write(feed)
+        fp.write(feed.encode("UTF-8"))
     os.replace(tempname, target_file)
 
 
