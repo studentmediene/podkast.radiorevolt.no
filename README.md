@@ -24,6 +24,25 @@ your own show_source, episode_source and metadata sources though.
 This project uses Python v3.4 only, and is written so that the podcast feeds can be updated regularly (by something like
  a cron job) or generated afresh each time a feed is accessed (potentially with a cache).
 
+## Changelog ##
+
+### 0.2 (not released yet) ###
+
+* Lots of improvements
+* Switched from feedgen to podgen (so you must run
+  `pip install -U -r webserver/requirements.txt` when upgrading)
+* URL redirection service lets you do statistics using your access log
+* size and duration db are no longer used; new media_obj database is used
+  instead. You will therefore have to re-download all the episodes in the
+  archive.
+
+  * Upgrading? Run `calculate_durations.py` to generate the database file
+    _before_ making it live.
+  * The size is only calculated by `calculate_durations.py`, so it must be run
+    more often so it's unlikely anyone gets a feed without size.
+
+* Descriptions from Digas are now HTML-escaped, and <br> tags are added so line
+  breaks are preserved. http:// in text will be converted to links.
 
 ## Scripts ##
 
@@ -40,8 +59,11 @@ This project uses Python v3.4 only, and is written so that the podcast feeds can
     <dd>Run web server which generates podcast feeds as they're requested.</dd>
     <dt>generate_redirect_rules.py</dt>
     <dd>Create mod_rewrite rules which can be used to redirect from the old podcast host.</dd>
-    <dt>utils/feedburner_url_fetcher/get_urls.py</dt>
+    <dt>utils/feedburner/get_urls.py</dt>
     <dd>Special script for generating <code>ALTERNATE_SHOW_NAMES</code> when Feedburner is in use and the source feed follows a format which ends in the DigAS ID. See <code>README.md</code> in the same directory for installation instructions - its environment differs wildly from the usual one.</dd>
+    <dt>utils/feedburner/get_categories.py</dt>
+    <dd>Script for generating <code>manual_changes.json</code> file with your
+      categories set, using whatever categories are set on Feedburner.</dd>
 
 </dl>
 
@@ -63,6 +85,8 @@ We use `py.test` to run our tests. The test files are located in the same packag
 
 ### Podcast feed generation ###
 
+**NOTE: Those tests are currently broken af, don't bother running them.**
+
 While the virtualenv is activated, run
 ```bash
 py.test generator/
@@ -73,7 +97,11 @@ exceptionally**. We should definitively have many more unit tests!!
 The reason you're not advised to run just `py.test` without arguments, is that it would run all the tests found in the
 virtualenv folder as well (for example Flask, py.test and so on).
 
-### Podcast feed URLs
+### Podcast feed URLs (integration test-ish)
+
+Those aren't traditional tests; they test whether all the URLs work. If those
+tests work, then you know that all feeds work. However, you must remember to
+maintain the test so that new feeds are tested when they are created.
 
 Run
 ```bash
@@ -84,8 +112,7 @@ have. **You MUST run this AT LEAST whenever a program changes its name or a new 
 Ideally, you would set up a script to alert you if any of the tests fail, and run that script daily.
 
 You MUST also maintain `webserver/test_rr_url.py`, by adding a show's new URL when they change name (while keeping the
-old URL there, so you can test if the `SHOW_CUSTOM_URL` settings in `webserver/settings.py` and/or
-`webserver/settings_template.py` function properly).
+old URL there, so you can test if the `ALTERNATE_SHOW_NAMES` settings in `webserver/alternate_show_names.py` function properly).
 
 ## Details: How it works ##
 

@@ -7,6 +7,8 @@ import requests
 from markdown import Markdown
 import urllib.parse
 from cached_property import cached_property
+from sys import stderr
+from podgen import htmlencode
 
 
 class Chimera(EpisodeMetadataSource):
@@ -41,13 +43,13 @@ class Chimera(EpisodeMetadataSource):
 
     def accepts(self, episode) -> bool:
         try:
-            return super().accepts(episode) and episode.sound_url in self._get_episodes(episode.show.show_id)
+            return super().accepts(episode) and episode.media.url in self._get_episodes(episode.show.id)
         except KeyError:
             # Show not in Chimera
             return False
 
     def populate(self, episode) -> None:
-        metadata = self._get_episodes(episode.show.show_id)[episode.sound_url]
+        metadata = self._get_episodes(episode.show.id)[episode.media.url]
         if not metadata['is_published']:
             raise SkipEpisode
 
@@ -61,16 +63,16 @@ class Chimera(EpisodeMetadataSource):
 
         episode.title = metadata['headline']
 
-        episode.short_description = metadata['lead']
+        episode.summary = metadata['lead']
 
         # For long_description, use the article lead and body
         markdown_description = """**{0}**\n\n{1}""".format(metadata['lead'], metadata['body'])
         html_description = self.markdown.reset() \
             .convert(markdown_description)
-        episode.long_description = html_description
+        episode.long_summary = html_description
 
         # article URL is not part of the api, so use search page instead
         search_string = urllib.parse.urlencode({"q": metadata['headline']})
-        episode.article_url = "http://dusken.no/search/?" + search_string
+        episode.link = "http://dusken.no/search/?" + search_string
 
         episode.image = metadata['image']

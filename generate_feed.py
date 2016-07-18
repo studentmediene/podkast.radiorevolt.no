@@ -36,7 +36,7 @@ def main():
     program = PodcastFeedGenerator(pretty_xml=pretty_xml, quiet=quiet)
     try:
         feed = program.generate_feed(show)
-        print(feed.decode("utf-8"))
+        print(feed)
     except NoSuchShowError:
         print("ERROR: No show with ID {0} was found.".format(show), file=sys.stderr)
 

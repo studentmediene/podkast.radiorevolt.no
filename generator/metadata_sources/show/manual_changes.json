@@ -2,197 +2,303 @@
   "digas_show_id (in quotes)":
   {
     "IMPORTANT": "Those are ALL the properties you can set, but please don't actually use them all! You need only overwrite a few fields, since data for the rest is found automatically by other metadata sources. Properties you omit will not be touched. Start with an empty plate and add only the properties not fetched from elsewhere.",
-    "title": "Name of the show",
-    "short_description": "Short description (couple words) describing the show.",
-    "long_description": "Long description, which is used when you hover the i icon in iTunes.",
+    "name": "Name of the show",
+    "subtitle": "Short description (couple words) describing the show.",
+    "description": "Long description, which is used when you hover the i icon in iTunes.",
     "image": "URL for image which will be used for this show. It must be PNG or JPEG, and it must be between 1400x1400 and 3000x3000 pixels in resolution.",
-    "category": "iTunes category for this show. See https://help.apple.com/itc/podcasts_connect/#/itc9267a2f12 for available categories.",
-    "sub_category": "iTunes sub-category for this show. See https://help.apple.com/itc/podcasts_connect/#/itc9267a2f12 for available sub-categories.",
+    "category": ["iTunes category for this show. See https://help.apple.com/itc/podcasts_connect/#/itc9267a2f12 for available categories.",
+                 "iTunes sub-category for this show (can be omitted). See https://help.apple.com/itc/podcasts_connect/#/itc9267a2f12 for available sub-categories."],
     "language": "Language of this show. Use one of the two-letter values found in http://www.loc.gov/standards/iso639-2/php/code_list.php.",
-    "show_url": "This show's website.",
-    "author": "Name of the author.",
-    "explicit": "(remove quotes) true if this show is explicit, false if this show is clean, null if it's undecided.",
-    "old": "(remove quotes) true if there won't be more episodes in this show, false otherwise",
-    "editorial_email": "Email for whoever is accountable for the content.",
-    "technical_email": "Email for whoever is responsible for the technical aspect of the feed, for instance the webmaster."
+    "website": "This show's website.",
+    "authors": [{"name": "Name of the author.", "email": "Email of the author"}],
+    "explicit": "(remove quotes) true if this show is explicit, false if this show is clean",
+    "complete": "(remove quotes) true if there won't be more episodes in this show, false otherwise",
+    "web_master": {"name": "Name for whoever is responsible for the technical aspect of the feed",
+                   "email": "That person's email"}
   },
   "2592": {
-    "category": "Games & Hobbies",
-    "sub_category": "Video Games",
-    "long_description": "I spillmagasinet Nerdeprat tar vi opp ukas nyheter og informerer deg om de spillene du burde spille ‒ spesielt de du kanskje har gått glipp av. Vi diskuterer også tema rundt spill og nerdekultur, med akademisk og humoristisk tilnærming, og spiller aktuelle låter fra dataspill. Du hører oss live hver onsdag, fra 17 til 19.",
-    "show_url": "http://dusken.no/radio/nerdeprat/"
+    "category": ["Games & Hobbies", "Video Games"],
+    "description": "I spillmagasinet Nerdeprat tar vi opp ukas nyheter og informerer deg om de spillene du burde spille ‒ spesielt de du kanskje har gått glipp av. Vi diskuterer også tema rundt spill og nerdekultur, med akademisk og humoristisk tilnærming, og spiller aktuelle låter fra dataspill. Du hører oss live hver onsdag, fra 17 til 19.",
+    "website": "http://dusken.no/radio/nerdeprat/"
   },
     "": {
-        "category": "Government & Organizations",
-        "sub_category": "Non-Profit"
+        "category": [
+            "Government & Organizations",
+            "Non-Profit"
+        ]
     },
     "2609": {
-        "category": "Comedy"
+        "category": [
+            "Comedy"
+        ]
     },
     "2438": {
-        "category": "Music"
+        "category": [
+            "Music"
+        ]
     },
     "2590": {
-        "category": "Comedy"
+        "category": [
+            "Comedy"
+        ]
     },
     "2649": {
-        "category": "News & Politics"
+        "category": [
+            "News & Politics"
+        ]
+    },
+    "2651": {
+        "category": [
+            "Comedy"
+        ]
     },
     "2650": {
-        "category": "Education",
-        "sub_category": "Higher Education"
+        "category": [
+            "Education",
+            "Higher Education"
+        ]
     },
     "2467": {
-        "category": "Comedy"
+        "category": [
+            "Comedy"
+        ]
     },
     "232": {
-        "category": "TV & Film"
+        "category": [
+            "TV & Film"
+        ]
     },
     "2345": {
-        "category": "Comedy"
+        "category": [
+            "Comedy"
+        ]
     },
     "2541": {
-        "category": "Society & Culture",
-        "sub_category": "Philosophy"
+        "category": [
+            "Society & Culture",
+            "Philosophy"
+        ]
     },
     "2341": {
-        "category": "Arts",
-        "sub_category": "Fashion & Beauty"
+        "category": [
+            "Arts",
+            "Fashion & Beauty"
+        ]
     },
     "2340": {
-        "category": "Society & Culture",
-        "sub_category": "History"
+        "category": [
+            "Society & Culture",
+            "History"
+        ]
     },
     "1980": {
-        "category": "Arts",
-        "sub_category": "Literature"
+        "category": [
+            "Arts",
+            "Literature"
+        ]
     },
     "2003": {
-        "category": "Arts",
-        "sub_category": "Food"
+        "category": [
+            "Arts",
+            "Food"
+        ]
     },
     "2560": {
-        "category": "News & Politics"
+        "category": [
+            "News & Politics"
+        ]
     },
     "1615": {
-        "category": "Games & Hobbies",
-        "sub_category": "Video Games"
+        "category": [
+            "Games & Hobbies",
+            "Video Games"
+        ]
     },
     "2380": {
-        "category": "Comedy"
+        "category": [
+            "Comedy"
+        ]
     },
     "2383": {
-        "category": "Health",
-        "sub_category": "Alternative Health"
+        "category": [
+            "Health",
+            "Alternative Health"
+        ]
     },
     "2539": {
-        "category": "Comedy"
+        "category": [
+            "Comedy"
+        ]
     },
     "1520": {
-        "category": "Music"
+        "category": [
+            "Music"
+        ]
     },
     "2245": {
-        "category": "Comedy"
+        "category": [
+            "Comedy"
+        ]
     },
     "2247": {
-        "category": "Comedy"
+        "category": [
+            "Comedy"
+        ]
     },
     "2241": {
-        "category": "Music"
+        "category": [
+            "Music"
+        ]
     },
     "2242": {
-        "category": "Comedy"
+        "category": [
+            "Comedy"
+        ]
     },
     "2465": {
-        "category": "Technology"
+        "category": [
+            "Technology"
+        ]
     },
     "2611": {
-        "category": "Comedy"
+        "category": [
+            "Comedy"
+        ]
     },
     "2607": {
-        "category": "News & Politics"
+        "category": [
+            "News & Politics"
+        ]
     },
     "2447": {
-        "category": "Comedy"
+        "category": [
+            "Comedy"
+        ]
     },
     "2445": {
-        "category": "Arts",
-        "sub_category": "Food"
+        "category": [
+            "Arts",
+            "Food"
+        ]
     },
     "2608": {
-        "category": "Health"
+        "category": [
+            "Health"
+        ]
     },
     "2424": {
-        "category": "Comedy"
+        "category": [
+            "Comedy"
+        ]
     },
     "2347": {
-        "category": "Comedy"
+        "category": [
+            "Comedy"
+        ]
     },
     "2589": {
-        "category": "Science & Medicine",
-        "sub_category": "Social Sciences"
+        "category": [
+            "Science & Medicine",
+            "Social Sciences"
+        ]
     },
     "2425": {
-        "category": "Society & Culture"
+        "category": [
+            "Society & Culture"
+        ]
     },
     "1957": {
-        "category": "Science & Medicine",
-        "sub_category": "Natural Sciences"
+        "category": [
+            "Science & Medicine",
+            "Natural Sciences"
+        ]
     },
     "1977": {
-        "category": "News & Politics"
+        "category": [
+            "News & Politics"
+        ]
     },
     "2338": {
-        "category": "Arts",
-        "sub_category": "Literature"
+        "category": [
+            "Arts",
+            "Literature"
+        ]
     },
     "2339": {
-        "category": "Comedy"
+        "category": [
+            "Comedy"
+        ]
     },
     "2233": {
-        "category": "Comedy"
+        "category": [
+            "Comedy"
+        ]
     },
     "2494": {
-        "category": "Comedy"
+        "category": [
+            "Comedy"
+        ]
     },
     "2002": {
-        "category": "News & Politics"
+        "category": [
+            "News & Politics"
+        ]
     },
     "2410": {
-        "category": "Society & Culture"
+        "category": [
+            "Society & Culture"
+        ]
     },
     "2413": {
-        "category": "Sports & Recreation",
-        "sub_category": "Amateur"
+        "category": [
+            "Sports & Recreation",
+            "Amateur"
+        ]
     },
     "2412": {
-        "category": "News & Politics"
+        "category": [
+            "News & Politics"
+        ]
     },
     "2414": {
-        "category": "Education",
-        "sub_category": "Training"
+        "category": [
+            "Education",
+            "Training"
+        ]
     },
     "1617": {
-        "category": "Arts",
-        "sub_category": "Performing Arts"
+        "category": [
+            "Arts",
+            "Performing Arts"
+        ]
     },
     "2251": {
-        "category": "Comedy"
+        "category": [
+            "Comedy"
+        ]
     },
     "2350": {
-        "category": "Arts",
-        "sub_category": "Literature"
+        "category": [
+            "Arts",
+            "Literature"
+        ]
     },
     "2511": {
-        "category": "Technology",
-        "sub_category": "Tech News"
+        "category": [
+            "Technology",
+            "Tech News"
+        ]
     },
     "2512": {
-        "category": "Sports & Recreation",
-        "sub_category": "Professional"
+        "category": [
+            "Sports & Recreation",
+            "Professional"
+        ]
     },
     "2250": {
-        "category": "Government & Organizations",
-        "sub_category": "Local"
+        "category": [
+            "Government & Organizations",
+            "Local"
+        ]
     }
 }

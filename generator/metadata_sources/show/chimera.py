@@ -21,18 +21,16 @@ class Chimera(ShowMetadataSource):
         return {show['showID']: show for show in json}
 
     def accepts(self, show) -> bool:
-        return super().accepts(show) and show.show_id in self.shows
+        return super().accepts(show) and show.id in self.shows
 
     def populate(self, show) -> None:
-        metadata = self.shows[show.show_id]
+        metadata = self.shows[show.id]
 
-        show.title = metadata['name']
+        show.name = metadata['name']
 
-        show.old = metadata['is_old']
+        show.complete = metadata['is_old']
 
-        show.short_description = metadata['lead']
-
-        show.long_description = show.short_description
+        show.description = metadata['lead']
 
         show.image = NEW_IMAGE_PREFIX + metadata['image'][len(ORIG_IMAGE_PREFIX):-len(ORIG_IMAGE_SUFFIX)] + \
                      NEW_IMAGE_SUFFIX

@@ -1,9 +1,14 @@
+import base64
+
+import hashlib
+
 from generator.generate_feed import PodcastFeedGenerator
 from generator.no_such_show_error import NoSuchShowError
 from generator import metadata_sources
 from . import settings, logo
 from .alternate_show_names import ALTERNATE_SHOW_NAMES, ALTERNATE_ALL_EPISODES_FEED_NAME
-from flask import Flask, abort, make_response, redirect, url_for, request, Response
+from flask import Flask, abort, make_response, redirect, url_for, request,\
+    Response, jsonify
 import re
 import shortuuid
 import sqlite3
@@ -54,11 +59,14 @@ def url_for_feed(show):
     return url_for("output_feed", show_name=get_feed_slug(show), _external=True)
 
 
+def xslt_url():
+    return url_for('static', filename="style.xsl")
+
 remove_non_word = re.compile(r"[^\w\d]|_")
 
 
 def get_feed_slug(show):
-    return get_readable_slug_from(show.title)
+    return get_readable_slug_from(show.name)
 
 
 def get_readable_slug_from(show_name):
@@ -73,11 +81,10 @@ def ignore_get():
 
 @app.route('/all')
 def output_all_feed():
-    gen = PodcastFeedGenerator(quiet=True, pretty_xml=True)
+    gen = PodcastFeedGenerator(quiet=True, xslt=xslt_url(), pretty_xml=True)
     gen.register_redirect_services(get_redirect_sound, get_redirect_article)
 
-    feed = gen.generate_feed_with_all_episodes().decode("utf-8")
-    feed = _prepare_feed(feed)
+    feed = gen.generate_feed_with_all_episodes()
     return _prepare_feed_response(feed, 10 * 60)
 
 
@@ -85,7 +92,8 @@ def output_all_feed():
 def output_feed(show_name):
     # Replace image so it fits iTunes' specifications
     metadata_sources.SHOW_METADATA_SOURCES.append(logo.ReplaceImageURL)
-    gen = PodcastFeedGenerator(quiet=True, pretty_xml=True)  # Make it pretty, so curious people can learn from it
+    # Make it pretty, so curious people can learn from it
+    gen = PodcastFeedGenerator(quiet=True, xslt=xslt_url(), pretty_xml=True)
     try:
         show = find_show(gen, show_name)
     except NoSuchShowError:
@@ -100,16 +108,8 @@ def output_feed(show_name):
 
     PodcastFeedGenerator.register_redirect_services(get_redirect_sound, get_redirect_article)
 
-    feed = gen.generate_feed(show.show_id).decode("utf-8")
-    feed = _prepare_feed(feed)
+    feed = gen.generate_feed(show.id)
     return _prepare_feed_response(feed, 60 * 60)
-
-
-def _prepare_feed(feed) -> str:
-    # Inject stylesheet processor instruction by replacing the very first line break
-    return feed.replace("\n",
-                        '\n<?xml-stylesheet type="text/xsl" href="' + url_for('static', filename="style.xsl") + '"?>\n',
-                        1)
 
 
 def _prepare_feed_response(feed, max_age) -> Response:
@@ -146,11 +146,30 @@ def api_slug_name(show_name):
     return url_for('output_feed', show_name=get_readable_slug_from(show_name), _external=True)
 
 
+@app.route('/api/id/')
+def api_id():
+    json_dict = {"episode": dict(), "article": dict()}
+    with sqlite3.connect(settings.REDIRECT_DB_FILE) as c:
+        r = c.execute("SELECT proxy, original FROM sound")
+
+        for row in r:
+            json_dict['episode'][row[0]] = row[1]
+
+        r = c.execute("SELECT proxy, original FROM article")
+
+        for row in r:
+            json_dict['article'][row[0]] = row[1]
+
+    return jsonify(**json_dict)
+
+
 @app.route('/api/')
 def api_help():
     alternatives = [
         ("Podkast URLs:", "/api/url/"),
         ("Predict URL from show name:", "/api/slug/"),
+        ("Get JSON list which maps episode or article identifier to URL:",
+         "/api/id/")
     ]
     return "<pre>API for podcast-feed-gen\nFormat:\n" + \
            ("\n".join(["{0:<20}{1}".format(i[0], i[1]) for i in alternatives])) \
@@ -207,16 +226,16 @@ def get_redirect_sound(original_url, episode):
             r = c.execute("SELECT proxy FROM sound WHERE original=?", (original_url,))
             row = r.fetchone()
             if not row:
-                raise KeyError(episode.sound_url)
+                raise KeyError(episode.media.url)
             return redirect_url_for(episode, row[0])
         except KeyError:
-            new_uri = shortuuid.uuid()
+            new_uri = get_url_hash(original_url)
             e = c.execute("INSERT INTO sound (original, proxy) VALUES (?, ?)", (original_url, new_uri))
             return redirect_url_for(episode, new_uri)
 
 
 def redirect_url_for(episode, identifier):
-    filename = os.path.basename(urllib.parse.urlparse(episode.sound_url).path)
+    filename = os.path.basename(urllib.parse.urlparse(episode.media.url).path)
     return url_for("redirect_episode", show=get_feed_slug(episode.show), episode=identifier,
                    title=filename, _external=True)
 
@@ -229,16 +248,21 @@ def get_redirect_article(original_url, episode):
                 r = c.execute("SELECT proxy FROM article WHERE original=?", (original_url,))
                 row = r.fetchone()
                 if not row:
-                    raise KeyError(episode.sound_url)
+                    raise KeyError(episode.link)
                 return url_for("redirect_article", show=get_feed_slug(show), article=row[0], _external=True)
             except KeyError:
-                new_uri = shortuuid.uuid()
+                new_uri = get_url_hash(original_url)
                 e = c.execute("INSERT INTO article (original, proxy) VALUES (?, ?)", (original_url, new_uri))
                 return url_for("redirect_article", show=get_feed_slug(show), article=new_uri, _external=True)
     except sqlite3.IntegrityError:
         # Either the entry was added by someone else between the SELECT and the INSERT, or the uuid was duplicate.
         # Trying again should resolve both issues.
         return get_redirect_article(original_url, episode)
+
+
+def get_url_hash(original_url):
+    m = hashlib.md5(original_url.encode("UTF-8")).digest()
+    return base64.urlsafe_b64encode(m).decode("UTF-8")[:-2]
 
 
 @app.before_first_request

@@ -1,3 +1,5 @@
+from time import strptime
+
 from .. import ShowMetadataSource
 from ..base_manual_changes import BaseManualChanges
 from ...settings import METADATA_SOURCE
@@ -5,6 +7,7 @@ from cached_property import cached_property
 import json
 import os.path
 import sys
+from podgen import Person, Category
 
 
 class ManualChanges(BaseManualChanges, ShowMetadataSource):
@@ -21,7 +24,7 @@ class ManualChanges(BaseManualChanges, ShowMetadataSource):
 
     @staticmethod
     def _get_key(show):
-        return str(show.show_id)
+        return str(show.id)
 
     def accepts(self, show) -> bool:
         return super().accepts(show)
@@ -29,23 +32,29 @@ class ManualChanges(BaseManualChanges, ShowMetadataSource):
     def populate(self, show) -> None:
         metadata = self.data[self._get_key(show)]
 
-        show.title = metadata.get("title", show.title)
-
-        show.short_description = metadata.get("short_description", show.short_description)
-        show.long_description = metadata.get("long_description", show.long_description)
-        show.category = metadata.get("category", show.category)
-        show.sub_category = metadata.get("sub_category", show.sub_category)
-        show.image = metadata.get("image", show.image)
-        show.author = metadata.get("author", show.author)
-        show.editorial_email = metadata.get("editorial_email", show.editorial_email)
-        show.technical_email = metadata.get("technical_email", show.technical_email)
-        show.old = metadata.get("old", show.old)
-        show.explicit = metadata.get("explicit", show.explicit)
-        show.show_url = metadata.get("show_url", show.show_url)
-        show.language = metadata.get("language", show.language)
-        show.copyright = metadata.get("copyright", show.copyright)
-
-        recognized_keys = {"title", "short_description", "long_description", "category", "sub_category", "image",
-                           "author", "editorial_email", "technical_email", "old", "explicit", "show_url",
-                           "language", "copyright"}
-        self.check_for_unrecognized_keys(metadata, recognized_keys, self._get_key(show))
+        for attribute, value in metadata.items():
+            if hasattr(show, attribute):
+                if attribute in ("publication_date", "last_updated"):
+                    try:
+                        setattr(show, attribute, strptime(value, "%Y-%m-%d %H:%M:%S %z"))
+                    except ValueError:
+                        print("WARNING: Date {date} in file {file} could not be parsed, so it was ignored.\n"
+                              "Make sure it's on the following form (±HHMM being timezone offset):\n"
+                              "    YYYY-MM-DD HH:MM:SS ±HHMM".format(date=metadata['date'], file=self._config_file),
+                              file=sys.stderr)
+                elif attribute == "authors":
+                    authors = [Person(p.get('name'), p.get('email')) for p in value]
+                    show.authors = authors
+                elif attribute == "web_master":
+                    show.web_master = Person(value.get('name'), value.get('email'))
+                elif attribute == "category":
+                    if len(value) == 2:
+                        show.category = Category(value[0], value[1])
+                    else:
+                        show.category = Category(value[0])
+                else:
+                    setattr(show, attribute, value)
+            else:
+                print("WARNING {source}: Attribute {keys} for {id} was not recognized."
+                      .format(source=self._source_name, id=show.id, keys=attribute),
+                      file=sys.stderr)

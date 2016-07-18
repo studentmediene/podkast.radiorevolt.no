@@ -261,7 +261,7 @@ class LocalImage:
 
         if not quiet:
             def print_progress(i, show):
-                print("Processing image {i:02}/{n:02}: {show.title}".format(i=i + 1, n=num_images, show=show),
+                print("Processing image {i:02}/{n:02}: {show.name}".format(i=i + 1, n=num_images, show=show),
                       file=sys.stderr)
         else:
             def print_progress(*args, **kwargs):
