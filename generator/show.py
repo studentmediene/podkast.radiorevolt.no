@@ -47,6 +47,9 @@ class Show(Podcast):
         self._set_if_none("explicit", SETTINGS.DEFAULT_EXPLICIT)
         self._set_if_false("owner", SETTINGS.OWNER)
 
+        if self.owner:
+            self._set_if_false("copyright", self.owner.name)
+
         if not SETTINGS.MARK_OLD_AS_COMPLETE:
             self.complete = False
 
