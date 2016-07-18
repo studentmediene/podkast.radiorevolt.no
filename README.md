@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/RadioRevolt/podcast-feed-gen.png?label=ready&title=Ready)](https://waffle.io/RadioRevolt/podcast-feed-gen)
 # Podcast feed generator for Radio Revolt #
 
 Generate podcast feeds that can act as drop-in replacement for the existing podcast feeds, and work well with podcast apps.
