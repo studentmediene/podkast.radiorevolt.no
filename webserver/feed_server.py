@@ -7,7 +7,8 @@ from generator.no_such_show_error import NoSuchShowError
 from generator import metadata_sources
 from . import settings, logo
 from .alternate_show_names import ALTERNATE_SHOW_NAMES, ALTERNATE_ALL_EPISODES_FEED_NAME
-from flask import Flask, abort, make_response, redirect, url_for, request, Response
+from flask import Flask, abort, make_response, redirect, url_for, request,\
+    Response, jsonify
 import re
 import shortuuid
 import sqlite3
@@ -145,11 +146,30 @@ def api_slug_name(show_name):
     return url_for('output_feed', show_name=get_readable_slug_from(show_name), _external=True)
 
 
+@app.route('/api/id/')
+def api_id():
+    json_dict = {"episode": dict(), "article": dict()}
+    with sqlite3.connect(settings.REDIRECT_DB_FILE) as c:
+        r = c.execute("SELECT proxy, original FROM sound")
+
+        for row in r:
+            json_dict['episode'][row[0]] = row[1]
+
+        r = c.execute("SELECT proxy, original FROM article")
+
+        for row in r:
+            json_dict['article'][row[0]] = row[1]
+
+    return jsonify(**json_dict)
+
+
 @app.route('/api/')
 def api_help():
     alternatives = [
         ("Podkast URLs:", "/api/url/"),
         ("Predict URL from show name:", "/api/slug/"),
+        ("Get JSON list which maps episode or article identifier to URL:",
+         "/api/id/")
     ]
     return "<pre>API for podcast-feed-gen\nFormat:\n" + \
            ("\n".join(["{0:<20}{1}".format(i[0], i[1]) for i in alternatives])) \
