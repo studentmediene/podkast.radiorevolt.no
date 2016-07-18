@@ -125,6 +125,17 @@
                     details > :not(summary) {
                         margin-left: 2em;
                     }
+
+                    footer {
+                        opacity: 0.7;
+                        text-align: center;
+                    }
+
+                    a:hover img.icon {
+                        filter: brightness(130%);
+                        -webkit-filter: brightness(130%);
+                    }
+                    /* do not style a:visit img.icon; browsers won't apply it */
                 </style>
             </head>
             <body>
@@ -149,7 +160,7 @@
                         </details>
 
                         <p style="margin-top: 0.5em;">
-                            Kopier nettadressen nedenfor og legg den til i podkastappen din.
+                            <a href="#" id="itunes_link">Åpne i iTunes</a> eller legg til adressen nedenfor i podkastappen din.
                             <input class="input" type="text" id="input" readonly="readonly"><xsl:attribute name="value"><xsl:value-of select="rss/channel/link"/></xsl:attribute></input>
                             <script>
                                 var input = document.getElementById('input');
@@ -164,6 +175,9 @@
                                 }
                                 };
                                 }
+
+                                var link = document.getElementById('itunes_link');
+                                link.href = window.location.href.replace("http://", "itpc://").replace("https://", "itpc://")
                             </script>
                         </p>
                     </div>
@@ -178,11 +192,24 @@
                             <xsl:for-each select="rss/channel/item">
                                 <li class="episodes-list__item">
                                     <h3 class="no-margin">
-                                        <a> <xsl:attribute name="href"> <xsl:value-of select="link"/> </xsl:attribute> <xsl:value-of select="title"/> </a>
+                                        <xsl:if test="link">
+                                            <a> <xsl:attribute name="href"> <xsl:value-of select="link"/> </xsl:attribute> <xsl:value-of select="title"/> </a>
+                                        </xsl:if>
+                                        <xsl:if test="not(link)">
+                                            <xsl:value-of select="title"/>
+                                        </xsl:if>
                                     </h3>
                                     <xsl:value-of select="description" disable-output-escaping="yes"/>
-                                    <p><a> <xsl:attribute name="href"> <xsl:value-of select="enclosure/@url"/> </xsl:attribute> Last ned MP3 </a>
-                                    <span style="color: #AAA">(<span id="placeholder_size"> </span> MB,
+                                    <p>
+                                        <a style="padding: 11px 6px 3px 6px;"> <xsl:attribute name="href"> <xsl:value-of select="enclosure/@url"/> </xsl:attribute>
+                                            <img class="icon" src="/static/icons/glyphicons-174-play.png"
+                                                 alt="Spill av i nettleseren"
+                                                 title="Spill av i nettleseren"/></a>&#160;
+                                        <a style="padding: 3px" download=""><xsl:attribute name="href"> <xsl:value-of select="enclosure/@url"/></xsl:attribute>
+                                            <img class="icon" src="/static/icons/glyphicons-182-download-alt.png"
+                                                 alt="Last ned MP3"
+                                                 title="Last ned MP3"/></a>
+                                    <span style="color: #AAA"> (<span id="placeholder_size"> </span> MB,
                                         varighet <xsl:value-of select="itunes:duration"/>)</span></p>
                                     <script>element = document.getElementById("placeholder_size");
                                         element.innerHTML = Math.ceil(<xsl:value-of select="enclosure/@length"/>/(1000000));
@@ -193,6 +220,13 @@
                         </ul>
                     </div>
                 </div>
+
+                <footer>
+                    <xsl:value-of select="rss/channel/title"/> er © <xsl:value-of
+                        select="rss/channel/copyright"/><br/>
+                    Ikonene, <a href="http://glyphicons.com">GLYPHICONS</a>, er lisensiert under <a href="https://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a> og
+                    har blitt endret fra originalene.
+                </footer>
             </body>
         </html>
     </xsl:template>
