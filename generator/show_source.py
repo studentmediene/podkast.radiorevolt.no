@@ -29,11 +29,11 @@ class ShowSource:
         show_list = r.json()
 
         # Convert to dictionary with id as key
-        return {show['id']: Show(title=show['name'], show_id=show['id']) for show in show_list}
+        return {show['id']: Show(name=show['name'], id=show['id']) for show in show_list}
 
     @cached_property
     def get_show_names(self) -> dict:
-        """Get dictionary with show_id as key and show name as value.
+        """Get dictionary with show.name as key and show as value.
 
         Useful when searching for a show by its name."""
-        return {show.title: show for show in self.shows.values()}
+        return {show.name: show for show in self.shows.values()}

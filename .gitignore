@@ -180,10 +180,12 @@ run_calculate_durations.sh
 run_resize_logos.sh
 # Used earlier to cache episode durations, but not used since commit 2b6b464. Retained for backwards compatibility.
 **/episode_durations.txt
-# Cache episode durations.
+# Cache episode durations (legacy)
 **/episode_durations.db
-# Cache episode sizes
+# Cache episode sizes (legacy)
 **/episode_sizes.db
+# Cache episode durations and sizes
+**/media_obj.db
 # Redirect urls
 **/redirects.db
 # Local images

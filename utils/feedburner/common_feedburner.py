@@ -24,6 +24,8 @@ def get_logged_in_browser(username=None, password=None, debug=False):
     if not password:
         password = get_password()
 
+    print("Logging in...", file=stderr)
+
     b = spynner.Browser()
     if debug:
         b.show()
@@ -46,5 +48,5 @@ def get_feed_pages(browser):
     # Get list of feeds
     browser.load("https://feedburner.google.com/fb/a/myfeeds", load_timeout=60)
 
-    li = BeautifulSoup(browser.html)
+    li = BeautifulSoup(browser.html, "lxml")
     return [show.get('href') for show in li.select('td.title > a')]

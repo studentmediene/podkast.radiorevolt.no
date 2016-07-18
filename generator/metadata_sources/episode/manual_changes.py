@@ -4,7 +4,8 @@ from cached_property import cached_property
 import json
 import os.path
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
+from podgen import Person
 
 
 class ManualChanges(BaseManualChanges, EpisodeMetadataSource):
@@ -24,28 +25,41 @@ class ManualChanges(BaseManualChanges, EpisodeMetadataSource):
 
     @staticmethod
     def _get_key(episode):
-        return str(episode.sound_url)
+        return str(episode.media.url)
 
     def populate(self, episode) -> None:
         metadata = self.data[self._get_key(episode)]
 
-        episode.title = metadata.get("title", episode.title)
-        if "date" in metadata:
-            try:
-                episode.date = datetime.strptime(metadata['date'], "%Y-%m-%d %H:%M:%S %z")
-            except ValueError:
-                print("WARNING: Date {date} in file {file} could not be parsed, so it was ignored.\n"
-                      "Make sure it's on the following form (±HHMM being timezone offset):\n"
-                      "    YYYY-MM-DD HH:MM:SS ±HHMM".format(date=metadata['date'], file=self._config_file),
+        for attribute, value in metadata.items():
+            if hasattr(episode, attribute):
+                if attribute == "publication_date":
+                    try:
+                        episode.publication_date = datetime.strptime(metadata['publication_date'], "%Y-%m-%d %H:%M:%S %z")
+                    except ValueError:
+                        print("WARNING: Date {date} in file {file} could not be parsed, so it was ignored.\n"
+                              "Make sure it's on the following form (±HHMM being timezone offset):\n"
+                              "    YYYY-MM-DD HH:MM:SS ±HHMM".format(date=metadata['date'], file=self._config_file),
+                              file=sys.stderr)
+                elif attribute == "authors":
+                    authors = [Person(p.get('name'), p.get('email')) for p in value]
+                    episode.authors = authors
+                elif attribute.startswith("media."):
+                    media_attribute = attribute[6:]
+                    if media_attribute == "duration":
+                        # Convert to datetime.timedelta
+                        splitted = value.split(":")
+                        if len(splitted) == 3:
+                            duration = timedelta(hours=splitted[0],
+                                minutes=splitted[1], seconds=splitted[2])
+                        else:
+                            duration = timedelta(minutes=splitted[0],
+                                                 seconds=splitted[1])
+                        episode.media.duration = duration
+                    else:
+                        setattr(episode.media, media_attribute, value)
+                else:
+                    setattr(episode, attribute, value)
+            else:
+                print("WARNING {source}: Attribute {keys} for {id} was not recognized."
+                      .format(source=self._source_name, id=episode.media.url, keys=attribute),
                       file=sys.stderr)
-        episode.short_description = metadata.get("short_description", episode.short_description)
-        episode.long_description = metadata.get("long_description", episode.long_description)
-        episode.image = metadata.get("image", episode.image)
-        episode.author = metadata.get("author", episode.author)
-        episode.author_email = metadata.get("author_email", episode.author_email)
-        episode.explicit = metadata.get("explicit", episode.explicit)
-        episode.article_url = metadata.get("article_url", episode.article_url)
-
-        recognized_keys = {"title", "date", "short_description", "long_description", "image", "author",
-                           "author_email", "explicit", "article_url"}
-        self.check_for_unrecognized_keys(metadata, recognized_keys, self._get_key(episode))

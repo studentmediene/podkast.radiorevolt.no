@@ -90,6 +90,7 @@ def rr_urls():
         "alleepisoder",
         "allepisodes",
         "feber",    # example of feed without episodes
+        "bermudashortstriangelet",
     ]
 
 
@@ -104,5 +105,5 @@ def test_feed_works(rr_url):
     url = "/{slug}".format(slug=rr_url)
     res = tester.head(url, follow_redirects=True)
     assert res.status_code in (200,), \
-        "The URL {url} resulted in status code {status}, check SHOW_CUSTOM_URL in settings_template.py or settings.py"\
+        "The URL {url} resulted in status code {status}, check ALTERNATE_SHOW_NAMES in webserver/alternate_show_names.py"\
             .format(url=url, status=res.status_code)

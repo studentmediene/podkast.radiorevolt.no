@@ -1,310 +1,48 @@
-import datetime
-import requests
 import podgen
+import copy
 from . import settings as SETTINGS
-import threading
-import os
-import json
-from tinytag.tinytag import TinyTag
-import tempfile
-from cached_property import cached_property
-import sqlite3
-import pickle
-
-# Number of threads that can download episodes at the same time.
-MAX_CONCURRENT_EPISODE_DOWNLOADS = 10
-# Max size of memory that can be used by download process at any time.
-max_megabytes = 500
-# How many bytes shall be read into memory before they're written to disc?
-CHUNK_SIZE = (max_megabytes // MAX_CONCURRENT_EPISODE_DOWNLOADS) * (1024 ** 2)
 
 
-class Episode:
+class Episode(podgen.Episode):
     """Class representing a single podcast episode."""
-    # Create the required table(s) if they don't exist already.
-    # (Do it here to ensure it's only done once)
 
-    _create_table_durations = sqlite3.connect(SETTINGS.EPISODE_DURATIONS_DB)
-    _create_table_durations.execute("create table if not exists durations (id text primary key, duration blob)")
-    _create_table_durations.close()
-
-    _create_table_size = sqlite3.connect(SETTINGS.EPISODE_SIZES_DB)
-    _create_table_size.execute("create table if not exists sizes (id text primary key, filesize integer)")
-    _create_table_size.close()
-
-    _download_constrain = threading.BoundedSemaphore(MAX_CONCURRENT_EPISODE_DOWNLOADS)
-
-    def __init__(self, sound_url: str, title: str, show, date: datetime.datetime, requests_session: requests.Session,
-                 article_url: str = None, author: str = None, author_email: str=None, short_description: str=None,
-                 long_description: str = None, image: str = None, explicit: bool=None):
-        """
-        Initialize this episode with the given data.
-
-        Args:
-            sound_url (str): URL on which this episode MP3-file can be found. Mandatory.
-            title (str): Name which will identify this episode to the end user. Mandatory.
-            show (Show): The Show which this episode belongs to. Used by episode metadata sources. Mandatory.
-            date (datetime.datetime): The timezone-aware date and time this episode was published. Mandatory.
-            requests_session (requests.Session): Requests session which will be used when making requests to other
-                servers. Mandatory.
-            article_url (str): URL on which the entire description can be read, for example article on dusken.no.
-                Defaults to sound_url.
-            author (str): Name of the person who authored this episode. Defaults to the show's author.
-            author_email (str): Email of the person who authored this episode. Defaults to the show's editorial email.
-            short_description (str): Short description used to give users an idea on what this episode contains. Cannot
-                contain markup of any kind. Defaults to the episode's title, or the first line of long_description if
-                present.
-            long_description (str): Long description shown when users hover over an (i) icon. Used to describe the episode
-                more than the short_description can. HTML is supported and preferred; metadata sources must convert to
-                HTML themselves. Defaults to short_description.
-            image (str): URL to image for this episode. Must be between 1400x1400 and 3000x3000 pixels, and PNG or JPG.
-                Defaults to using the feed's image.
-            explicit (bool): True if this episode is inappropiate to children, False if it is appropiate, None to use
-                the show's explicit value.
-        """
-        # Mandatory parameters
-        self.sound_url = sound_url
-        """str: URL on which this episode MP3-file can be found. Read-only."""
-
-        self.title = title
-        """str: Name which will identify this episode to the end user."""
-
-        if short_description is not None:
-            self.short_description = short_description
-        elif long_description is not None:
-            # Use the first line in long description (or everything if there's no newline)
-            first_newline = long_description.find("\n")
-            self.short_description = long_description[:first_newline] if first_newline != -1 else long_description
-        else:
-            # No description supplied; use title
-            self.short_description = title
-            """str: Short description used to give users an idea on what this episode contains. Cannot
-        contain markup of any kind."""
-
-        self.date = date
-        """datetime.datetime: The timezone-aware date and time this episode was published."""
-
+    def __init__(self, show=None, **kwargs):
         self.show = show
-        """Show: The Show which this episode belongs to. Used by episode metadata sources."""
+        """The Show this Episode belongs to. Only used to identify which episode
+        this is (and where to collect data for it)."""
+        super().__init__(**kwargs)
 
-        self.requests = requests_session
-        """requests.Session: The Requests session which shall be used when making requests to other servers."""
+    def set_defaults(self):
+        if self.summary is None and self.long_summary is not None:
+            # Use the first line in long description (or everything if there's no newline)
+            first_newline = self.long_summary.find("\n")
+            self.summary = self.long_summary[:first_newline] if first_newline != -1 else self.long_summary
+        if self.id is None:
+            self.id = self.media.url
 
-        # Optional parameters
-        self.article_url = article_url if article_url is not None else sound_url
-        """str: URL on which the entire description can be read, for example article on dusken.no."""
+    def rss_entry(self):
+        self.set_defaults()
 
-        self.author = author if author is not None else show.author
-        """str: Name of the person who authored this episode."""
-
-        self.author_email = author_email if author_email is not None else show.editorial_email
-        """str: Email of the person who authored this episode."""
-
-        self.long_description = long_description if long_description is not None else short_description
-        """str: Long description shown when users hover over an (i) icon. Used to describe the episode
-    more than the short_description can. HTML is supported and preferred; metadata sources must convert to
-    HTML themselves."""
-
-        self.image = image
-        """str: URL to image for this episode. Must be between 1400x1400 and 3000x3000 pixels, and PNG or JPG."""
-
-        self.explicit = explicit
-        """bool: True if this episode is inappropiate to children, False if it is appropiate, None to use show's
-        explicit value."""
-
-        # Internal properties
-        self.__size = None
-        self._feed_entry = None
-
-    @cached_property
-    def size(self) -> int:
-        """Number of bytes this episode is. Read-only."""
-        db = None
-        try:
-            # Create new database connection (a new one each time, since it is bound to one thread)
-            db = sqlite3.connect(SETTINGS.EPISODE_SIZES_DB)
-            db.execute("PRAGMA busy_timeout = 30000")
-            # Try to fetch this episode's filesize
-            c = db.execute("SELECT filesize FROM sizes WHERE id=?", (self.sound_url,))
-            value = c.fetchone()
-            c.close()
-            # Did we get it?
-            if value:
-                return str(value[0])
-            else:
-                # Nope, calculate and save it for later times
-                size = self._get_size()
-                db.execute("INSERT INTO sizes (id, filesize) VALUES (:id, :filesize)",
-                           {"id": self.sound_url, "filesize": size})
-                db.commit()
-                return size
-        finally:
-            if db:
-                db.close()
-
-    def _get_size(self) -> int:
-        head = self.requests.head(self.sound_url, allow_redirects=True)
-        return head.headers['content-length']
-
-    @property
-    def duration(self) -> str:
-        """String representing how long this episodes lasts, in format HH:MM:SS. None if not available. Read-only."""
-        db = None
-        try:
-            # Create new database connection (we do it here because a connection can only be used in the thread it's
-            # created in).
-            db = sqlite3.connect(SETTINGS.EPISODE_DURATIONS_DB)
-            db.execute("PRAGMA busy_timeout = 30000")
-            # Fetch any saved duration, if it exists
-            c = db.execute("SELECT duration FROM durations WHERE id=?", (self.sound_url,))
-            value = c.fetchone()
-            c.close()
-
-            # Was there a duration saved for this episode?
-            if value:
-                # Yes, use it
-                return pickle.loads(value[0])
-            else:
-                return None
-        finally:
-            if db:
-                db.close()
-
-    def calculate_duration(self, force: bool =False) -> bool:
-        """
-        Find the episode's duration and save it in the database.
-
-        Args:
-            force (bool): Set to True to force a re-download and re-evaluation of the episode's duration.
-
-        Returns:
-            bool: True if the duration was updated, False if it was not.
-        """
-        update = False
-        if self.duration is not None:
-            if not force:
-                return False
-            else:
-                update = True
-        db = sqlite3.connect(SETTINGS.EPISODE_DURATIONS_DB)
-        db.execute("PRAGMA busy_timeout = 30000")
-        try:
-
-            duration = self._fetch_duration()
-            if duration is None:
-                return False
-            # Convert to binary data that can be remade into timedelta again
-            pickled_duration = pickle.dumps(duration)
-
-            # Persist this in the database
-            if not update:
-                try:
-                    db.execute("INSERT INTO durations (id, duration) VALUES (:id, :duration)",
-                               {"id": self.sound_url, "duration": pickled_duration})
-                except sqlite3.IntegrityError:
-                    # There is already an entry for this episode -
-                    # someone else has found the duration while we were busy, so just update it
-                    update = True
-            if update:
-                db.execute("UPDATE durations SET duration=:duration WHERE id=:id",
-                           {"id": self.sound_url, "duration": pickled_duration})
-
-            db.commit()
-            return True
-        finally:
-            if db:
-                db.close()
-
-    def _fetch_duration(self) -> datetime.timedelta:
-        """Download episode and find its duration."""
-
-        while not self._download_constrain.acquire(timeout=10):
-            if SETTINGS.CANCEL.is_set():
-                return None
-        try:
-            if SETTINGS.CANCEL.is_set():
-                return None
-            # Start fetching mp3 file
-            r = self.requests.get(self.sound_url, stream=True)
-            # Save the mp3 file (streaming it so we won't run out of memory)
-            filename = None
-            try:
-                with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as fd:
-                    filename = fd.name
-                    for chunk in r.iter_content(chunk_size=CHUNK_SIZE):
-                        fd.write(chunk)
-                        del chunk
-                        if SETTINGS.CANCEL.is_set():
-                            return None
-                # Read its metadata and determine duration
-                tag = TinyTag.get(filename)
-                return datetime.timedelta(seconds=tag.duration)
-            finally:
-                # Remove temporary file
-                try:
-                    if filename:
-                        os.remove(filename)
-                except FileNotFoundError:
-                    pass
-        finally:
-            self._download_constrain.release()
-
-    def add_to_feed(self, fg: podgen.Podcast) -> podgen.Episode:
-        """Add this episode to the given feed, but don't fill in any details yet.
-
-        Args:
-            fg (FeedGenerator): The feed which this episode is to be added to.
-
-        Returns:
-            podgen.Episode: The new Episode.
-
-        Raises:
-            RuntimeError: if invoked after this episode has already been added to a feed.
-    """
-        if self._feed_entry is None:
-            fe = fg.add_episode()
-
-            self._feed_entry = fe
-            return fe
+        if SETTINGS.URL_REDIRECTION_SOUND_URL and self.media:
+            sound_url = SETTINGS.URL_REDIRECTION_SOUND_URL(self.media.url, self)
         else:
-            raise RuntimeError("This episode is already added to a Podcast")
+            sound_url = self.media.url
 
-    def populate_feed_entry(self):
-        """Write data to the FeedEntry associated with this episode.
-
-        You will need to call add_to_feed first."""
-        if self._feed_entry is None:
-            raise RuntimeError("populate_feed_entry was called before this episode was added to a feed.")
-
-        if SETTINGS.URL_REDIRECTION_SOUND_URL:
-            sound_url = SETTINGS.URL_REDIRECTION_SOUND_URL(self.sound_url, self)
+        if SETTINGS.URL_REDIRECTION_ARTICLE_URL and self.link:
+            article_url = SETTINGS.URL_REDIRECTION_ARTICLE_URL(self.link, self)
         else:
-            sound_url = self.sound_url
+            article_url = self.link
 
-        if SETTINGS.URL_REDIRECTION_ARTICLE_URL:
-            article_url = SETTINGS.URL_REDIRECTION_ARTICLE_URL(self.article_url, self)
-        else:
-            article_url = self.article_url
+        # Temporary set media and link
+        old_media = copy.copy(self.media)
+        old_link = self.link
 
-        fe = self._feed_entry
-        fe.id = self.sound_url  # Don't use URL redirection service for GUID
-        fe.title = self.title
-        fe.summary = self.short_description
-        fe.long_summary = self.long_description
-        fe.media = podgen.Media(sound_url, self.size, "audio/mpeg",
-                                self.duration)
-        fe.authors = [podgen.Person(self.author, self.author_email)]
-        fe.link = article_url
-        fe.publication_date = self.date
+        self.media.url = sound_url
+        self.link = article_url
 
-        fe.image = self.image
+        item = super().rss_entry()
 
-        fe.explicit = self.explicit
+        self.media = old_media
+        self.link = old_link
 
-    def remove_from_feed(self, fg: podgen.Podcast) -> None:
-        """Remove this episode from the given feed."""
-        if self._feed_entry is not None:
-            fg.episodes.remove(self._feed_entry)
-            self._feed_entry = None
-        else:
-            raise RuntimeError("This episode is not yet added to any podgen.Podcast")
+        return item

@@ -180,7 +180,7 @@
                                     <h3 class="no-margin">
                                         <a> <xsl:attribute name="href"> <xsl:value-of select="link"/> </xsl:attribute> <xsl:value-of select="title"/> </a>
                                     </h3>
-                                    <xsl:value-of select="description"/>
+                                    <xsl:value-of select="description" disable-output-escaping="yes"/>
                                     <p><a> <xsl:attribute name="href"> <xsl:value-of select="enclosure/@url"/> </xsl:attribute> Last ned MP3 </a>
                                     <span style="color: #AAA">(<span id="placeholder_size"> </span> MB,
                                         varighet <xsl:value-of select="itunes:duration"/>)</span></p>

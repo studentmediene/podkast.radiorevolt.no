@@ -34,7 +34,7 @@ class EpisodeMetadataSource(metaclass=ABCMeta):
             bool: True if this metadata source has metadata for the provided episode, False otherwise.
         """
 
-        if episode.sound_url in self.bypass:
+        if episode.media.url in self.bypass:
             # Bypass, even if start and end dates are set
             return False
         elif 'START_DATE' in self.settings and 'END_DATE' in self.settings:
@@ -43,13 +43,13 @@ class EpisodeMetadataSource(metaclass=ABCMeta):
             end = self.settings['END_DATE']
             if start and end:
                 # Both are present, date must be between them
-                return start <= episode.date <= end
+                return start <= episode.publication_date <= end
             elif start:
                 # Only start is present, date must be after start
-                return start <= episode.date
+                return start <= episode.publication_date
             elif end:
                 # Only end is present, date must be before end
-                return episode.date <= end
+                return episode.publication_date <= end
             else:
                 # None of them are present, accept all
                 return True

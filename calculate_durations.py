@@ -5,6 +5,8 @@ from generator import settings
 from generator.no_episodes_error import NoEpisodesError
 from threading import Thread, RLock, BoundedSemaphore
 from sys import stderr
+import random
+from podgen import Media
 
 
 def print_err(*args, **kwargs):
@@ -20,6 +22,15 @@ def parse_cli_arguments():
     parser.add_argument("--exclude", "-x", action="store_true",
                         help="Calculate durations for all shows EXCEPT the ones named on the "
                              "command line.")
+
+    def one_or_greater(string):
+        value = int(string)
+        if value <= 0:
+            raise argparse.ArgumentTypeError("%s is not >= 1" % value)
+        return value
+
+    parser.add_argument("--parallels", "-p", default=2, type=one_or_greater,
+                        help="Number of concurrent downloads. [default: 2]")
     parser.add_argument("shows", nargs="*", type=int,
                         help="DigAS IDs for the shows you want to calculate durations for. "
                              "Defaults to all shows.")
@@ -33,6 +44,7 @@ def main():
     parser, args = parse_cli_arguments()
     quiet = args.quiet
     exclude = args.exclude
+    num_threads = args.parallels
     args_shows = args.shows
     args_shows_set = set(args_shows)
 
@@ -67,7 +79,7 @@ def main():
         except NoEpisodesError:
             pass
 
-    episodes_without_duration = [episode for episode in all_episodes if episode.duration is None]
+    episodes_without_duration = [episode for episode in all_episodes if episode.media.duration is None]
 
     if not episodes_without_duration:
         parser.exit(message="All episodes have duration information.\n" if not quiet else None)
@@ -77,15 +89,21 @@ def main():
     if not quiet:
         print_err("{num} episodes need to be fetched. Please be patient.".format(num=num_episodes))
 
+    # Shuffle the list of episodes, so that multiple instances at least are
+    # unlikely to work on the same episodes
+    random.shuffle(episodes_without_duration)
+
+    if not quiet:
+        print_err("Starting downloads.")
+
     print_lock = RLock()
     threads = list()
-    num_threads = 20
     run_constraint = BoundedSemaphore(num_threads)
     try:
         for episode in episodes_without_duration:
             run_constraint.acquire()
             threads.append(Thread(target=fetch_duration,
-                                  kwargs={"episode": episode, "print_lock": print_lock,
+                                  kwargs={"episode": episode, "es": es, "print_lock": print_lock,
                                           "quiet": quiet, "total": num_episodes, "constrain": run_constraint}))
             threads[-1].start()
 
@@ -94,7 +112,10 @@ def main():
     except KeyboardInterrupt:
         if not quiet:
             with print_lock:
-                print_err("Exiting and cleaning up. Please wait, this could take around one and a half minute...")
+                print_err("Exiting and cleaning up. All %s downloads that have "
+                          "been started, will be allowed to finish. Please "
+                          "wait, this could take several minutes..."
+                          % num_threads)
         settings.CANCEL.set()
         for thread in threads:
             try:
@@ -104,10 +125,13 @@ def main():
                 pass
 
 
-def fetch_duration(episode, print_lock, quiet, total, constrain):
-    e = episode.calculate_duration()
-    _ = episode.size
-    if not quiet and not settings.CANCEL.is_set():
+def fetch_duration(episode, es, print_lock, quiet, total, constrain):
+    media = es.media_load(episode.media.url)
+    if not media.duration or not media.size:
+        episode.media = Media.create_from_server_response(media.url, requests_=es.requests)
+        episode.media.fetch_duration()
+        es.media_save(episode.media)
+    if not quiet:
         print_progress(episode, print_lock, total)
     constrain.release()
 

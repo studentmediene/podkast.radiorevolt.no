@@ -54,11 +54,14 @@ def url_for_feed(show):
     return url_for("output_feed", show_name=get_feed_slug(show), _external=True)
 
 
+def xslt_url():
+    return url_for('static', filename="style.xsl")
+
 remove_non_word = re.compile(r"[^\w\d]|_")
 
 
 def get_feed_slug(show):
-    return get_readable_slug_from(show.title)
+    return get_readable_slug_from(show.name)
 
 
 def get_readable_slug_from(show_name):
@@ -73,11 +76,10 @@ def ignore_get():
 
 @app.route('/all')
 def output_all_feed():
-    gen = PodcastFeedGenerator(quiet=True, pretty_xml=True)
+    gen = PodcastFeedGenerator(quiet=True, xslt=xslt_url(), pretty_xml=True)
     gen.register_redirect_services(get_redirect_sound, get_redirect_article)
 
     feed = gen.generate_feed_with_all_episodes()
-    feed = _prepare_feed(feed)
     return _prepare_feed_response(feed, 10 * 60)
 
 
@@ -85,7 +87,8 @@ def output_all_feed():
 def output_feed(show_name):
     # Replace image so it fits iTunes' specifications
     metadata_sources.SHOW_METADATA_SOURCES.append(logo.ReplaceImageURL)
-    gen = PodcastFeedGenerator(quiet=True, pretty_xml=True)  # Make it pretty, so curious people can learn from it
+    # Make it pretty, so curious people can learn from it
+    gen = PodcastFeedGenerator(quiet=True, xslt=xslt_url(), pretty_xml=True)
     try:
         show = find_show(gen, show_name)
     except NoSuchShowError:
@@ -100,16 +103,8 @@ def output_feed(show_name):
 
     PodcastFeedGenerator.register_redirect_services(get_redirect_sound, get_redirect_article)
 
-    feed = gen.generate_feed(show.show_id)
-    feed = _prepare_feed(feed)
+    feed = gen.generate_feed(show.id)
     return _prepare_feed_response(feed, 60 * 60)
-
-
-def _prepare_feed(feed) -> str:
-    # Inject stylesheet processor instruction by replacing the very first line break
-    return feed.replace("\n",
-                        '\n<?xml-stylesheet type="text/xsl" href="' + url_for('static', filename="style.xsl") + '"?>\n',
-                        1)
 
 
 def _prepare_feed_response(feed, max_age) -> Response:
@@ -209,7 +204,7 @@ def get_redirect_sound(original_url, episode):
             r = c.execute("SELECT proxy FROM sound WHERE original=?", (original_url,))
             row = r.fetchone()
             if not row:
-                raise KeyError(episode.sound_url)
+                raise KeyError(episode.media.url)
             return redirect_url_for(episode, row[0])
         except KeyError:
             new_uri = shortuuid.uuid()
@@ -218,7 +213,7 @@ def get_redirect_sound(original_url, episode):
 
 
 def redirect_url_for(episode, identifier):
-    filename = os.path.basename(urllib.parse.urlparse(episode.sound_url).path)
+    filename = os.path.basename(urllib.parse.urlparse(episode.media.url).path)
     return url_for("redirect_episode", show=get_feed_slug(episode.show), episode=identifier,
                    title=filename, _external=True)
 
@@ -231,7 +226,7 @@ def get_redirect_article(original_url, episode):
                 r = c.execute("SELECT proxy FROM article WHERE original=?", (original_url,))
                 row = r.fetchone()
                 if not row:
-                    raise KeyError(episode.sound_url)
+                    raise KeyError(episode.link)
                 return url_for("redirect_article", show=get_feed_slug(show), article=row[0], _external=True)
             except KeyError:
                 new_uri = shortuuid.uuid()

@@ -15,13 +15,17 @@ def get_categories(base, debug=False):
     categories = dict()
     b = common_feedburner.get_logged_in_browser(debug=debug)
     shows = common_feedburner.get_feed_pages(b)
-    for url in shows:
+    print("Found %s shows." % len(shows), file=stderr)
+    total = len(shows)
+    for i, url in enumerate(shows):
+        print("Collecting category for show %s out of %s..." % (i + 1, total),
+              end="\r", file=stderr)
         # Manipulate url so it loads the page with podcast options
         url = url.replace("dashboard", "smartcast", 1)
 
         b.load(url, load_timeout=60)
 
-        sh = BeautifulSoup(b.html)
+        sh = BeautifulSoup(b.html, "lxml")
         digas_id = sh.select_one('input[name="sourceUrl"]')['value'][len(base):]
 
         category = unicode(sh.select_one('div#iTunesOptions > ul > li > select > option[selected]').string)
@@ -41,9 +45,14 @@ def get_categories(base, debug=False):
 
         if category is None:
             continue
+        elif sub_category is None:
+            category_tuple = (category,)
+        else:
+            category_tuple = (category, sub_category)
 
-        categories[digas_id] = (category, sub_category)
+        categories[digas_id] = category_tuple
 
+    print("", file=stderr)  # Don't blend next output with progress messages
     return categories
 
 
@@ -60,7 +69,9 @@ def main():
     debug = args.debug
     base = args.BASE_URL
     if not base:
-        print("Part of source URLs common for all feeds: ", end="", file=stderr)
+        print("Part of source URLs common for all feeds (will be stripped "
+              "away from the source URL to obtain the DigasID):\n> ", end="",
+              file=stderr)
         base = raw_input()
 
     categories = get_categories(
@@ -68,17 +79,11 @@ def main():
         debug
     )
 
-    # Convert to format compatible with manual_changes
-    categories_data = dict()
-    for digas_id, category in categories.items():
-        entry = dict()
-        if category[0]:
-            entry["category"] = category[0]
-            if category[1]:
-                entry["sub_category"] = category[1]
-        categories_data[digas_id] = entry
+    # Convert to format expected by ManualChanges
+    category_data = {digas_id: {"category": category}
+                     for digas_id, category in categories.items()}
 
-    print(json.dumps(categories_data, indent=4))
+    print(json.dumps(category_data, indent=4))
 
 if __name__ == '__main__':
     main()

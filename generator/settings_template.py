@@ -1,11 +1,11 @@
 import datetime, pytz, os.path, threading
+from podgen import Person, Category
 
 __all__ = [
     "DEBUG",
-    "DEFAULT_EDITORIAL_EMAIL",
-    "DEFAULT_TECHNICAL_EMAIL",
-    "OWNER_NAME",
-    "OWNER_EMAIL",
+    "DEFAULT_AUTHORS",
+    "DEFAULT_WEBMASTER",
+    "OWNER",
     "DEFAULT_SHORT_FEED_DESCRIPTION",
     "DEFAULT_WEBSITE",
     "URL_REDIRECTION_SOUND_URL",
@@ -17,12 +17,9 @@ __all__ = [
     "METADATA_SOURCE",
     "BYPASS_EPISODE",
     "BYPASS_SHOW",
-    "EPISODE_DURATIONS_DB",
-    "EPISODE_SIZES_DB",
     "ALL_EPISODES_FEED_TITLE",
     "DEFAULT_CATEGORY",
     "DEFAULT_EXPLICIT",
-    "DEFAULT_SUB_CATEGORY",
     "MARK_OLD_AS_COMPLETE",
 ]
 # Remove the hash symbol and space from the beginning of the following line
@@ -36,13 +33,12 @@ DEBUG = False
 MARK_OLD_AS_COMPLETE = False
 
 # Default email address for who to contact regarding content in a show.
-DEFAULT_EDITORIAL_EMAIL = "editor@example.org"
+DEFAULT_AUTHORS = [Person("Example Radio", "editor@example.org")]
 # Default email address for who to contact regarding technical aspects of the podcast feed.
-DEFAULT_TECHNICAL_EMAIL = "it@example.org"
+DEFAULT_WEBMASTER = Person("Radio Technique", "it@example.org")
 # Name and email for the podcast owner, which will be contacted by iTunes for questions, problems etc.
 # regarding the podcasts
-OWNER_NAME = "Example Radio"
-OWNER_EMAIL = "it@example.org"
+OWNER = Person("Example Radio", "it@example.org")
 
 # Default short description to use on shows with no description.
 DEFAULT_SHORT_FEED_DESCRIPTION = "Podcast from Example Radio"
@@ -52,9 +48,7 @@ DEFAULT_WEBSITE = "http://example.org"
 DEFAULT_EXPLICIT = False
 # Default category (see https://help.apple.com/itc/podcasts_connect/#/itc9267a2f12 for alternatives, use the normal
 # alternative without escaping)
-DEFAULT_CATEGORY = "Education"
-# Default sub-category (see https://help.apple.com/itc/podcasts_connect/#/itc9267a2f12 for alternatives)
-DEFAULT_SUB_CATEGORY = "Higher Education"
+DEFAULT_CATEGORY = Category("Education", "Higher Education")
 
 # Default title for the special feed with episodes from all shows
 ALL_EPISODES_FEED_TITLE = "All podcast episodes from Example Radio"
@@ -97,19 +91,10 @@ EPISODE_SOURCE = {
     # Base URL for the Radio Rest API (without trailing slash). Example: "http://example.org/v1"
     # Reuse value from SHOW_SOURCE
     'RADIO_REST_API_URL': SHOW_SOURCE['RADIO_REST_API_URL'],
+    # Where to store the database file for caching episode size and duration.
+    # A new one will be created if it doesn't exist.
+    'MEDIA_OBJECTS_DB': os.path.join(current_folder, "..", "data", "media_obj.db")
 }
-
-# EPISODE SETTINGS
-
-# Where to store the database file for caching episode durations. A new file will be created if it doesn't exist.
-# Defaults to episode_durations.db in this folder, but you might want to place it somewhere else so you can
-# restrict the program's permissions to edit its sources.
-EPISODE_DURATIONS_DB = os.path.join(current_folder, "..", "data", "episode_durations.db")
-
-# Where to store the database file for caching episode sizes. A new file will be created if it doesn't exist.
-# Defaults to episode_sizes.db in this folder. The above notes about security applies to this as well.
-EPISODE_SIZES_DB = os.path.join(current_folder, "..", "data", "episode_sizes.db")
-
 
 # METADATA SOURCE SETTINGS - key must match the class name.
 

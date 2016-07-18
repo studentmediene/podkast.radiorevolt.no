@@ -18,13 +18,15 @@ import re
 
 class PodcastFeedGenerator:
 
-    def __init__(self, pretty_xml=False, quiet=False):
+    def __init__(self, pretty_xml=False, quiet=False, xslt=None):
         self.requests = requests.Session()
         self.requests.headers.update({"User-Agent": "podcast-feed-gen"})
 
         self.show_source = ShowSource(self.requests)
         self.pretty_xml = pretty_xml
         self.re_remove_chars = re.compile(r"[^\w\d]|_")
+
+        self.xslt = xslt
 
         SETTINGS.QUIET = quiet
 
@@ -97,9 +99,7 @@ class PodcastFeedGenerator:
         if not SETTINGS.QUIET:
             print("Finding show metadata...", end="\r", file=sys.stderr)
         self.populate_show_metadata(show, enable_skip_show)
-
-        # Start generating feed
-        feed = show.init_feed()
+        show.xslt = self.xslt
 
         # Add episodes
         if not episode_source:
@@ -115,7 +115,7 @@ class PodcastFeedGenerator:
         show.add_episodes_to_feed(episode_source, self.episode_metadata_sources)
 
         # Generate!
-        return feed.rss_str(minimize=not self.pretty_xml)
+        return show.rss_str(minimize=not self.pretty_xml)
 
     def generate_all_feeds_sequence(self) -> dict:
         return self.generate_feeds_sequence(self.show_source.shows.values())
@@ -137,11 +137,11 @@ class PodcastFeedGenerator:
             if not SETTINGS.QUIET:
                 # Update progress bar
                 i += 1
-                print("{0: <60} ({1:03}/{2:03})".format(show.title, i, num_shows),
+                print("{0: <60} ({1:03}/{2:03})".format(show.name, i, num_shows),
                       file=sys.stderr)
             try:
                 # Do the job
-                feeds[show.show_id] = self._generate_feed(show, episode_source=es)
+                feeds[show.id] = self._generate_feed(show, episode_source=es)
             except (NoEpisodesError, SkipShow):
                 # Skip this show
                 pass
@@ -160,7 +160,7 @@ class PodcastFeedGenerator:
         shows = self.show_source.get_show_names
         shows_lower_nospace = {self.re_remove_chars.sub("", name.lower()): show for name, show in shows.items()}
         try:
-            return shows_lower_nospace[name].show_id
+            return shows_lower_nospace[name].id
         except KeyError as e:
             raise NoSuchShowError from e
 
@@ -178,12 +178,12 @@ class PodcastFeedGenerator:
                         pass
 
     def generate_feed_with_all_episodes(self, title=None):
-        show = Show(title or SETTINGS.ALL_EPISODES_FEED_TITLE, 0)
-        feed = show.init_feed()
+        show = Show(name=title or SETTINGS.ALL_EPISODES_FEED_TITLE, id=0)
+        show.xslt = self.xslt
         es = EpisodeSource(self.requests)
         self._prepare_for_batch(es)
         # Get all episodes
-        episodes = [EpisodeSource.episode(self.show_source.shows[ep['program_defnr']], ep, self.requests)
+        episodes = [es.episode(self.show_source.shows[ep['program_defnr']], ep)
                     for ep in es.all_episodes if ep['program_defnr'] != 0]
         # Populate metadata
         progress_n = len(episodes)
@@ -199,10 +199,9 @@ class PodcastFeedGenerator:
                     exc_type, exc_value, exc_traceback = sys.exc_info()
                     cause = traceback.extract_tb(exc_traceback, 2)[1][0]
                     print("NOTE: Skipping episode named {name}\n    URL: \"{url}\"\n    Caused by {cause}\n"
-                          .format(name=episode.title, url=episode.sound_url, cause=cause),
+                          .format(name=episode.title, url=episode.media.url, cause=cause),
                           file=sys.stderr)
                 continue
-            episode.add_to_feed(feed)
-            episode.populate_feed_entry()
+            show.add_episode(episode)
 
-        return feed.rss_str(minimize=not self.pretty_xml)
+        return show.rss_str(minimize=not self.pretty_xml)
