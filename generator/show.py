@@ -1,10 +1,14 @@
 from . import settings as SETTINGS
+import logging
 from .episode_source import EpisodeSource
 from podgen import Podcast, Person, Episode, Category
 from .metadata_sources import EpisodeMetadataSource
 from .metadata_sources.skip_episode import SkipEpisode
 import sys
 import traceback
+
+
+logger = logging.getLogger(__name__)
 
 
 class Show(Podcast):
@@ -88,9 +92,8 @@ class Show(Podcast):
                     if not SETTINGS.QUIET:
                         exc_type, exc_value, exc_traceback = sys.exc_info()
                         cause = traceback.extract_tb(exc_traceback, 2)[1][0]
-                        print("NOTE: Skipping episode named {name}\n    URL: \"{url}\"\n    Caused by {cause}\n"
-                              .format(name=episode.title, url=episode.sound_url, cause=cause),
-                              file=sys.stderr)
+                        logger.info("Skipping episode named %(name)s\n    URL: \"%(url)s\"\n    Caused by %(cause)s\n"
+                              , {"name": episode.title, "url": episode.sound_url, "cause": cause})
 
                     self._progress_increment()
                     continue

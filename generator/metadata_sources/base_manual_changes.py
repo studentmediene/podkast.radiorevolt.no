@@ -33,7 +33,6 @@ class BaseManualChanges(metaclass=ABCMeta):
 
     @cached_property
     def data(self):
-        print(__name__, file=sys.stderr)
         try:
             return json.load(open(self._config_file))
         except IOError:
