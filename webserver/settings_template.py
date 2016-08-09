@@ -7,6 +7,7 @@ __all__ = [
     "OFFICIAL_WEBSITE",
     "DEBUG",
     "REDIRECT_DB_FILE",
+    "URL_DB_CONNECTION_PARAMS",
 ]
 
 # Set to True to enable debug mode. DO NOT LEAVE ON IN PRODUCTION!
@@ -18,3 +19,17 @@ OFFICIAL_WEBSITE = "http://radio.example.org"
 
 # Path to the DB file used by the redirection service
 REDIRECT_DB_FILE = path.abspath(path.join(path.dirname(__file__), "..", "data", "redirects.db"))
+
+# Connection details for the URL PostgreSQL database.
+URL_DB_CONNECTION_PARAMS = {
+    # The host where the database is located. Remove the line if the host is the
+    # same for both podcast-feed-gen and the PostgreSQL server.
+    "host": "db.example.com",
+    # Port to use for the connection. 5432 is the default.
+    "port": 5432,
+    # Database to use.
+    "database": "urlredirect",
+    # Username and password used to authenticate on the server.
+    "user": "bob",
+    "password": "password123",
+}

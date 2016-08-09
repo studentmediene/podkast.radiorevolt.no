@@ -59,6 +59,7 @@ def get_canonical_slug_for_slug(slug: str) -> str:
         # Add it in the database.
         sluglist = SlugList(digas_id, slug)
         sluglist.persist()
+        return sluglist.canonical_slug
     except:
         if sluglist:
             sluglist.abort()
@@ -96,7 +97,7 @@ def sluggify(name: str) -> str:
     Returns:
         str: name, converted into a URL- and human-friendly slug.
     """
-    return remove_non_word.sub("", name.lower())
+    return remove_non_word.sub("", name.strip().lower())
 
 
 def get_show_with_slug(slug: str) -> int:
