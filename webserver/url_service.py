@@ -59,10 +59,15 @@ def get_canonical_slug_for_slug(slug: str) -> str:
         # Add it in the database.
         sluglist = SlugList(digas_id, slug)
         sluglist.persist()
+    except:
+        if sluglist:
+            sluglist.abort()
+            # Make sure sluglist isn't committed by the finally block
+            sluglist = None
+        raise
     finally:
         if sluglist:
             sluglist.commit()
-            sluglist.close()
 
 
 def create_slug_for(digas_id: int) -> str:
