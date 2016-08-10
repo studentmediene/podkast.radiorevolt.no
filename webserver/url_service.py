@@ -1,5 +1,8 @@
 import logging
 import re
+from psycopg2.extensions import TransactionRollbackError
+from time import sleep
+from random import randint
 
 from generator.generate_feed import PodcastFeedGenerator
 from .slug_list import SlugList
@@ -11,7 +14,7 @@ from generator import NoSuchShowError
 logger = logging.getLogger(__name__)
 
 
-def get_canonical_slug_for_slug(slug: str, gen: PodcastFeedGenerator) -> str:
+def get_canonical_slug_for_slug(slug: str, gen: PodcastFeedGenerator, level=0) -> str:
     """Get the slug which shall be used for the given slug.
 
     Args:
@@ -52,6 +55,7 @@ def get_canonical_slug_for_slug(slug: str, gen: PodcastFeedGenerator) -> str:
                     stored_canonical_slug
                 )
         return sluglist.canonical_slug
+
     except NoSuchSlug:
         # There is no record of this slug in the database.
         # Is it an actual slug for a show, or is this a 404?
@@ -62,12 +66,33 @@ def get_canonical_slug_for_slug(slug: str, gen: PodcastFeedGenerator) -> str:
         sluglist = SlugList(digas_id, slug)
         sluglist.persist()
         return sluglist.canonical_slug
+
+    except TransactionRollbackError:
+        # Someone has probably beat us to the punch
+        if sluglist:
+            sluglist.connection.close()
+            # Make sure the finally block won't try to commit sluglist
+            sluglist = None
+        # Should we give up?
+        if level >= 10:
+            raise
+        # I don't know if we need this, but randomize how long we sleep, so two
+        # instances won't bash their heads against each other forever
+        sleep(randint(0, 2**level) / 100)
+        # Try again; should work in most cases
+        return get_canonical_slug_for_slug(
+            slug,
+            PodcastFeedGenerator(quiet=True),  # use fresh data
+            level + 1
+        )
+
     except:
         if sluglist:
             sluglist.abort()
             # Make sure sluglist isn't committed by the finally block
             sluglist = None
         raise
+
     finally:
         if sluglist:
             sluglist.commit()
