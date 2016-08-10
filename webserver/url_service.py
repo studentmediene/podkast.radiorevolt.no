@@ -23,8 +23,8 @@ def get_canonical_slug_for_slug(slug: str, gen: PodcastFeedGenerator, level=0) -
             actual name.
 
     Returns:
-        str: The canonical slug which should be used (instead of the given
-            slug).
+        (int, str): Tuple containing the Digas ID and the canonical slug which
+            should be used (instead of the given slug).
 
     Raises:
         NoSuchShowError: If no show matches the given slug.
@@ -34,45 +34,46 @@ def get_canonical_slug_for_slug(slug: str, gen: PodcastFeedGenerator, level=0) -
     slug = slug.strip().lower()
     sluglist = None
     try:
-        sluglist = SlugList.from_slug(slug)
-        stored_canonical_slug = sluglist.canonical_slug
-        actual_canonical_slug = create_slug_for(sluglist.digas_id, gen)
+        try:
+            sluglist = SlugList.from_slug(slug)
+            stored_canonical_slug = sluglist.canonical_slug
+            actual_canonical_slug = create_slug_for(sluglist.digas_id, gen)
 
-        if stored_canonical_slug != actual_canonical_slug:
-            # This show has gotten a new name
-            try:
-                sluglist.canonical_slug = actual_canonical_slug
-            except SlugAlreadyInUse:
-                # Another show is using the slug this show is trying to use
-                # Notify radioteknisk
-                logger.critical(
-                    "The slug %s is already in use by another show (with"
-                    "canonical slug %s). Falling back to previous slug, %s. "
-                    "Pick another name for the show; you may confuse "
-                    "listeners.",
-                    actual_canonical_slug,
-                    get_canonical_slug_for_slug(actual_canonical_slug),
-                    stored_canonical_slug
-                )
-        return sluglist.canonical_slug
+            if stored_canonical_slug != actual_canonical_slug:
+                # This show has gotten a new name
+                try:
+                    sluglist.canonical_slug = actual_canonical_slug
+                except SlugAlreadyInUse as e:
+                    # Another show is using the slug this show is trying to use
+                    # Notify radioteknisk
+                    logger.critical(
+                        "The slug %s is already in use by another show (%s)"
+                        ". Falling back to previous slug, %s. "
+                        "Pick another name for the show; you may confuse "
+                        "listeners.",
+                        actual_canonical_slug,
+                        e,
+                        stored_canonical_slug
+                    )
+            sluglist.commit()
+            return sluglist.digas_id, sluglist.canonical_slug
 
-    except NoSuchSlug:
-        # There is no record of this slug in the database.
-        # Is it an actual slug for a show, or is this a 404?
-        digas_id = get_show_with_slug(slug)
+        except NoSuchSlug:
+            # There is no record of this slug in the database.
+            # Is it an actual slug for a show, or is this a 404?
+            digas_id = get_show_with_slug(slug)
 
-        # No exception, so there is a show with this slug.
-        # Add it in the database.
-        sluglist = SlugList(digas_id, slug)
-        sluglist.persist()
-        return sluglist.canonical_slug
+            # No exception, so there is a show with this slug.
+            # Add it in the database.
+            sluglist = SlugList(digas_id, slug)
+            sluglist.persist()
+            sluglist.commit()
+            return sluglist.digas_id, sluglist.canonical_slug
 
     except TransactionRollbackError:
         # Someone has probably beat us to the punch
         if sluglist:
             sluglist.connection.close()
-            # Make sure the finally block won't try to commit sluglist
-            sluglist = None
         # Should we give up?
         if level >= 10:
             raise
@@ -89,13 +90,7 @@ def get_canonical_slug_for_slug(slug: str, gen: PodcastFeedGenerator, level=0) -
     except:
         if sluglist:
             sluglist.abort()
-            # Make sure sluglist isn't committed by the finally block
-            sluglist = None
         raise
-
-    finally:
-        if sluglist:
-            sluglist.commit()
 
 
 def create_slug_for(digas_id: int, gen: PodcastFeedGenerator) -> str:
@@ -108,7 +103,10 @@ def create_slug_for(digas_id: int, gen: PodcastFeedGenerator) -> str:
     Returns:
         str: The slug which the given show shall have.
     """
-    show = gen.show_source.shows[digas_id]
+    try:
+        show = gen.show_source.shows[digas_id]
+    except KeyError as e:
+        raise NoSuchShowError(digas_id) from e
     return sluggify(show.name)
 
 
