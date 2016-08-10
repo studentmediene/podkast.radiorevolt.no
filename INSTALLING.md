@@ -65,7 +65,8 @@
 A PostgreSQL database is used as a shared storage for all podcast-feed-gen
 instances. It stores information about which URLs go to what show.
 
-You only need to do this once.
+You only need to do this once per PostgreSQL server; not once per instance of
+podcast-feed-gen. That's also why it's a bit clunky.
 
 1. Set up the PostgreSQL server (Google; this varies wildly between distros).
 
