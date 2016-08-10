@@ -120,7 +120,7 @@ def create_slug_for(digas_id: int, gen: PodcastFeedGenerator) -> str:
     return sluggify(show.name)
 
 
-remove_non_word = re.compile(r"[^\w\d]|_")
+split_on_non_word = re.compile(r"(?:[^\w\d]|_)+")
 
 
 def sluggify(name: str) -> str:
@@ -132,7 +132,7 @@ def sluggify(name: str) -> str:
     Returns:
         str: name, converted into a URL- and human-friendly slug.
     """
-    return remove_non_word.sub("", name.strip().lower())
+    return "-".join([word for word in split_on_non_word.split(name.strip().lower()) if word])
 
 
 def get_show_with_slug(slug: str) -> int:
