@@ -14,7 +14,7 @@ from generator import NoSuchShowError
 logger = logging.getLogger(__name__)
 
 
-def get_canonical_slug_for_slug(slug: str, gen: PodcastFeedGenerator, level=0) -> str:
+def get_canonical_slug_for_slug(slug: str, gen: PodcastFeedGenerator, level=0, connection=None) -> str:
     """Get the slug which shall be used for the given slug.
 
     Args:
@@ -33,9 +33,11 @@ def get_canonical_slug_for_slug(slug: str, gen: PodcastFeedGenerator, level=0) -
     # Normalize
     slug = slug.strip().lower()
     sluglist = None
+    connection_provided = connection is not None
+    connection = connection or SlugList._create_connection()
     try:
         try:
-            sluglist = SlugList.from_slug(slug)
+            sluglist = SlugList.from_slug(slug, connection)
             stored_canonical_slug = sluglist.canonical_slug
             actual_canonical_slug = create_slug_for(sluglist.digas_id, gen)
 
@@ -55,27 +57,34 @@ def get_canonical_slug_for_slug(slug: str, gen: PodcastFeedGenerator, level=0) -
                         e,
                         stored_canonical_slug
                     )
-            sluglist.commit()
+            if not connection_provided:
+                sluglist.commit()
             return sluglist.digas_id, sluglist.canonical_slug
 
         except NoSuchSlug:
             # There is no record of this slug in the database.
             # Is it an actual slug for a show, or is this a 404?
             digas_id = get_show_with_slug(slug)
-
             # No exception, so there is a show with this slug.
-            # Add it in the database.
-            sluglist = SlugList(digas_id, slug)
-            sluglist.persist()
-            sluglist.commit()
+
+            try:
+                # Assuming the show already is present in the database
+                sluglist = SlugList.from_id(digas_id, connection)
+                sluglist.canonical_slug = slug
+            except NoSuchSlug:
+                # Nope, add it in the database.
+                sluglist = SlugList(digas_id, slug, connection=connection)
+                sluglist.persist()
+            if not connection_provided:
+                sluglist.commit()
             return sluglist.digas_id, sluglist.canonical_slug
 
     except TransactionRollbackError:
         # Someone has probably beat us to the punch
         if sluglist:
-            sluglist.connection.close()
+            connection.close()
         # Should we give up?
-        if level >= 10:
+        if level >= 10 or connection_provided:
             raise
         # I don't know if we need this, but randomize how long we sleep, so two
         # instances won't bash their heads against each other forever
@@ -88,8 +97,9 @@ def get_canonical_slug_for_slug(slug: str, gen: PodcastFeedGenerator, level=0) -
         )
 
     except:
-        if sluglist:
-            sluglist.abort()
+        if not connection_provided:
+            connection.rollback()
+            connection.close()
         raise
 
 

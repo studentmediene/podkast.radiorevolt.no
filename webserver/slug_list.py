@@ -42,17 +42,24 @@ class SlugList:
         Returns:
             SlugList: The SlugList that points to the given digas_id.
         """
+        connection_provided = connection is not None
         connection = connection or cls._create_connection()
-        with connection.cursor() as cursor:
-            cursor.execute(
-                "SELECT slug FROM slug_to_id WHERE digas_id = %s;",
-                (digas_id,)
-            )
-            if not cursor.rowcount:
-                raise NoSuchSlug("with digas_id = %s" % digas_id)
-            row = cursor.fetchone()
-            slug = row[0]
-        return cls.from_slug(slug)
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    "SELECT slug FROM slug_to_id WHERE digas_id = %s;",
+                    (digas_id,)
+                )
+                if not cursor.rowcount:
+                    raise NoSuchSlug("with digas_id = %s" % digas_id)
+                row = cursor.fetchone()
+                slug = row[0]
+        except:
+            if not connection_provided:
+                connection.close()
+            raise
+
+        return cls.from_slug(slug, connection)
 
     @classmethod
     def from_slug(cls, slug: str, connection=None):
@@ -69,43 +76,48 @@ class SlugList:
         Returns:
             SlugList: The SlugList which contains the given slug.
         """
+        connection_provided = connection is not None
         connection = connection or cls._create_connection()
+        try:
+            # First, find the canonical slug
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    "SELECT canonical_slug FROM slug_to_slug WHERE slug = %s",
+                    (slug,)
+                )
+                row = cursor.fetchone()
+                if row is None:
+                    raise NoSuchSlug(slug)
+                canonical_slug = row[0]
+                if canonical_slug is None:
+                    # This slug is the canonical slug
+                    canonical_slug = slug
 
-        # First, find the canonical slug
-        with connection.cursor() as cursor:
-            cursor.execute(
-                "SELECT canonical_slug FROM slug_to_slug WHERE slug = %s",
-                (slug,)
-            )
-            row = cursor.fetchone()
-            if row is None:
-                raise NoSuchSlug(slug)
-            canonical_slug = row[0]
-            if canonical_slug is None:
-                # This slug is the canonical slug
-                canonical_slug = slug
+            # Then, find all the other slugs
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    "SELECT slug FROM slug_to_slug WHERE canonical_slug = %s",
+                    (canonical_slug,)
+                )
+                if cursor.rowcount > 0:
+                    slugs = [row[0] for row in cursor.fetchall()] + [canonical_slug]
+                else:
+                    slugs = [canonical_slug]
 
-        # Then, find all the other slugs
-        with connection.cursor() as cursor:
-            cursor.execute(
-                "SELECT slug FROM slug_to_slug WHERE canonical_slug = %s",
-                (canonical_slug,)
-            )
-            if cursor.rowcount > 0:
-                slugs = [row[0] for row in cursor.fetchall()] + [canonical_slug]
-            else:
-                slugs = [canonical_slug]
+            # Finally, find the digas_id
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    "SELECT digas_id FROM slug_to_id WHERE slug = %s",
+                    (canonical_slug,)
+                )
+                digas_id = cursor.fetchone()[0]
 
-        # Finally, find the digas_id
-        with connection.cursor() as cursor:
-            cursor.execute(
-                "SELECT digas_id FROM slug_to_id WHERE slug = %s",
-                (canonical_slug,)
-            )
-            digas_id = cursor.fetchone()[0]
-
-        # Create a new instance of this class, with the data fetched from the db
-        return cls(digas_id, *slugs, connection=connection)
+            # Create a new instance of this class, with the data fetched from the db
+            return cls(digas_id, *slugs, connection=connection)
+        except:
+            if not connection_provided:
+                connection.close()
+            raise
 
     @property
     def canonical_slug(self):

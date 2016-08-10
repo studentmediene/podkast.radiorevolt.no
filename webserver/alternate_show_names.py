@@ -5,7 +5,7 @@
 # 1. Add a line in the dictionary which looks like:
 #   "old_slug": digas_id,
 #          - OR -
-#   "old_slug": "new_slug"
+#   "old_slug": "current_slug"
 
 # 2. Repeat step 1 for each old URL you want to import.
 
@@ -87,26 +87,50 @@ ALTERNATE_ALL_EPISODES_FEED_NAME = {
 }
 
 
-def get_sluglist(id_or_slug, sluglist_cls):
+def get_sluglist(id_or_slug, sluglist_cls, connection):
     if isinstance(id_or_slug, int):
         # Is id
-        return sluglist_cls.from_id(id_or_slug)
+        return sluglist_cls.from_id(id_or_slug, connection)
     else:
         # Is slug
-        return sluglist_cls.from_slug(id_or_slug.lower().strip())
+        return sluglist_cls.from_slug(id_or_slug.lower().strip(), connection)
 
 
 def populate_url_service():
     from .slug_list import SlugList
+    from . import url_service
     from webserver.no_such_slug import NoSuchSlug
+    from generator.generate_feed import PodcastFeedGenerator
+
+    gen = PodcastFeedGenerator(quiet=True)
+
     for slug, target in ALTERNATE_SHOW_NAMES.items():
+        slug = slug.lower().strip()
+        if isinstance(target, str):
+            target = target.lower().strip()
+        connection = SlugList._create_connection()
         try:
-            sl = get_sluglist(target, SlugList)
-            sl.prepend(slug.lower().strip())
+            sl = get_sluglist(target, SlugList, connection=connection)
+            sl.prepend(slug)
             sl.commit()
         except NoSuchSlug:
-            print("Id or slug %s not found in database. Try running \n"
-                  "py.test webserver/test_rr_url.py\n to populate the db.")
+            if isinstance(target, int):
+                canonical_slug = url_service.create_slug_for(target, gen)
+                if canonical_slug == slug:
+                    sl = SlugList(target, slug, connection=connection)
+                else:
+                    sl = SlugList(target, slug, canonical_slug, connection=connection)
+                sl.persist()
+                sl.commit()
+            else:
+                url_service.get_canonical_slug_for_slug(target, gen, connection=connection)
+                sl = SlugList.from_slug(target, connection)
+                sl.prepend(slug)
+                sl.commit()
+        except:
+            connection.close()
+            raise
+
 
 if __name__ == '__main__':
     populate_url_service()

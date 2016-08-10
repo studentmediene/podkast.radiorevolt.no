@@ -83,10 +83,6 @@ podcast-feed-gen. That's also why it's a bit clunky.
    > exit()
    ```
 
-4. Populate by running:
-
-   `py.test webserver/test_api.py`
-
 5. Populate with old urls by running:
 
    `python -m webserver.alternate_show_names`
