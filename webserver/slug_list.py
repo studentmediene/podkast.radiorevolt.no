@@ -248,6 +248,45 @@ class SlugList:
         # If we got here, we are successful.
         self.slugs.append(new_slug)
 
+    def prepend(self, new_slug: str):
+        """
+        Add new_slug before canonical_slug, thus making it redirect to this
+        list's canonical slug.
+
+        Can only be called on a SlugList which has been inserted into the
+        database.
+
+        Args:
+            new_slug (str): Slug which shall redirect to canonical_slug.
+
+        Raises:
+            SlugAlreadyInUse: If the slug is already in use by another list.
+                You will need to start the transaction over if this occurs,
+                by calling abort() and creating the SlugList anew.
+        """
+        if new_slug in self.slugs:
+            # Our job here is done
+            return
+
+        try:
+            with self._create_cursor() as cursor:
+                cursor.execute(
+                    """
+                    INSERT INTO slug_to_slug
+                      (slug, canonical_slug)
+                    VALUES
+                      (%(new_slug)s, %(can_slug)s);
+                    """,
+                    {'new_slug': new_slug, 'can_slug': self.canonical_slug}
+                )
+                if not cursor.rowcount:
+                    raise RuntimeError("Query did not insert anything (%s)" %
+                                       cursor.query)
+        except psycopg2.IntegrityError as e:
+            raise SlugAlreadyInUse(new_slug) from e
+        # We were successful
+        self.slugs.insert(-1, new_slug)
+
     @classmethod
     def _create_connection(cls) -> psycopg2.extensions.connection:
         """
