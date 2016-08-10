@@ -4,5 +4,9 @@ flask
 shortuuid
 # Our own webserver
 mod_wsgi
+# Image manipulation
+Pillow
+# Database connection (for SlugList)
+psycopg2
 # We will need to use the generator, so install its dependencies
 -r ../generator/requirements.txt

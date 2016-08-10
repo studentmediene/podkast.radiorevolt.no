@@ -6,7 +6,7 @@ import tempfile
 def save_feed_to_file(feed, target_file):
     with tempfile.NamedTemporaryFile(delete=False) as fp:
         tempname = fp.name
-        fp.write(feed)
+        fp.write(feed.encode("UTF-8"))
     os.replace(tempname, target_file)
 
 
@@ -78,7 +78,7 @@ def main():
 
     filenames = dict()
     for show_id, show in chosen_shows_dict.items():
-        show_title = show.title
+        show_title = show.name
         # Find the filename
         # Use list of tuples to ensure the last item is actually replaced last
         replacements = [("%T", show_title), ("%t", show_title.lower()), ("%i", str(show_id)), ("%%", "%")]

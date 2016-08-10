@@ -32,7 +32,7 @@ class ShowMetadataSource(metaclass=ABCMeta):
         Returns:
             bool: True if this metadata source has metadata for the provided show, False otherwise.
         """
-        return show.show_id not in self.bypass
+        return show.id not in self.bypass
 
     @abstractmethod
     def populate(self, show) -> None:

@@ -19,7 +19,7 @@ def main():
 
     program = PodcastFeedGenerator(pretty_xml=pretty, quiet=quiet)
     feed = program.generate_feed_with_all_episodes()
-    print(feed.decode('UTF-8'))
+    print(feed)
 
 if __name__ == '__main__':
     main()

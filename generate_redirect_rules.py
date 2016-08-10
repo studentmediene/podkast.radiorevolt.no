@@ -4,6 +4,7 @@ import re
 from generator.show_source import ShowSource
 from generator.episode_source import EpisodeSource
 from generator.no_episodes_error import NoEpisodesError
+import requests
 
 try:
     from webserver import feed_server
@@ -52,9 +53,9 @@ def get_redirect_rule(show, old_url: str, is_temporary: bool) -> str:
     rule = ""
 
     old_url = old_url\
-        .replace("%i", str(show.show_id))\
+        .replace("%i", str(show.id))\
         .replace("%s", feed_server.get_feed_slug(show))\
-        .replace("%t", show.title)
+        .replace("%t", show.name)
     if "?" in old_url:
         # The URL uses a query string, so we must add rules about that
         query_string_start = old_url.find("?")
@@ -71,39 +72,39 @@ def get_redirect_rule(show, old_url: str, is_temporary: bool) -> str:
     return rule
 
 
-def get_shows(get_all: bool) -> list:
+def get_shows(get_all: bool, es: EpisodeSource) -> list:
     """
     Get a list of Show objects.
 
     Args:
         get_all (bool): Set to True to return ALL shows. Defaults to returning shows with published episodes.
+        es (EpisodeSource): The EpisodeSource which shall be used.
 
     Returns:
         list: List of Show objects.
     """
-    show_source = ShowSource()
+    show_source = ShowSource(es.requests)
     all_shows = show_source.shows.values()
     if get_all:
         return all_shows
     else:
         return [show for show in all_shows
-                if has_episodes(show)]
+                if has_episodes(show, es)]
 
 
-def has_episodes(show) -> bool:
+def has_episodes(show, es: EpisodeSource) -> bool:
     """
     Test if the given Show has any published episodes.
 
     Args:
         show (Show): Show which shall be tested.
+        es (EpisodeSource): The EpisodeSource to be used.
 
     Returns:
         bool: True if show has episodes, False otherwise.
     """
     try:
-        episode_source = EpisodeSource(show)
-        episode_source.populate_episodes()
-        return True
+        return len(es._get_episode_data(show))
     except NoEpisodesError:
         return False
 
@@ -129,7 +130,11 @@ def main():
     is_temporary = args.temporary
     include_load_rules = args.load_module
 
-    EpisodeSource.populate_all_episodes_list()
+    requests_session = requests.Session()
+    requests_session.headers['User-Agent'] = "podcast-feed-gen"
+    es = EpisodeSource(requests_session)
+
+    es.populate_all_episodes_list()
 
     rules = list()
 
@@ -143,7 +148,7 @@ def main():
     feed_server.app.config['SERVER_NAME'] = new_url
     with feed_server.app.app_context():
         rules.extend([get_redirect_rule(show, old_url, is_temporary)
-                      for show in get_shows(get_all_shows)])
+                      for show in get_shows(get_all_shows, es)])
     print("\n".join(rules))
 
 if __name__ == '__main__':
