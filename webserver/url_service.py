@@ -11,11 +11,13 @@ from generator import NoSuchShowError
 logger = logging.getLogger(__name__)
 
 
-def get_canonical_slug_for_slug(slug: str) -> str:
+def get_canonical_slug_for_slug(slug: str, gen: PodcastFeedGenerator) -> str:
     """Get the slug which shall be used for the given slug.
 
     Args:
         slug (str): The slug which we shall find the canonical slug for.
+        gen (PodcastFeedGenerator): Instance used to query for the show's
+            actual name.
 
     Returns:
         str: The canonical slug which should be used (instead of the given
@@ -31,7 +33,7 @@ def get_canonical_slug_for_slug(slug: str) -> str:
     try:
         sluglist = SlugList.from_slug(slug)
         stored_canonical_slug = sluglist.canonical_slug
-        actual_canonical_slug = create_slug_for(sluglist.digas_id)
+        actual_canonical_slug = create_slug_for(sluglist.digas_id, gen)
 
         if stored_canonical_slug != actual_canonical_slug:
             # This show has gotten a new name
@@ -71,16 +73,16 @@ def get_canonical_slug_for_slug(slug: str) -> str:
             sluglist.commit()
 
 
-def create_slug_for(digas_id: int) -> str:
+def create_slug_for(digas_id: int, gen: PodcastFeedGenerator) -> str:
     """Create slug for the given show, using the show's name.
 
     Args:
         digas_id (int): The Digas ID of the show we shall create the slug for.
+        gen (PodcastFeedGenerator): Instance used to query for the show's name.
 
     Returns:
         str: The slug which the given show shall have.
     """
-    gen = PodcastFeedGenerator(quiet=True)
     show = gen.show_source.shows[digas_id]
     return sluggify(show.name)
 
