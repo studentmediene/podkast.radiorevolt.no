@@ -1,15 +1,26 @@
-# Define custom URLs for some shows
-# The URL slug to match is the key (without slashes).
-# The new URL slug (without slashes) or the DigAS ID is the value.
-# NOTE: None of those are case-sensitive.
-# NOTE: When a program changes its name, add an entry with the old name without spaces and the new name without spaces.
-# This way, old links will continue to work even after the name change.
-# WARNING: Make sure you don't create a cycle (ie. "example": "example" or "example": "example2", "example2": "example")
-# Such endless loops result in a 500 Internal Server Error when triggered.
+# This dictionary is not used during normal operation.
+# However, you can use it to import earlier urls into podcast-feed-gen.
 
-# !!!VERY IMPORTANT!!!: You MUST update test_rr_url.py and run py.test before moving any changes to production!!!
-# This way, you can be absolutely sure that you don't break anyone's feed.
+# HOW TO USE:
+# 1. Add a line in the dictionary which looks like:
+#   "old_slug": digas_id,
+#          - OR -
+#   "old_slug": "current_slug"
 
+# 2. Repeat step 1 for each old URL you want to import.
+
+# 3. While you're in the parent directory (relative to this file), run:
+
+#   python -m webserver.alternate_show_names
+
+# 4. Confirm that this works by visiting the URLs in a browser while running the
+#    server. Note that they are case insensitive.
+
+# WARNING: Once you've put podcast-feed-gen into production, you won't need to
+# add changes here. Instead, changes in show name are noticed and taken care of,
+# ensuring that all old URLs work. YOU DO NOT NEED TO CARE ABOUT
+# ALTERNATE_SHOW_NAMES, EXCEPT WHEN NEEDING TO ADD OLD URLS WHEN SETTING UP
+# PODCAST-FEED-GEN!!!
 ALTERNATE_SHOW_NAMES = {
     # The following entries are specific for Radio Revolt. Remove them if you're not from Radio Revolt.
     # Compatibility with existing podcast URLs (not all are needed, but they're listed here so we know about them)
@@ -74,3 +85,52 @@ ALTERNATE_ALL_EPISODES_FEED_NAME = {
     "allepisodes",
     "*",
 }
+
+
+def get_sluglist(id_or_slug, sluglist_cls, connection):
+    if isinstance(id_or_slug, int):
+        # Is id
+        return sluglist_cls.from_id(id_or_slug, connection)
+    else:
+        # Is slug
+        return sluglist_cls.from_slug(id_or_slug.lower().strip(), connection)
+
+
+def populate_url_service():
+    from .slug_list import SlugList
+    from . import url_service
+    from webserver.no_such_slug import NoSuchSlug
+    from generator.generate_feed import PodcastFeedGenerator
+
+    gen = PodcastFeedGenerator(quiet=True)
+
+    for slug, target in ALTERNATE_SHOW_NAMES.items():
+        slug = slug.lower().strip()
+        if isinstance(target, str):
+            target = target.lower().strip()
+        connection = SlugList._create_connection()
+        try:
+            sl = get_sluglist(target, SlugList, connection=connection)
+            sl.prepend(slug)
+            sl.commit()
+        except NoSuchSlug:
+            if isinstance(target, int):
+                canonical_slug = url_service.create_slug_for(target, gen)
+                if canonical_slug == slug:
+                    sl = SlugList(target, slug, connection=connection)
+                else:
+                    sl = SlugList(target, slug, canonical_slug, connection=connection)
+                sl.persist()
+                sl.commit()
+            else:
+                url_service.get_canonical_slug_for_slug(target, gen, connection=connection)
+                sl = SlugList.from_slug(target, connection)
+                sl.prepend(slug)
+                sl.commit()
+        except:
+            connection.close()
+            raise
+
+
+if __name__ == '__main__':
+    populate_url_service()

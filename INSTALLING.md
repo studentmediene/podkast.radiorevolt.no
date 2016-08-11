@@ -15,6 +15,8 @@
 
     * apache2-bin
     * apache2-dev
+    * libpq-dev
+    * python3-dev
 
     And for image manipulation:
 
@@ -55,6 +57,38 @@
 
 5. Copy `generator/settings_template.py` to `generator/settings.py` and fill in settings.
 6. Do the same with `webserver/settings_template.py` if you intend to use the provided web server.
+7. If you haven't already, you'll need to set up a PostgreSQL server, user and
+   database (again, if you'll use the provided web server).
+
+### Initializing database ###
+
+A PostgreSQL database is used as a shared storage for all podcast-feed-gen
+instances. It stores information about which URLs go to what show.
+
+You only need to do this once per PostgreSQL server; not once per instance of
+podcast-feed-gen. That's also why it's a bit clunky.
+
+1. Set up the PostgreSQL server (Google; this varies wildly between distros).
+
+   This includes setting up a user and database which podcast-feed-gen can use.
+   You may also need to open up your firewall so the hosts which podcast-feed-gen
+   runs on, can access the database.
+2. Populate `webserver/settings.py` with the connection details.
+3. Set up all tables by running:
+
+   ```
+   python
+   > from webserver.slug_list import SlugList
+   > SlugList.init_db()
+   > exit()
+   ```
+
+5. Populate with old urls by running:
+
+   `python -m webserver.alternate_show_names`
+
+6. The database should contain everything it needs by now. From here on out, it
+   will be used to keep all URLs working.
 
 
 ### Deploying to Apache ###
@@ -141,7 +175,7 @@
     To check it: run `screen -r` to reattach yourself. You may then detach again if it's not done, or exit if it's done.
 
 
-11. When `calculate_durations.py` and `resize_images.py` is done running the first time, add it to crontab so it runs every 30 minutes.
+11. When `calculate_durations.py` and `resize_images.py` is done running the first time, add it to crontab so it runs every 30 minutes or more often.
 
     1. Copy `run_calculate_durations_template.sh` and save it as `run_calculate_durations.sh`.
     2. Copy `run_resize_images_template.sh` and save it as `run_resize_images.sh`.

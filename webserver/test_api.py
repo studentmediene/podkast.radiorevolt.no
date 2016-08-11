@@ -1,6 +1,5 @@
 import pytest
-from . import feed_server, settings
-from .alternate_show_names import ALTERNATE_SHOW_NAMES
+from . import feed_server
 from generator import show_source as source
 import urllib.parse
 import requests
@@ -34,17 +33,9 @@ def test_api_url_help():
     assert "/api/url/" in data
 
 
-def get_test_params_for_url():
-    params = list(ALTERNATE_SHOW_NAMES.keys())
-    params = params[:min(len(params), 10)]
-    shows = show_ids()
-    params.extend(shows[:min(len(shows), 10)])
-    return params
-
-
-@pytest.fixture(params=get_test_params_for_url())
+@pytest.fixture(params=show_ids())
 def slug(request):
-    """Test with max 10 DigAS IDs and max 10 keys from SHOW_CUSTOM_URL."""
+    """Test with max 10 DigAS IDs."""
     return request.param
 
 
@@ -57,6 +48,8 @@ def test_api_url_works(slug):
 
 def test_api_url_not_found():
     res = tester.get("/api/url/thisdoesnotexist")
+    assert res.status_code == 404
+    res = tester.get("/api/url/404040")
     assert res.status_code == 404
 
 
