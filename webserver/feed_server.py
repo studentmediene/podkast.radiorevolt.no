@@ -33,6 +33,11 @@ def ignore_get():
         return redirect(request.base_url, 301)
 
 
+@app.route('/favicon.ico')
+def redirect_to_favicon():
+    return redirect(url_for('static', filename="favicon.ico"))
+
+
 @app.route('/all')
 def output_all_feed():
     gen = PodcastFeedGenerator(quiet=True, xslt=xslt_url(), pretty_xml=True)
