@@ -19,7 +19,7 @@ class ShowSource:
     @cached_property
     def shows(self):
         """dict: Dictionary with all shows, with their DigAS ID as key and Show instance as value."""
-        self.last_fetched = datetime.datetime.utcnow()
+        self.last_fetched = datetime.datetime.now(datetime.timezone.utc)
         return self._get_all_shows()
 
     def _get_all_shows(self) -> dict:
