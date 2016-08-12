@@ -1,4 +1,6 @@
 import argparse
+import logging
+
 import os.path
 from generator.generate_feed import PodcastFeedGenerator
 import tempfile
@@ -36,6 +38,10 @@ def parse_cli_arguments():
 
 
 def main():
+    # Don't write the same message over and over and over and over
+    logging.getLogger("generator.generate_feed")\
+        .addFilter(lambda record: record.msg != "Finding show metadata...")
+
     parser, args = parse_cli_arguments()
     target_dir = args.target_dir
     naming_scheme = args.naming_scheme
