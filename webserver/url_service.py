@@ -48,7 +48,7 @@ def get_canonical_slug_for_slug(slug: str, gen: PodcastFeedGenerator, level=0, c
                 except SlugAlreadyInUse as e:
                     # Another show is using the slug this show is trying to use
                     # Notify radioteknisk
-                    logger.critical(
+                    logger.error(
                         "The slug %s is already in use by another show (%s)"
                         ". Falling back to previous slug, %s. "
                         "Pick another name for the show; you may confuse "
