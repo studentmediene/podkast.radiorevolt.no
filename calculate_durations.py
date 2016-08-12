@@ -8,6 +8,7 @@ from sys import stderr
 import random
 from podgen import Media
 import logging
+from clint.textui import progress
 
 logger = logging.getLogger(__name__)
 
@@ -103,45 +104,48 @@ def main():
 
     threads = list()
     run_constraint = BoundedSemaphore(num_threads)
-    try:
-        for episode in episodes_without_duration:
-            run_constraint.acquire()
-            threads.append(Thread(target=fetch_duration,
-                                  kwargs={"episode": episode, "es": es,
-                                          "total": num_episodes, "constrain": run_constraint}))
-            threads[-1].start()
+    with progress.Bar(expected_size=num_episodes) as progressbar:
+        try:
+            for episode in episodes_without_duration:
+                run_constraint.acquire()
+                threads.append(Thread(target=fetch_duration,
+                                      kwargs={"episode": episode, "es": es,
+                                              "total": num_episodes, "constrain": run_constraint,
+                                              "progressbar": progressbar}))
+                threads[-1].start()
 
-        for thread in threads:
-            thread.join()
-    except KeyboardInterrupt:
-        logger.warning("Interrupted by user. Exiting and cleaning up. All %s "
-                       "downloads that have been started, will be allowed to "
-                       "finish. Please wait, this could take several "
-                       "minutes...", num_threads)
-        settings.CANCEL.set()
-        for thread in threads:
-            try:
+            for thread in threads:
                 thread.join()
-            except RuntimeError:
-                # The thread may never have been started
-                pass
+        except KeyboardInterrupt:
+            logger.warning("Interrupted by user. Exiting and cleaning up. All %s "
+                           "downloads that have been started, will be allowed to "
+                           "finish. Please wait, this could take several "
+                           "minutes...", num_threads)
+            settings.CANCEL.set()
+            for thread in threads:
+                try:
+                    thread.join()
+                except RuntimeError:
+                    # The thread may never have been started
+                    pass
     logger.info("Done.")
 
 
-def fetch_duration(episode, es, total, constrain):
+def fetch_duration(episode, es, total, constrain, progressbar):
     media = es.media_load(episode.media.url)
     if not media.duration or not media.size:
         episode.media = Media.create_from_server_response(media.url, requests_=es.requests)
         episode.media.fetch_duration()
         es.media_save(episode.media)
-    print_progress(episode, total)
+    print_progress(episode, total, progressbar)
     constrain.release()
 
 
-def print_progress(episode, total):
+def print_progress(episode, total, progressbar):
     global done_episodes
     done_episodes += 1
     logger.debug("{i:04}/{total:04}: {title} done!".format(i=done_episodes, total=total, title=episode.title))
+    progressbar.show(done_episodes)
 
 
 if __name__ == '__main__':

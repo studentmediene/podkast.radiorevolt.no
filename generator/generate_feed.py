@@ -1,4 +1,3 @@
-import traceback
 import logging
 
 from .metadata_sources.skip_episode import SkipEpisode
@@ -12,6 +11,7 @@ from . import settings as SETTINGS
 import requests
 
 from cached_property import cached_property
+from clint.textui import progress
 
 import sys
 import re
@@ -139,9 +139,8 @@ class PodcastFeedGenerator:
         self._prepare_for_batch(es)
 
         feeds = dict()
-        for show in shows:
-            # TODO: Implement progress bar
-            # Update progress bar
+        for show in progress.bar(shows):
+            # Also log progress
             i += 1
             logger.debug("{0: <60} ({1:03}/{2:03})".format(show.name, i, num_shows))
             try:
@@ -193,9 +192,7 @@ class PodcastFeedGenerator:
         episodes = [es.episode(self.show_source.shows[ep['program_defnr']], ep)
                     for ep in es.all_episodes if ep['program_defnr'] != 0]
         # Populate metadata
-        # TODO: Implement progress bar
-        progress_n = len(episodes)
-        for i, episode in enumerate(episodes):
+        for episode in progress.bar(episodes):
             logger.debug("Populating episode %s (from %s)", episode.title,
                          episode.show.name)
             try:
