@@ -135,6 +135,8 @@ class PodcastFeedGenerator:
         num_shows = len(shows)
         i = 0
 
+        logger.info("Generating %s feeds in batch", num_shows)
+
         # Ensure we only download list of episodes once
         logger.info("Downloading metadata, this could take a while...")
         es = EpisodeSource(self.requests)
