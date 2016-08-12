@@ -38,6 +38,7 @@ def get_canonical_slug_for_slug(slug: str, gen: PodcastFeedGenerator, level=0, c
     try:
         try:
             sluglist = SlugList.from_slug(slug, connection)
+            invalidate_list_of_shows_if_old(gen, sluglist)
             stored_canonical_slug = sluglist.canonical_slug
             actual_canonical_slug = create_slug_for(sluglist.digas_id, gen)
 
@@ -115,6 +116,24 @@ def get_canonical_slug_for_slug(slug: str, gen: PodcastFeedGenerator, level=0, c
             connection.rollback()
             connection.close()
         raise
+
+
+def invalidate_list_of_shows_if_old(
+        gen: PodcastFeedGenerator,
+        sluglist: SlugList
+):
+    fetched_at = gen.show_source.last_fetched
+    last_modified_at = sluglist.last_modified
+
+    if fetched_at is None:
+        return
+
+    if fetched_at < last_modified_at:
+        if gen.show_source.get_show_names:
+            del gen.show_source.get_show_names
+        if gen.show_source.shows:
+            del gen.show_source.shows
+    return
 
 
 def create_slug_for(digas_id: int, gen: PodcastFeedGenerator) -> str:
