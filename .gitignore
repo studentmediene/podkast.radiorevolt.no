@@ -191,3 +191,5 @@ run_resize_logos.sh
 # Local images
 webserver/static/images/*
 !webserver/static/images/.keep
+# Rotated log files
+*.log.*.gz
