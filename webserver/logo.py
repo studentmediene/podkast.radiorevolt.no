@@ -14,6 +14,7 @@ from generator.no_episodes_error import NoEpisodesError
 import sys
 import traceback
 from cached_property import cached_property
+from clint.textui import progress
 
 
 logger = logging.getLogger(__name__)
@@ -259,21 +260,15 @@ class LocalImage:
         num_images = len(show_image_tuples)
 
         if not num_images:
-            if not quiet:
-                print("There are no images to process.", file=sys.stderr)
+            logger.info("There are no images to process.")
             return
 
-        if not quiet:
-            def print_progress(i, show):
-                print("Processing image {i:02}/{n:02}: {show.name}".format(i=i + 1, n=num_images, show=show),
-                      file=sys.stderr)
-        else:
-            def print_progress(*args, **kwargs):
-                pass  # no-op
+        logger.info("Creating local copies of %s images.", num_images)
 
-        for i, item in enumerate(show_image_tuples):
+        for item in progress.bar(show_image_tuples,
+                                 hide=True if quiet else None):
             show, image = item
-            print_progress(i, show)
+            logger.debug("Processing image for %(show)s", {"show": show.name})
             try:
                 image.create_local_copy()
             except (IOError, ImageIsTooSmall, RuntimeError):
