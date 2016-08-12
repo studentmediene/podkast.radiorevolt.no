@@ -66,8 +66,6 @@ class Show(Podcast):
         # Are the metadata sources of the right type?
         for source in metadata_sources:
             assert isinstance(source, EpisodeMetadataSource), "%r is not a subclass of EpisodeMetadataSource." % source
-        if not SETTINGS.QUIET:
-            print("Processing episodes...            ", file=sys.stderr, end="\r")
         self.progress_n = len(episode_source.episode_list(self))
         if self.progress_n == 1:
             # add the single episode, but ignore SkipEpisode
@@ -79,9 +77,11 @@ class Show(Podcast):
                     except SkipEpisode:
                         pass
             self.add_episode(episode)
-            self._progress_increment()
         else:
             for episode in episode_source.episode_list(self):
+                logger.debug(
+                    "Processing episode %(episodename)s (from %(showname)s)",
+                    {'episodename': episode.title, 'showname': episode.show.name})
                 try:
                     # Let each metadata source provide metadata, if they have it
                     for source in metadata_sources:
@@ -89,22 +89,11 @@ class Show(Podcast):
                             source.populate(episode)
                 except SkipEpisode as e:
                     # Don't add this episode to the feed
-                    if not SETTINGS.QUIET:
-                        exc_type, exc_value, exc_traceback = sys.exc_info()
-                        cause = traceback.extract_tb(exc_traceback, 2)[1][0]
-                        logger.info("Skipping episode named %(name)s\n    URL: \"%(url)s\"\n    Caused by %(cause)s\n"
-                              , {"name": episode.title, "url": episode.sound_url, "cause": cause})
-
-                    self._progress_increment()
+                    logger.info(
+                        "Skipping episode named %(name)s (URL: \"%(url)s\")",
+                        {"name": episode.title, "url": episode.sound_url},
+                        exc_info=True
+                    )
                     continue
                 # Add this episode to the feed
                 self.add_episode(episode)
-                self._progress_increment()
-
-    def _progress_increment(self):
-        if not SETTINGS.QUIET:
-            self.progress_i += 1
-            print(
-                "Processed episode {0} of {1}                    ".format(self.progress_i, self.progress_n),
-                file=sys.stderr, end="\r"
-            )

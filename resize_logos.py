@@ -1,6 +1,7 @@
 import argparse
 import sys
 from generator.generate_feed import PodcastFeedGenerator
+from generator import set_up_logger
 import traceback
 
 try:
@@ -28,6 +29,8 @@ def parse_cli_arguments() -> (argparse.ArgumentParser, argparse.Namespace):
 def main():
     parser, args = parse_cli_arguments()
     quiet = args.quiet
+    if quiet:
+        set_up_logger.quiet()
     force = args.force
     require_episodes = args.require_episodes
 

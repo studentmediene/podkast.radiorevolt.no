@@ -33,8 +33,10 @@ class BaseManualChanges(metaclass=ABCMeta):
 
     @cached_property
     def data(self):
+        f = None
         try:
-            return json.load(open(self._config_file))
+            f = open(self._config_file)
+            return json.load(f)
         except IOError:
             logger.exception("%s is added as a metadata source, but the configuration file "
                              "%s could not be loaded.",
@@ -49,6 +51,9 @@ class BaseManualChanges(metaclass=ABCMeta):
                          "Ensure the setting %s is set for METADATA_SOURCE['ManualChanges'] "
                          "in %s.", self._source_name, self._config_file_settings_key, path)
             return None
+        finally:
+            if f:
+                f.close()
 
     def accepts(self, obj) -> bool:
         try:

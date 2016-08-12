@@ -10,7 +10,6 @@ __all__ = [
     "DEFAULT_WEBSITE",
     "URL_REDIRECTION_SOUND_URL",
     "URL_REDIRECTION_ARTICLE_URL",
-    "QUIET",
     "CANCEL",
     "SHOW_SOURCE",
     "EPISODE_SOURCE",
@@ -63,8 +62,6 @@ ALL_EPISODES_FEED_TITLE = "All podcast episodes from Example Radio"
 URL_REDIRECTION_SOUND_URL = None
 URL_REDIRECTION_ARTICLE_URL = None
 
-# Determines whether progress information should be printed. Modified by command line options.
-QUIET = True
 # Do not modify
 CANCEL = threading.Event()
 

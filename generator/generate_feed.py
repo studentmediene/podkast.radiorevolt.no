@@ -2,7 +2,7 @@ import traceback
 import logging
 
 from .metadata_sources.skip_episode import SkipEpisode
-from . import metadata_sources
+from . import metadata_sources, set_up_logger
 from .episode_source import EpisodeSource
 from . import Show
 from .show_source import ShowSource
@@ -15,6 +15,7 @@ from cached_property import cached_property
 
 import sys
 import re
+import datetime
 
 
 logger = logging.getLogger(__name__)
@@ -30,9 +31,12 @@ class PodcastFeedGenerator:
         self.pretty_xml = pretty_xml
         self.re_remove_chars = re.compile(r"[^\w\d]|_")
 
+        self.created = datetime.datetime.utcnow()
+
         self.xslt = xslt
 
-        SETTINGS.QUIET = quiet
+        if quiet:
+            set_up_logger.quiet()
 
     @staticmethod
     def register_redirect_services(sound_redirect, article_redirect):
@@ -100,8 +104,7 @@ class PodcastFeedGenerator:
         """
 
         # Populate show with more metadata
-        if not SETTINGS.QUIET:
-            print("Finding show metadata...", end="\r", file=sys.stderr)
+        logger.info("Finding show metadata...")
         self.populate_show_metadata(show, enable_skip_show)
         show.xslt = self.xslt
 
@@ -131,18 +134,16 @@ class PodcastFeedGenerator:
         i = 0
 
         # Ensure we only download list of episodes once
-        if not SETTINGS.QUIET:
-            print("Downloading metadata, this could take a while...", file=sys.stderr)
+        logger.info("Downloading metadata, this could take a while...")
         es = EpisodeSource(self.requests)
         self._prepare_for_batch(es)
 
         feeds = dict()
         for show in shows:
-            if not SETTINGS.QUIET:
-                # Update progress bar
-                i += 1
-                print("{0: <60} ({1:03}/{2:03})".format(show.name, i, num_shows),
-                      file=sys.stderr)
+            # TODO: Implement progress bar
+            # Update progress bar
+            i += 1
+            logger.debug("{0: <60} ({1:03}/{2:03})".format(show.name, i, num_shows))
             try:
                 # Do the job
                 feeds[show.id] = self._generate_feed(show, episode_source=es)
@@ -150,9 +151,11 @@ class PodcastFeedGenerator:
                 # Skip this show
                 pass
 
+        logger.info("Done creating the feeds.")
         return feeds
 
     def _prepare_for_batch(self, es):
+        logger.debug("Preparing for processing multiple shows")
         es.populate_all_episodes_list()
         for source in self.episode_metadata_sources:
             source.prepare_batch()
@@ -179,7 +182,7 @@ class PodcastFeedGenerator:
                         raise e
                     else:
                         # We're not skipping this show, just go on...
-                        pass
+                        logger.debug("Ignoring SkipShow", exc_info=True)
 
     def generate_feed_with_all_episodes(self, title=None):
         show = Show(name=title or SETTINGS.ALL_EPISODES_FEED_TITLE, id=0)
@@ -190,22 +193,21 @@ class PodcastFeedGenerator:
         episodes = [es.episode(self.show_source.shows[ep['program_defnr']], ep)
                     for ep in es.all_episodes if ep['program_defnr'] != 0]
         # Populate metadata
+        # TODO: Implement progress bar
         progress_n = len(episodes)
         for i, episode in enumerate(episodes):
-            if not SETTINGS.QUIET:
-                print("Populating episode {i} out of {n}".format(i=i, n=progress_n), end="\r", file=sys.stderr)
+            logger.debug("Populating episode %s (from %s)", episode.title,
+                         episode.show.name)
             try:
                 for source in self.episode_metadata_sources:
                     if source.accepts(episode):
                         source.populate(episode)
             except SkipEpisode:
-                if not SETTINGS.QUIET:
-                    exc_type, exc_value, exc_traceback = sys.exc_info()
-                    cause = traceback.extract_tb(exc_traceback, 2)[1][0]
-                    logger.info("Skipping episode named %(name)s\n    "
-                                "URL: \"%(url)s\"\n    Caused by %(cause)s\n" ,
-                                {"name": episode.title, "url": episode.media.url,
-                                 "cause": cause})
+                logger.info(
+                    "Skipping episode named %(name)s (URL: \"%(url)s\")",
+                    {"name": episode.title, "url": episode.media.url},
+                    exc_info=True
+                )
                 continue
             show.add_episode(episode)
 

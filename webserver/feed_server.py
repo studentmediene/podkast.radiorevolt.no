@@ -1,3 +1,4 @@
+from generator import set_up_logger
 import base64
 
 import hashlib
@@ -13,9 +14,75 @@ import sqlite3
 from werkzeug.contrib.fixers import ProxyFix
 import urllib.parse
 import os.path
+import logging
 
+
+# Set up logging so all log messages include request information
+class ContextFilter(logging.Filter):
+    # Inject request information into the record
+    def filter(self, record):
+        if request:
+            record.method = request.method
+            record.path = request.path
+            record.ip = request.remote_addr
+            record.agent_platform = request.user_agent.platform
+            record.agent_browser = request.user_agent.browser
+            record.agent_browser_version = request.user_agent.version
+            record.agent = request.user_agent.string
+        else:
+            record.method = "Outside of request context (before first request?)"
+            record.path = ""
+            record.ip = ""
+            record.agent_platform = ""
+            record.agent_browser = ""
+            record.agent_browser_version = ""
+            record.agent = ""
+        return True
+
+
+class SkipSameUrl(logging.Filter):
+    def __init__(self):
+        super().__init__()
+        self.paths = dict()
+
+    def filter(self, record):
+        if request:
+            if record.getMessage() in self.paths.setdefault(request.path, set()):
+                return False
+            else:
+                self.paths[request.path].add(record.getMessage())
+                return True
+        else:
+            return True
+
+# Format the message so that the extra information is outputted
+log_formatter = logging.Formatter(fmt="""\
+================================================================================
+%(levelname)s while running the web server
+    at %(asctime)s
+    in %(pathname)s at line %(lineno)s
+    PID: %(process)s, thread: %(thread)s, logger: %(name)s
+
+    Request:   %(method)s %(path)s
+    IP:        %(ip)s
+    Agent:     %(agent_platform)s | %(agent_browser)s %(agent_browser_version)s
+    Raw Agent: %(agent)s
+
+%(message)s
+"""
+)
+
+# Put our filter and formatter to use
+logging.getLogger("").addFilter(SkipSameUrl())
+logging.getLogger("py.warnings").addFilter(SkipSameUrl())
+set_up_logger.rotatingHandler.setFormatter(log_formatter)
+set_up_logger.rotatingHandler.addFilter(ContextFilter())
+
+# Set up flask
 app = Flask(__name__)
+# Make sure everything works when behind Apache proxy
 app.wsgi_app = ProxyFix(app.wsgi_app)
+# Set debug level to whatever the settings say
 app.debug = settings.DEBUG
 
 
