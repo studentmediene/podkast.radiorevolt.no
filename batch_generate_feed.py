@@ -5,6 +5,9 @@ import os.path
 from generator.generate_feed import PodcastFeedGenerator
 import tempfile
 
+logger = logging.getLogger(__name__)
+
+
 def save_feed_to_file(feed, target_file):
     with tempfile.NamedTemporaryFile(delete=False) as fp:
         tempname = fp.name
@@ -62,23 +65,30 @@ def main():
 
     dropped_shows = arg_shows_set - all_shows_set
     if dropped_shows:
-        parser.error("One or more of the given shows were not recognized, namely {shows}."
-                     .format(shows=dropped_shows))
+        logger.error("One or more of the given shows were not recognized, "
+                     "namely %(shows)s", {"shows": dropped_shows})
+        parser.error("Some shows not recognized")
     elif not arg_shows_set:
         # No arguments given, assume all shows
         chosen_shows = all_shows_set
     elif not chosen_shows:
+        logger.error("No shows matched.")
         parser.error("No shows matched.")
 
     if not os.path.isdir(target_dir):
         if create_dir:
             os.makedirs(target_dir)
         else:
-            parser.error("target_dir does not exist and the --create-directory flag is not set.")
+            logger.error("%s does not exist, and the --create-directory flag "
+                         "is not set.",
+                         target_dir)
+            parser.error("No such directory: " + target_dir)
 
     if "%t" not in naming_scheme and "%i" not in naming_scheme and "%T" not in naming_scheme:
-        parser.error("naming_scheme must contain %t, %i, %T or a combination in order to generate unique filenames for "
-                     "each show.")
+        logger.error("naming_scheme (%s) must contain %t, %i, %T or a "
+                      "combination in order to generate unique filenames for "
+                      "each show.", naming_scheme)
+        parser.error("Naming scheme won't produce unique filenames.")
 
     chosen_shows_dict = {show_id: all_shows[show_id] for show_id in chosen_shows}
 
@@ -98,8 +108,7 @@ def main():
 
     feeds = generator.generate_feeds_sequence(chosen_shows_dict.values())
     # Save to files
-    if not quiet:
-        print("Writing feeds to files...")
+    logger.info("Writing feeds to files...")
     for show_id, feed in feeds.items():
         save_feed_to_file(feed, filenames[show_id])
 
