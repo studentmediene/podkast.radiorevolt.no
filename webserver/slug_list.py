@@ -6,7 +6,7 @@ from .slug_already_in_use import SlugAlreadyInUse
 
 
 class SlugList:
-    def __init__(self, digas_id, *slug, connection=None):
+    def __init__(self, digas_id, *slug, last_modified=None, connection=None):
         """Class representing a linked list of slugs in which the last slug
         points to a digas_id.
 
@@ -23,6 +23,7 @@ class SlugList:
         """
         self.digas_id = digas_id
         self.slugs = list(slug)
+        self.last_modified = last_modified
 
         if not connection:
             connection = self._create_connection()
@@ -107,13 +108,16 @@ class SlugList:
             # Finally, find the digas_id
             with connection.cursor() as cursor:
                 cursor.execute(
-                    "SELECT digas_id FROM slug_to_id WHERE slug = %s",
+                    "SELECT digas_id, last_modified FROM slug_to_id WHERE slug = %s",
                     (canonical_slug,)
                 )
-                digas_id = cursor.fetchone()[0]
+                row = cursor.fetchone()
+                digas_id = row[0]
+                last_modified = row[1]
 
             # Create a new instance of this class, with the data fetched from the db
-            return cls(digas_id, *slugs, connection=connection)
+            return cls(digas_id, *slugs, last_modified=last_modified,
+                       connection=connection)
         except:
             if not connection_provided:
                 connection.close()
@@ -351,14 +355,39 @@ class SlugList:
             connection.autocommit = True
             with connection.cursor() as cursor:
                 create_table_query =\
-"""CREATE TABLE slug_to_slug (
+"""-- Table for linked list of slugs
+CREATE TABLE slug_to_slug (
   slug VARCHAR(50) PRIMARY KEY,
   canonical_slug VARCHAR(50)
 );
+
+-- Function which will automatically update a SlugList's last_modified datetime
+CREATE FUNCTION update_last_modified_function()
+RETURNS TRIGGER
+AS
+$$
+BEGIN
+    NEW.last_modified = clock_timestamp();
+    RETURN NEW;
+END;
+$$
+language 'plpgsql';
+
+-- Mapping between a canonical slug and its Digas ID
 CREATE TABLE slug_to_id (
   slug VARCHAR(50) PRIMARY KEY REFERENCES slug_to_slug(slug) ON UPDATE CASCADE,
-  digas_id INT NOT NULL UNIQUE
+  digas_id INT NOT NULL UNIQUE,
+  last_modified TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT clock_timestamp()
 );
+
+-- Automatically update last_changed on update
+CREATE TRIGGER last_modified_on_slug_to_id
+BEFORE UPDATE
+ON slug_to_id
+FOR EACH ROW
+EXECUTE PROCEDURE update_last_modified_function();
+
+-- Add reflexive relation in slug_to_slug
 ALTER TABLE slug_to_slug
   ADD FOREIGN KEY (canonical_slug) REFERENCES slug_to_slug(slug) ON DELETE
     RESTRICT ON UPDATE CASCADE;
