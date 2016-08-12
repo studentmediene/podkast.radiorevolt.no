@@ -4,7 +4,7 @@ import requests
 import requests.auth
 from .settings import SHOW_SOURCE as SETTINGS
 from .show import Show
-from cached_property import cached_property
+from cached_property import threaded_cached_property as cached_property
 
 
 class ShowSource:

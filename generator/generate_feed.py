@@ -1,5 +1,6 @@
 import logging
 
+import copy
 from .metadata_sources.skip_episode import SkipEpisode
 from . import metadata_sources, set_up_logger
 from .episode_source import EpisodeSource
@@ -10,7 +11,7 @@ from .metadata_sources.skip_show import SkipShow
 from . import settings as SETTINGS
 import requests
 
-from cached_property import cached_property
+from cached_property import threaded_cached_property as cached_property
 from clint.textui import progress
 
 import sys
@@ -81,7 +82,7 @@ class PodcastFeedGenerator:
             str: The RSS podcast feed for the given show_id.
         """
         try:
-            show = self.show_source.shows[show_id]
+            show = copy.copy(self.show_source.shows[show_id])
         except KeyError as e:
             raise NoSuchShowError from e
 

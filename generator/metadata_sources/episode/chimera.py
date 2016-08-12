@@ -6,9 +6,10 @@ import pytz
 import requests
 from markdown import Markdown
 import urllib.parse
-from cached_property import cached_property
+from cached_property import threaded_cached_property as cached_property
 from sys import stderr
 from podgen import htmlencode
+from threading import RLock
 
 
 class Chimera(EpisodeMetadataSource):
@@ -16,14 +17,20 @@ class Chimera(EpisodeMetadataSource):
         super().__init__(*args, **kwargs)
         self._episodes_by_chimera_id = dict()
         self.markdown = Markdown(output="html5")
+        self._episode_list_locks = dict()
 
     def _get_episodes(self, digas_id):
-        chimera_id = self._shows_by_digas_id[digas_id]
         try:
-            return self._episodes_by_chimera_id[chimera_id]
+            chimera_id = self._shows_by_digas_id[digas_id]
         except KeyError:
-            self._episodes_by_chimera_id[chimera_id] = self._fetch_episodes(chimera_id)
-            return self._episodes_by_chimera_id[chimera_id]
+            # Digas ID not recognized
+            return []
+        with self._episode_list_locks.setdefault(chimera_id, RLock()):
+            try:
+                return self._episodes_by_chimera_id[chimera_id]
+            except KeyError:
+                self._episodes_by_chimera_id[chimera_id] = self._fetch_episodes(chimera_id)
+                return self._episodes_by_chimera_id[chimera_id]
 
     @cached_property
     def _shows_by_digas_id(self):
@@ -42,11 +49,7 @@ class Chimera(EpisodeMetadataSource):
         return {episode['podcast_url']: episode for episode in episodes}
 
     def accepts(self, episode) -> bool:
-        try:
-            return super().accepts(episode) and episode.media.url in self._get_episodes(episode.show.id)
-        except KeyError:
-            # Show not in Chimera
-            return False
+        return super().accepts(episode) and episode.media.url in self._get_episodes(episode.show.id)
 
     def populate(self, episode) -> None:
         metadata = self._get_episodes(episode.show.id)[episode.media.url]

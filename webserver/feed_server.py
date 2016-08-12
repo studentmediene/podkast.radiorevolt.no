@@ -9,12 +9,13 @@ from generator import metadata_sources
 from . import settings, logo, url_service
 from .alternate_show_names import ALTERNATE_ALL_EPISODES_FEED_NAME
 from flask import Flask, abort, make_response, redirect, url_for, request,\
-    Response, jsonify
+    Response, jsonify, g
 import sqlite3
 from werkzeug.contrib.fixers import ProxyFix
 import urllib.parse
 import os.path
 import logging
+import datetime
 
 
 # Set up logging so all log messages include request information
@@ -40,21 +41,6 @@ class ContextFilter(logging.Filter):
         return True
 
 
-class SkipSameUrl(logging.Filter):
-    def __init__(self):
-        super().__init__()
-        self.paths = dict()
-
-    def filter(self, record):
-        if request:
-            if record.getMessage() in self.paths.setdefault(request.path, set()):
-                return False
-            else:
-                self.paths[request.path].add(record.getMessage())
-                return True
-        else:
-            return True
-
 # Format the message so that the extra information is outputted
 log_formatter = logging.Formatter(fmt="""\
 ================================================================================
@@ -73,8 +59,6 @@ log_formatter = logging.Formatter(fmt="""\
 )
 
 # Put our filter and formatter to use
-logging.getLogger("").addFilter(SkipSameUrl())
-logging.getLogger("py.warnings").addFilter(SkipSameUrl())
 set_up_logger.rotatingHandler.setFormatter(log_formatter)
 set_up_logger.rotatingHandler.addFilter(ContextFilter())
 
@@ -94,6 +78,16 @@ def xslt_url():
     return url_for('static', filename="style.xsl")
 
 
+def get_podcast_feed_generator():
+    gen, created_at = getattr(g, '_gen', (None, None))
+    if gen is None:
+        logging.info("Creating PodcastFeedGenerator")
+        print("Creating PodcastFeedGenerator")
+        gen = PodcastFeedGenerator(pretty_xml=True, quiet=True, xslt=xslt_url())
+        g._gen = (gen, datetime.datetime.now(datetime.timezone.utc))
+    return gen
+
+
 @app.before_request
 def ignore_get():
     if request.base_url != request.url:
@@ -107,7 +101,7 @@ def redirect_to_favicon():
 
 @app.route('/all')
 def output_all_feed():
-    gen = PodcastFeedGenerator(quiet=True, xslt=xslt_url(), pretty_xml=True)
+    gen = get_podcast_feed_generator()
     gen.register_redirect_services(get_redirect_sound, get_redirect_article)
 
     feed = gen.generate_feed_with_all_episodes()
@@ -119,7 +113,7 @@ def output_feed(show_name):
     # Replace image so it fits iTunes' specifications
     metadata_sources.SHOW_METADATA_SOURCES.append(logo.ReplaceImageURL)
     # Make it pretty, so curious people can learn from it
-    gen = PodcastFeedGenerator(quiet=True, xslt=xslt_url(), pretty_xml=True)
+    gen = get_podcast_feed_generator()
     try:
         show, canonical_slug = \
             url_service.get_canonical_slug_for_slug(show_name, gen)
@@ -152,7 +146,7 @@ def _prepare_feed_response(feed, max_age) -> Response:
 @app.route('/api/url/<show>')
 def api_url_show(show):
     try:
-        return url_for_feed(url_service.create_slug_for(int(show), PodcastFeedGenerator(quiet=True)))
+        return url_for_feed(url_service.create_slug_for(int(show), get_podcast_feed_generator()))
     except (NoSuchShowError, ValueError):
         abort(404)
 
