@@ -104,7 +104,8 @@ def main():
 
     threads = list()
     run_constraint = BoundedSemaphore(num_threads)
-    with progress.Bar(expected_size=num_episodes) as progressbar:
+    with progress.Bar(expected_size=num_episodes,
+                      hide=True if quiet else None) as progressbar:
         try:
             for episode in episodes_without_duration:
                 run_constraint.acquire()
@@ -122,6 +123,7 @@ def main():
                            "finish. Please wait, this could take several "
                            "minutes...", num_threads)
             settings.CANCEL.set()
+            progressbar.show(done_episodes)
             for thread in threads:
                 try:
                     thread.join()

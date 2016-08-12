@@ -35,6 +35,8 @@ class PodcastFeedGenerator:
 
         self.xslt = xslt
 
+        self.quiet = quiet
+        self.hide_progressbar = True if quiet else None
         if quiet:
             set_up_logger.quiet()
 
@@ -139,7 +141,7 @@ class PodcastFeedGenerator:
         self._prepare_for_batch(es)
 
         feeds = dict()
-        for show in progress.bar(shows):
+        for show in progress.bar(shows, hide=self.hide_progressbar):
             # Also log progress
             i += 1
             logger.debug("{0: <60} ({1:03}/{2:03})".format(show.name, i, num_shows))
@@ -192,7 +194,7 @@ class PodcastFeedGenerator:
         episodes = [es.episode(self.show_source.shows[ep['program_defnr']], ep)
                     for ep in es.all_episodes if ep['program_defnr'] != 0]
         # Populate metadata
-        for episode in progress.bar(episodes):
+        for episode in progress.bar(episodes, hide=self.hide_progressbar):
             logger.debug("Populating episode %s (from %s)", episode.title,
                          episode.show.name)
             try:
