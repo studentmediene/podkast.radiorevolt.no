@@ -1,3 +1,4 @@
+import logging
 from .. import SkipEpisode, EpisodeMetadataSource
 from datetime import datetime
 from pytz import timezone
@@ -55,14 +56,14 @@ class Chimera(EpisodeMetadataSource):
         try:
             date = datetime.strptime(metadata['public_from'], "%Y-%m-%dT%H:%M:%SZ")
             date = pytz.utc.localize(date)
-            episode.publication_date = date
+            episode.date = date
         except ValueError:
             # published date can be ill-formed
             pass
 
         episode.title = metadata['headline']
 
-        episode.summary = htmlencode(metadata['lead'])
+        episode.summary = metadata['lead']
 
         # For long_description, use the article lead and body
         markdown_description = """**{0}**\n\n{1}""".format(metadata['lead'], metadata['body'])

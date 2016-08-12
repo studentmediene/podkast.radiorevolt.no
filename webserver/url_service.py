@@ -43,12 +43,15 @@ def get_canonical_slug_for_slug(slug: str, gen: PodcastFeedGenerator, level=0, c
 
             if stored_canonical_slug != actual_canonical_slug:
                 # This show has gotten a new name
+                logger.info("Change in slug: %s shall redirect to %s",
+                            stored_canonical_slug,
+                            actual_canonical_slug)
                 try:
                     sluglist.canonical_slug = actual_canonical_slug
                 except SlugAlreadyInUse as e:
                     # Another show is using the slug this show is trying to use
                     # Notify radioteknisk
-                    logger.critical(
+                    logger.error(
                         "The slug %s is already in use by another show (%s)"
                         ". Falling back to previous slug, %s. "
                         "Pick another name for the show; you may confuse "
@@ -70,21 +73,32 @@ def get_canonical_slug_for_slug(slug: str, gen: PodcastFeedGenerator, level=0, c
             try:
                 # Assuming the show already is present in the database
                 sluglist = SlugList.from_id(digas_id, connection)
+                logger.info("Change in slug: %s shall redirect to %s",
+                            sluglist.canonical_slug,
+                            slug)
                 sluglist.canonical_slug = slug
             except NoSuchSlug:
                 # Nope, add it in the database.
                 sluglist = SlugList(digas_id, slug, connection=connection)
+                logger.info("Adding slug %s (Digas ID %s) to the database",
+                            slug,
+                            digas_id)
                 sluglist.persist()
             if not connection_provided:
                 sluglist.commit()
             return sluglist.digas_id, sluglist.canonical_slug
 
     except TransactionRollbackError:
+        logger.debug("Transaction was rolled back")
         # Someone has probably beat us to the punch
         if sluglist:
             connection.close()
         # Should we give up?
         if level >= 10 or connection_provided:
+            if level >= 10:
+                logger.error(
+                    "Transaction has been rolled back 10 times, giving up"
+                )
             raise
         # I don't know if we need this, but randomize how long we sleep, so two
         # instances won't bash their heads against each other forever

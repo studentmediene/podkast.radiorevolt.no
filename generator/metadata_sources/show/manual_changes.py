@@ -1,4 +1,5 @@
 from time import strptime
+import logging
 
 from .. import ShowMetadataSource
 from ..base_manual_changes import BaseManualChanges
@@ -8,6 +9,9 @@ import json
 import os.path
 import sys
 from podgen import Person, Category
+
+
+logger = logging.getLogger(__name__)
 
 
 class ManualChanges(BaseManualChanges, ShowMetadataSource):
@@ -38,10 +42,9 @@ class ManualChanges(BaseManualChanges, ShowMetadataSource):
                     try:
                         setattr(show, attribute, strptime(value, "%Y-%m-%d %H:%M:%S %z"))
                     except ValueError:
-                        print("WARNING: Date {date} in file {file} could not be parsed, so it was ignored.\n"
+                        logger.warning("Date %(date)s in file %(file)s could not be parsed, so it was ignored.\n"
                               "Make sure it's on the following form (±HHMM being timezone offset):\n"
-                              "    YYYY-MM-DD HH:MM:SS ±HHMM".format(date=metadata['date'], file=self._config_file),
-                              file=sys.stderr)
+                              "    YYYY-MM-DD HH:MM:SS ±HHMM", {"date": metadata['date'], "file": self._config_file})
                 elif attribute == "authors":
                     authors = [Person(p.get('name'), p.get('email')) for p in value]
                     show.authors = authors
@@ -55,6 +58,5 @@ class ManualChanges(BaseManualChanges, ShowMetadataSource):
                 else:
                     setattr(show, attribute, value)
             else:
-                print("WARNING {source}: Attribute {keys} for {id} was not recognized."
-                      .format(source=self._source_name, id=show.id, keys=attribute),
-                      file=sys.stderr)
+                logger.warning("Attribute %(keys)s for %(id)s was not recognized."
+                      , {"id": show.id, "keys": attribute})

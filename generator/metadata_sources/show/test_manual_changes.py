@@ -24,24 +24,24 @@ def empty_config():
     return dict()
 
 
-def test_accepts(tmpdir, config, empty_config):
+def test_accepts(tmpdir, config, empty_config, requests):
     filename = write_config(tmpdir, config)
     accept_show = show()
     accept_show.show_id = 0
     not_accept_show = show()
     not_accept_show.show_id = 1
 
-    source = ManualChanges({"SHOW_CONFIG": filename}, set())
+    source = ManualChanges({"SHOW_CONFIG": filename}, set(), requests)
     assert source.accepts(accept_show)
     assert not source.accepts(not_accept_show)
 
     filename2 = write_config(tmpdir, empty_config)
-    source_2 = ManualChanges({"SHOW_CONFIG": filename2}, set())
+    source_2 = ManualChanges({"SHOW_CONFIG": filename2}, set(), requests)
     assert not source_2.accepts(accept_show)
     assert not source_2.accepts(not_accept_show)
 
 
-def test_populates(tmpdir):
+def test_populates(tmpdir, requests):
     show_id = "0"
     cfg = {show_id: {
         "title": "We're no strangers to love",
@@ -64,7 +64,7 @@ def test_populates(tmpdir):
     sh = show()
     sh.show_id = 0
 
-    source = ManualChanges({"SHOW_CONFIG": filename}, set())
+    source = ManualChanges({"SHOW_CONFIG": filename}, set(), requests)
     source.populate(sh)
 
     assert sh.title == c['title']
@@ -82,28 +82,28 @@ def test_populates(tmpdir):
     assert sh.language == c['language']
 
 
-def test_warning_no_config_set(capsys):
-    source = ManualChanges(dict(), set())
-    assert source.data is None
-    assert len(capsys.readouterr()[1])
+def test_warning_no_config_set(requests):
+    source = ManualChanges(dict(), set(), requests)
+    with assert_logging(logger):
+        assert source.data is None
 
 
-def test_warning_file_not_exists(capsys):
-    source = ManualChanges({"SHOW_CONFIG": "thisfiledoesnotexist" + str(random())}, set())
-    assert source.data is None
-    assert len(capsys.readouterr()[1])
+def test_warning_file_not_exists(requests):
+    source = ManualChanges({"SHOW_CONFIG": "thisfiledoesnotexist" + str(random())}, set(), requests)
+    with assert_logging(logger):
+        assert source.data is None
 
 
-def test_warning_error_in_file(capsys, tmpdir):
+def test_warning_error_in_file(tmpdir, requests):
     filename = path.join(str(tmpdir), "incorrect.json")
     with open(filename, "w") as fp:
         fp.write("{:}")  # just some incorrect json
-    source = ManualChanges({"SHOW_CONFIG": filename}, set())
-    assert source.data is None
-    assert len(capsys.readouterr()[1])
+    source = ManualChanges({"SHOW_CONFIG": filename}, set(), requests)
+    with assert_logging(logger):
+        assert source.data is None
 
 
-def test_warning_unrecognized_option(capsys, tmpdir):
+def test_warning_unrecognized_option(tmpdir, requests):
     show_id = "0"
     cfg = {show_id: {"show_uri": "http://never.gonna.run/around"}}
     filename = write_config(tmpdir, cfg)
@@ -111,16 +111,16 @@ def test_warning_unrecognized_option(capsys, tmpdir):
     sh = show()
     sh.show_id = 0
 
-    source = ManualChanges({"SHOW_CONFIG": filename}, set())
+    source = ManualChanges({"SHOW_CONFIG": filename}, set(), requests)
     assert source.data is not None
-    source.populate(sh)
-    assert len(capsys.readouterr()[1])
+    with assert_logging(logger):
+        source.populate(sh)
 
 
-def test_bypass(tmpdir, show, config):
+def test_bypass(tmpdir, show, config, requests):
     filename = write_config(tmpdir, config)
     show.show_id = 0
-    source = ManualChanges({"SHOW_CONFIG": filename}, {show.show_id})
+    source = ManualChanges({"SHOW_CONFIG": filename}, {show.show_id}, requests)
     assert not source.accepts(show)
     source.bypass.remove(show.show_id)
     assert source.accepts(show)

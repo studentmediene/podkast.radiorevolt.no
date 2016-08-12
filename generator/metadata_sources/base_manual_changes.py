@@ -1,9 +1,11 @@
+import logging
 from cached_property import cached_property
 import json
 import os.path
 import sys
 from abc import ABCMeta, abstractproperty, abstractstaticmethod
 
+logger = logging.getLogger(__name__)
 
 class BaseManualChanges(metaclass=ABCMeta):
     @abstractproperty
@@ -31,24 +33,27 @@ class BaseManualChanges(metaclass=ABCMeta):
 
     @cached_property
     def data(self):
+        f = None
         try:
-            return json.load(open(self._config_file))
-        except IOError as e:
-            print("WARNING: {source} is added as a metadata source, but the configuration file "
-                  "{file} could not be loaded. \nDetails: {e}"
-                  .format(file=self._config_file, e=e, source=self._source_name), file=sys.stderr)
+            f = open(self._config_file)
+            return json.load(f)
+        except IOError:
+            logger.exception("%s is added as a metadata source, but the configuration file "
+                             "%s could not be loaded.",
+                             self._source_name, self._config_file)
             return None
-        except ValueError as e:
-            print("WARNING: There is an error in {file}.\nDetails: {e}".format(file=self._config_file, e=e),
-                  file=sys.stderr)
+        except ValueError:
+            logger.exception("An error occurred while parsing %s. Check the syntax!", self._config_file)
             return None
         except KeyError:
             path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "settings.py"))
-            print("WARNING: No configuration file is configured for {source}.\n"
-                  "Ensure the setting {setting} is set for METADATA_SOURCE['ManualChanges'] "
-                  "in {path}.".format(path=path, source=self._source_name, setting=self._config_file_settings_key),
-                  file=sys.stderr)
+            logger.error("No configuration file is configured for %s. "
+                         "Ensure the setting %s is set for METADATA_SOURCE['ManualChanges'] "
+                         "in %s.", self._source_name, self._config_file_settings_key, path)
             return None
+        finally:
+            if f:
+                f.close()
 
     def accepts(self, obj) -> bool:
         try:
@@ -59,6 +64,5 @@ class BaseManualChanges(metaclass=ABCMeta):
     def check_for_unrecognized_keys(self, metadata, recognized_keys, id):
         unrecognized_keys = set(metadata.keys()) - recognized_keys
         if unrecognized_keys:
-            print("WARNING {source}: Some attributes for {id} were not recognized, namely {keys}."
-                  .format(source=self._source_name, id=id, keys=unrecognized_keys),
-                  file=sys.stderr)
+            logger.warning("%s: Some attributes for %s were not recognized, namely %s.",
+                        self._source_name, id, unrecognized_keys)

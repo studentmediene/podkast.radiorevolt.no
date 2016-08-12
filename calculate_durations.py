@@ -1,12 +1,16 @@
 import argparse
 from generator.generate_feed import PodcastFeedGenerator
 from generator.episode_source import EpisodeSource
-from generator import settings
+from generator import settings, set_up_logger
 from generator.no_episodes_error import NoEpisodesError
 from threading import Thread, RLock, BoundedSemaphore
 from sys import stderr
 import random
 from podgen import Media
+import logging
+from clint.textui import progress
+
+logger = logging.getLogger(__name__)
 
 
 def print_err(*args, **kwargs):
@@ -48,6 +52,9 @@ def main():
     args_shows = args.shows
     args_shows_set = set(args_shows)
 
+    if quiet:
+        set_up_logger.quiet()
+
     generator = PodcastFeedGenerator(quiet=quiet)
 
     # Find which shows to use
@@ -64,11 +71,11 @@ def main():
     # Were any arguments not recognized?
     dropped_shows = args_shows_set - all_shows_set
     if dropped_shows:
-        parser.error("One or more of the given shows were not recognized, namely {shows}."
+        logger.error("One or more of the given shows were not recognized, namely {shows}."
                      .format(shows=dropped_shows))
+        parser.error("Some shows not recognized")
 
-    if not quiet:
-        print_err("Collecting episodes...")
+    logger.info("Collecting episodes...")
 
     all_episodes = list()
     es = EpisodeSource(generator.requests)
@@ -82,65 +89,65 @@ def main():
     episodes_without_duration = [episode for episode in all_episodes if episode.media.duration is None]
 
     if not episodes_without_duration:
-        parser.exit(message="All episodes have duration information.\n" if not quiet else None)
+        logger.info("All episodes have duration information")
+        parser.exit()
 
     num_episodes = len(episodes_without_duration)
 
-    if not quiet:
-        print_err("{num} episodes need to be fetched. Please be patient.".format(num=num_episodes))
+    logger.info("{num} episodes need to be fetched. Please be patient.".format(num=num_episodes))
 
     # Shuffle the list of episodes, so that multiple instances at least are
     # unlikely to work on the same episodes
     random.shuffle(episodes_without_duration)
 
-    if not quiet:
-        print_err("Starting downloads.")
+    logger.info("Starting downloads.")
 
-    print_lock = RLock()
     threads = list()
     run_constraint = BoundedSemaphore(num_threads)
-    try:
-        for episode in episodes_without_duration:
-            run_constraint.acquire()
-            threads.append(Thread(target=fetch_duration,
-                                  kwargs={"episode": episode, "es": es, "print_lock": print_lock,
-                                          "quiet": quiet, "total": num_episodes, "constrain": run_constraint}))
-            threads[-1].start()
+    with progress.Bar(expected_size=num_episodes,
+                      hide=True if quiet else None) as progressbar:
+        try:
+            for episode in episodes_without_duration:
+                run_constraint.acquire()
+                threads.append(Thread(target=fetch_duration,
+                                      kwargs={"episode": episode, "es": es,
+                                              "total": num_episodes, "constrain": run_constraint,
+                                              "progressbar": progressbar}))
+                threads[-1].start()
 
-        for thread in threads:
-            thread.join()
-    except KeyboardInterrupt:
-        if not quiet:
-            with print_lock:
-                print_err("Exiting and cleaning up. All %s downloads that have "
-                          "been started, will be allowed to finish. Please "
-                          "wait, this could take several minutes..."
-                          % num_threads)
-        settings.CANCEL.set()
-        for thread in threads:
-            try:
+            for thread in threads:
                 thread.join()
-            except RuntimeError:
-                # The thread may never have been started
-                pass
+        except KeyboardInterrupt:
+            logger.warning("Interrupted by user. Exiting and cleaning up. All %s "
+                           "downloads that have been started, will be allowed to "
+                           "finish. Please wait, this could take several "
+                           "minutes...", num_threads)
+            settings.CANCEL.set()
+            progressbar.show(done_episodes)
+            for thread in threads:
+                try:
+                    thread.join()
+                except RuntimeError:
+                    # The thread may never have been started
+                    pass
+    logger.info("Done.")
 
 
-def fetch_duration(episode, es, print_lock, quiet, total, constrain):
+def fetch_duration(episode, es, total, constrain, progressbar):
     media = es.media_load(episode.media.url)
     if not media.duration or not media.size:
         episode.media = Media.create_from_server_response(media.url, requests_=es.requests)
         episode.media.fetch_duration()
         es.media_save(episode.media)
-    if not quiet:
-        print_progress(episode, print_lock, total)
+    print_progress(episode, total, progressbar)
     constrain.release()
 
 
-def print_progress(episode, print_lock, total):
-    with print_lock:
-        global done_episodes
-        done_episodes += 1
-        print_err("{i:04}/{total:04}: {title} done!".format(i=done_episodes, total=total, title=episode.title))
+def print_progress(episode, total, progressbar):
+    global done_episodes
+    done_episodes += 1
+    logger.debug("{i:04}/{total:04}: {title} done!".format(i=done_episodes, total=total, title=episode.title))
+    progressbar.show(done_episodes)
 
 
 if __name__ == '__main__':

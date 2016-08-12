@@ -1,3 +1,4 @@
+import logging
 from .. import EpisodeMetadataSource
 from ..base_manual_changes import BaseManualChanges
 from cached_property import cached_property
@@ -6,6 +7,7 @@ import os.path
 import sys
 from datetime import datetime, timedelta
 from podgen import Person
+logger = logging.getLogger(__name__)
 
 
 class ManualChanges(BaseManualChanges, EpisodeMetadataSource):
@@ -36,10 +38,9 @@ class ManualChanges(BaseManualChanges, EpisodeMetadataSource):
                     try:
                         episode.publication_date = datetime.strptime(metadata['publication_date'], "%Y-%m-%d %H:%M:%S %z")
                     except ValueError:
-                        print("WARNING: Date {date} in file {file} could not be parsed, so it was ignored.\n"
-                              "Make sure it's on the following form (±HHMM being timezone offset):\n"
-                              "    YYYY-MM-DD HH:MM:SS ±HHMM".format(date=metadata['date'], file=self._config_file),
-                              file=sys.stderr)
+                        logger.warning("Date %s in file %s could not be parsed, so it was ignored. "
+                            "Make sure it's on the following form (±HHMM being timezone offset): "
+                            "YYYY-MM-DD HH:MM:SS ±HHMM", metadata['date'], self._config_file)
                 elif attribute == "authors":
                     authors = [Person(p.get('name'), p.get('email')) for p in value]
                     episode.authors = authors
@@ -60,6 +61,5 @@ class ManualChanges(BaseManualChanges, EpisodeMetadataSource):
                 else:
                     setattr(episode, attribute, value)
             else:
-                print("WARNING {source}: Attribute {keys} for {id} was not recognized."
-                      .format(source=self._source_name, id=episode.media.url, keys=attribute),
-                      file=sys.stderr)
+                logger.warning("WARNING %s: Attribute %s for %s was not recognized.",
+                      self._source_name, attribute, episode.media.url)

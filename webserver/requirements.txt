@@ -1,12 +1,15 @@
 # Simple webserver framework
-flask
-# Utility for generating unique URLs
-shortuuid
+Flask==0.11.1
 # Our own webserver
-mod_wsgi
+mod-wsgi==4.5.4
 # Image manipulation
-Pillow
+Pillow==3.3.0
 # Database connection (for SlugList)
-psycopg2
+psycopg2==2.6.2
 # We will need to use the generator, so install its dependencies
 -r ../generator/requirements.txt
+## The following requirements were added by pip freeze:
+click==6.6
+itsdangerous==0.24
+Jinja2==2.8
+Werkzeug==0.11.10

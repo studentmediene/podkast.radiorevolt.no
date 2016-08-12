@@ -4,7 +4,7 @@ Description=Frond-end serving fresh podcast feeds
 [Service]
 Type=simple
 ExecStart=/bin/sh "sudo -u <username> <path>/start_server.sh"
-Restart=on-failure
+Restart=always
 
 [Install]
 WantedBy=multi-user.target

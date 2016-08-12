@@ -1,4 +1,5 @@
 import os.path
+import logging
 from urllib.parse import urlparse, unquote
 from flask import url_for
 from PIL import Image
@@ -13,6 +14,11 @@ from generator.no_episodes_error import NoEpisodesError
 import sys
 import traceback
 from cached_property import cached_property
+from clint.textui import progress
+
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 
 class ImageIsTooSmall(UserWarning):
@@ -75,7 +81,7 @@ class LocalImage:
         return os.path.exists(self.path)
 
     @classmethod
-    def _resize(cls, original_image, new_image):
+    def _resize(cls, original_image, new_image, url: str=""):
         """Create a properly resized image.
 
         Args:
@@ -84,8 +90,8 @@ class LocalImage:
         """
         img = Image.open(original_image)
 
-        new_width, new_height = cls._calculate_new_image_size(img, cls.min_image_size, cls.max_image_size)
-                                                                        # Skip resizing if there's no change in size
+        new_width, new_height = cls._calculate_new_image_size(img, cls.min_image_size, cls.max_image_size, url)
+        # Skip resizing if there's no change in size
         new_img = cls._create_resized_image(img, new_width, new_height) if (new_width, new_height) != img.size else img
         new_img.save(new_image, "png", optimize=True)
 
@@ -97,7 +103,8 @@ class LocalImage:
         return image.resize((width, height), Image.LANCZOS)
 
     @staticmethod
-    def _calculate_new_image_size(img: Image.Image, min_size: int, max_size: int) -> (int, int):
+    def _calculate_new_image_size(img: Image.Image, min_size: int, max_size: int,
+                                  url: str="") -> (int, int):
         """Figure out the new dimensions for the provided image.
 
         It will preserve aspect ratio and will be between min_size and max_size.
@@ -135,10 +142,8 @@ class LocalImage:
             else:
                 factor = (max_size - delta) / height
         elif too_small:
-            warn(("The size of the image is {width}x{height}, which means it must be upscaled so it fits iTunes' rules "
-                  "(minimum {min}x{min}, maximum {max}x{max}). Upscaling always looks ugly, so please export the logo at a "
-                  "higher resolution or recreate it with a higher resolution in mind.")
-                 .format(width=width, height=height, min=min_size, max=max_size),
+            warn("{url} is {width}x{height}. Will be upscaled to {min}x{min}."
+                 .format(width=width, height=height, min=min_size, url=url),
                  ImageIsTooSmall)
             width_is_smallest = min(img.size) == width
             if width_is_smallest:
@@ -170,7 +175,7 @@ class LocalImage:
         try:
             new_image = tempfile.NamedTemporaryFile("w+b", delete=False)
             # Write to the temporary file
-            self._resize(original_image, new_image)
+            self._resize(original_image, new_image, self.original_url)
             new_image.close()
             original_image.close()
             # Overwrite the possibly existing image, as an atomic action
@@ -255,26 +260,21 @@ class LocalImage:
         num_images = len(show_image_tuples)
 
         if not num_images:
-            if not quiet:
-                print("There are no images to process.", file=sys.stderr)
+            logger.info("There are no images to process.")
             return
 
-        if not quiet:
-            def print_progress(i, show):
-                print("Processing image {i:02}/{n:02}: {show.name}".format(i=i + 1, n=num_images, show=show),
-                      file=sys.stderr)
-        else:
-            def print_progress(*args, **kwargs):
-                pass  # no-op
+        logger.info("Creating local copies of %s images.", num_images)
 
-        for i, item in enumerate(show_image_tuples):
+        for item in progress.bar(show_image_tuples,
+                                 hide=True if quiet else None):
             show, image = item
-            print_progress(i, show)
+            logger.debug("Processing image for %(show)s", {"show": show.name})
             try:
                 image.create_local_copy()
             except (IOError, ImageIsTooSmall, RuntimeError):
-                print("An error happened while processing that image. Details:", file=sys.stderr)
-                traceback.print_exc(file=sys.stderr)
+                logger.exception("An error happened while processing the image "
+                                 "for %(show)s (image URL: %(url)s).",
+                                 {"show": show.name, "url": show.image})
 
 
 class ReplaceImageURL(ShowMetadataSource):
