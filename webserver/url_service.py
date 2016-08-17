@@ -38,6 +38,7 @@ def get_canonical_slug_for_slug(slug: str, gen: PodcastFeedGenerator, level=0, c
     try:
         try:
             sluglist = SlugList.from_slug(slug, connection)
+            invalidate_list_of_shows_if_old(gen, sluglist)
             stored_canonical_slug = sluglist.canonical_slug
             actual_canonical_slug = create_slug_for(sluglist.digas_id, gen)
 
@@ -67,8 +68,21 @@ def get_canonical_slug_for_slug(slug: str, gen: PodcastFeedGenerator, level=0, c
         except NoSuchSlug:
             # There is no record of this slug in the database.
             # Is it an actual slug for a show, or is this a 404?
-            digas_id = get_show_with_slug(slug)
+            digas_id = get_show_with_slug(slug, gen)
             # No exception, so there is a show with this slug.
+            # (Additional note about multiple instances of PodcastFeedGenerator:
+            #   A change in show name won't be applied before a new instance of
+            #   PodcastFeedGenerator is created, and then queried about the URL
+            #   of the show. Once that happens, the new slug is put into the DB
+            #   and any existing instances will notice that their list of shows
+            #   is out of date when queried about that show's URL. Before that
+            #   happens, there will be a timeframe in which the show's canonical
+            #   URL gives 404 (between the name changing, and a new
+            #   PodcastFeedGenerator instance being asked about the show's URL.)
+            # (If you want to make sure a new URL works, you can create a new
+            #   instance of PodcastFeedGenerator and call
+            #   get_canonical_slug_for_slug with the new PodcastFeedGenerator
+            #   instance.)
 
             try:
                 # Assuming the show already is present in the database
@@ -106,7 +120,7 @@ def get_canonical_slug_for_slug(slug: str, gen: PodcastFeedGenerator, level=0, c
         # Try again; should work in most cases
         return get_canonical_slug_for_slug(
             slug,
-            PodcastFeedGenerator(quiet=True),  # use fresh data
+            gen,
             level + 1
         )
 
@@ -115,6 +129,24 @@ def get_canonical_slug_for_slug(slug: str, gen: PodcastFeedGenerator, level=0, c
             connection.rollback()
             connection.close()
         raise
+
+
+def invalidate_list_of_shows_if_old(
+        gen: PodcastFeedGenerator,
+        sluglist: SlugList
+):
+    fetched_at = gen.show_source.last_fetched
+    last_modified_at = sluglist.last_modified
+
+    if fetched_at is None:
+        return
+
+    if fetched_at < last_modified_at:
+        if gen.show_source.get_show_names:
+            del gen.show_source.get_show_names
+        if gen.show_source.shows:
+            del gen.show_source.shows
+    return
 
 
 def create_slug_for(digas_id: int, gen: PodcastFeedGenerator) -> str:
@@ -149,11 +181,12 @@ def sluggify(name: str) -> str:
     return "-".join([word for word in split_on_non_word.split(name.strip().lower()) if word])
 
 
-def get_show_with_slug(slug: str) -> int:
+def get_show_with_slug(slug: str, gen: PodcastFeedGenerator) -> int:
     """Return the digas ID of the show whose actual slug equals the given slug.
 
     Args:
         slug (str): The slug the resulting show shall have.
+        gen (PodcastFeedGenerator): Instance used to query for the shows' name.
 
     Returns:
         int: The Digas ID of the show with the given slug.
@@ -161,7 +194,6 @@ def get_show_with_slug(slug: str) -> int:
     Raises:
         NoSuchShowError: If there is no matching show.
     """
-    gen = PodcastFeedGenerator(quiet=True)
     shows = gen.show_source.get_show_names
     show_slugs = \
         {

@@ -1,5 +1,6 @@
 import logging
 
+import copy
 from .metadata_sources.skip_episode import SkipEpisode
 from . import metadata_sources, set_up_logger
 from .episode_source import EpisodeSource
@@ -10,7 +11,7 @@ from .metadata_sources.skip_show import SkipShow
 from . import settings as SETTINGS
 import requests
 
-from cached_property import cached_property
+from cached_property import threaded_cached_property as cached_property
 from clint.textui import progress
 
 import sys
@@ -28,6 +29,7 @@ class PodcastFeedGenerator:
         self.requests.headers.update({"User-Agent": "podcast-feed-gen"})
 
         self.show_source = ShowSource(self.requests)
+        self.episode_source = EpisodeSource(self.requests)
         self.pretty_xml = pretty_xml
         self.re_remove_chars = re.compile(r"[^\w\d]|_")
 
@@ -81,14 +83,15 @@ class PodcastFeedGenerator:
             str: The RSS podcast feed for the given show_id.
         """
         try:
-            show = self.show_source.shows[show_id]
+            show = copy.deepcopy(self.show_source.shows[show_id])
         except KeyError as e:
             raise NoSuchShowError from e
 
-        return self._generate_feed(show, skip_empty=not force, enable_skip_show=not force)
+        return self._generate_feed(show, skip_empty=not force,
+                                   enable_skip_show=not force)
 
-    def _generate_feed(self, show: Show, skip_empty: bool =True, enable_skip_show: bool =True,
-                       episode_source: EpisodeSource =None) -> bytes:
+    def _generate_feed(self, show: Show, skip_empty: bool = True,
+                       enable_skip_show: bool = True) -> bytes:
         """Generate RSS feed for the provided show.
 
         This differs from generate_feed in that it accept Show, not show_id, as argument.
@@ -98,8 +101,6 @@ class PodcastFeedGenerator:
                 sources.
             skip_empty (bool): Set to true to raise exception if there are no episodes for this show.
             enable_skip_show (bool): Skip this show if any Show Metadata source raises SkipShow.
-            episode_source (EpisodeSource): The EpisodeSource which will be used.
-                A new one will be created if not given.
 
         Returns:
             str: The RSS podcast feed for the given show.
@@ -111,17 +112,15 @@ class PodcastFeedGenerator:
         show.xslt = self.xslt
 
         # Add episodes
-        if not episode_source:
-            episode_source = EpisodeSource(self.requests)
         try:
-            episode_source.episode_list(show)
+            self.episode_source.episode_list(show)
         except NoEpisodesError as e:
             if skip_empty:
                 raise e
             else:
                 # Go on and generate empty feed
                 pass
-        show.add_episodes_to_feed(episode_source, self.episode_metadata_sources)
+        show.add_episodes_to_feed(self.episode_source, self.episode_metadata_sources)
 
         # Generate!
         return show.rss_str(minimize=not self.pretty_xml)
@@ -139,8 +138,7 @@ class PodcastFeedGenerator:
 
         # Ensure we only download list of episodes once
         logger.info("Downloading metadata, this could take a while...")
-        es = EpisodeSource(self.requests)
-        self._prepare_for_batch(es)
+        self.prepare_for_batch()
 
         feeds = dict()
         for show in progress.bar(shows, hide=self.hide_progressbar):
@@ -149,7 +147,7 @@ class PodcastFeedGenerator:
             logger.debug("{0: <60} ({1:03}/{2:03})".format(show.name, i, num_shows))
             try:
                 # Do the job
-                feeds[show.id] = self._generate_feed(show, episode_source=es)
+                feeds[show.id] = self._generate_feed(show)
             except (NoEpisodesError, SkipShow):
                 # Skip this show
                 pass
@@ -157,9 +155,9 @@ class PodcastFeedGenerator:
         logger.info("Done creating the feeds.")
         return feeds
 
-    def _prepare_for_batch(self, es):
+    def prepare_for_batch(self):
         logger.debug("Preparing for processing multiple shows")
-        es.populate_all_episodes_list()
+        self.episode_source.populate_all_episodes_list()
         for source in self.episode_metadata_sources:
             source.prepare_batch()
         for source in self.show_metadata_sources:
@@ -190,11 +188,10 @@ class PodcastFeedGenerator:
     def generate_feed_with_all_episodes(self, title=None):
         show = Show(name=title or SETTINGS.ALL_EPISODES_FEED_TITLE, id=0)
         show.xslt = self.xslt
-        es = EpisodeSource(self.requests)
-        self._prepare_for_batch(es)
+        self.prepare_for_batch()
         # Get all episodes
-        episodes = [es.episode(self.show_source.shows[ep['program_defnr']], ep)
-                    for ep in es.all_episodes if ep['program_defnr'] != 0]
+        episodes = [self.episode_source.episode(self.show_source.shows[ep['program_defnr']], ep)
+                    for ep in self.episode_source.all_episodes if ep['program_defnr'] != 0]
         # Populate metadata
         for episode in progress.bar(episodes, hide=self.hide_progressbar):
             logger.debug("Populating episode %s (from %s)", episode.title,

@@ -1,8 +1,10 @@
+import datetime
+
 import requests
 import requests.auth
 from .settings import SHOW_SOURCE as SETTINGS
 from .show import Show
-from cached_property import cached_property
+from cached_property import threaded_cached_property as cached_property
 
 
 class ShowSource:
@@ -12,10 +14,12 @@ class ShowSource:
         """
         Use the given requests session when fetching data."""
         self.requests = request_session
+        self.last_fetched = None
 
     @cached_property
     def shows(self):
         """dict: Dictionary with all shows, with their DigAS ID as key and Show instance as value."""
+        self.last_fetched = datetime.datetime.now(datetime.timezone.utc)
         return self._get_all_shows()
 
     def _get_all_shows(self) -> dict:

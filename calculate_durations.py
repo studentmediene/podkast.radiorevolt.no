@@ -78,7 +78,7 @@ def main():
     logger.info("Collecting episodes...")
 
     all_episodes = list()
-    es = EpisodeSource(generator.requests)
+    es = generator.episode_source
     es.populate_all_episodes_list()
     for show in [all_shows[show_id] for show_id in chosen_shows]:
         try:

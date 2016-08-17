@@ -4,7 +4,7 @@ import logging
 from .. import ShowMetadataSource
 from ..base_manual_changes import BaseManualChanges
 from ...settings import METADATA_SOURCE
-from cached_property import cached_property
+from cached_property import threaded_cached_property as cached_property
 import json
 import os.path
 import sys

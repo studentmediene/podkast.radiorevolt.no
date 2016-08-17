@@ -13,7 +13,7 @@ from generator.episode_source import EpisodeSource
 from generator.no_episodes_error import NoEpisodesError
 import sys
 import traceback
-from cached_property import cached_property
+from cached_property import threaded_cached_property as cached_property
 from clint.textui import progress
 
 
@@ -229,7 +229,7 @@ class LocalImage:
         for show in shows:
             gen.populate_show_metadata(show, False)
 
-        episode_source = EpisodeSource(gen.requests)
+        episode_source = gen.episode_source
         episode_source.populate_all_episodes_list()
 
         selected_images = list()
