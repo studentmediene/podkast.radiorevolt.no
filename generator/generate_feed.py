@@ -82,7 +82,7 @@ class PodcastFeedGenerator:
             str: The RSS podcast feed for the given show_id.
         """
         try:
-            show = copy.copy(self.show_source.shows[show_id])
+            show = copy.deepcopy(self.show_source.shows[show_id])
         except KeyError as e:
             raise NoSuchShowError from e
 
