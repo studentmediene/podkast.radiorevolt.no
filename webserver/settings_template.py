@@ -1,3 +1,5 @@
+import datetime
+
 import os.path as path
 
 # Remove the hash and space at the beginning of the following line when creating settings.py
@@ -8,10 +10,16 @@ __all__ = [
     "DEBUG",
     "REDIRECT_DB_FILE",
     "URL_DB_CONNECTION_PARAMS",
+    "SOURCE_DATA_TTL",
 ]
 
 # Set to True to enable debug mode. DO NOT LEAVE ON IN PRODUCTION!
 DEBUG = False
+
+# How old source data (like list of shows, list of episodes, episode metadata)
+# can be before it is discarded and reloaded from the source. How old data the
+# clients can potentially get, is this plus max-age for the Apache cache.
+SOURCE_DATA_TTL = datetime.timedelta(minutes=14)
 
 
 # Website which you will be redirected to if you access / on the server.

@@ -1,3 +1,5 @@
+import threading
+
 from generator import set_up_logger
 import base64
 
@@ -78,14 +80,21 @@ def xslt_url():
     return url_for('static', filename="style.xsl")
 
 
+_create_gen_lock = threading.RLock()
+_gen = (None, None)
+
+
 def get_podcast_feed_generator():
-    gen, created_at = getattr(g, '_gen', (None, None))
-    if gen is None:
-        logging.info("Creating PodcastFeedGenerator")
-        print("Creating PodcastFeedGenerator")
-        gen = PodcastFeedGenerator(pretty_xml=True, quiet=True, xslt=xslt_url())
-        g._gen = (gen, datetime.datetime.now(datetime.timezone.utc))
-    return gen
+    global _gen
+    with _create_gen_lock:
+        gen, expires_at = _gen
+        if gen is None or \
+                datetime.datetime.now(datetime.timezone.utc) > expires_at:
+            logging.info("Creating PodcastFeedGenerator")
+            gen = PodcastFeedGenerator(pretty_xml=True, quiet=True, xslt=xslt_url())
+            gen.prepare_for_batch()
+            _gen = (gen, datetime.datetime.now(datetime.timezone.utc) + settings.SOURCE_DATA_TTL)
+        return gen
 
 
 @app.before_request

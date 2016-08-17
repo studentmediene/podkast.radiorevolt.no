@@ -229,7 +229,7 @@ class LocalImage:
         for show in shows:
             gen.populate_show_metadata(show, False)
 
-        episode_source = EpisodeSource(gen.requests)
+        episode_source = gen.episode_source
         episode_source.populate_all_episodes_list()
 
         selected_images = list()
