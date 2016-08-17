@@ -11,7 +11,7 @@ from generator import metadata_sources
 from . import settings, logo, url_service
 from .alternate_show_names import ALTERNATE_ALL_EPISODES_FEED_NAME
 from flask import Flask, abort, make_response, redirect, url_for, request,\
-    Response, jsonify, g
+    Response, jsonify
 import sqlite3
 from werkzeug.contrib.fixers import ProxyFix
 import urllib.parse
@@ -33,7 +33,7 @@ class ContextFilter(logging.Filter):
             record.agent_browser_version = request.user_agent.version
             record.agent = request.user_agent.string
         else:
-            record.method = "Outside of request context (before first request?)"
+            record.method = "Outside of request context"
             record.path = ""
             record.ip = ""
             record.agent_platform = ""
@@ -114,7 +114,7 @@ def output_all_feed():
     gen.register_redirect_services(get_redirect_sound, get_redirect_article)
 
     feed = gen.generate_feed_with_all_episodes()
-    return _prepare_feed_response(feed, 10 * 60)
+    return _prepare_feed_response(feed, datetime.timedelta(minutes=10))
 
 
 @app.route('/<show_name>')
@@ -141,13 +141,13 @@ def output_feed(show_name):
     PodcastFeedGenerator.register_redirect_services(get_redirect_sound, get_redirect_article)
 
     feed = gen.generate_feed(show.id)
-    return _prepare_feed_response(feed, 60 * 60)
+    return _prepare_feed_response(feed, settings.FEED_TTL)
 
 
-def _prepare_feed_response(feed, max_age) -> Response:
+def _prepare_feed_response(feed, max_age: datetime.timedelta) -> Response:
     resp = make_response(feed)
     resp.headers['Content-Type'] = 'application/xml'
-    resp.cache_control.max_age = max_age
+    resp.cache_control.max_age = int(max_age.total_seconds())
     resp.cache_control.public = True
     return resp
 

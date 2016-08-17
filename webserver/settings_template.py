@@ -11,6 +11,7 @@ __all__ = [
     "REDIRECT_DB_FILE",
     "URL_DB_CONNECTION_PARAMS",
     "SOURCE_DATA_TTL",
+    "FEED_TTL",
 ]
 
 # Set to True to enable debug mode. DO NOT LEAVE ON IN PRODUCTION!
@@ -18,8 +19,12 @@ DEBUG = False
 
 # How old source data (like list of shows, list of episodes, episode metadata)
 # can be before it is discarded and reloaded from the source. How old data the
-# clients can potentially get, is this plus max-age for the Apache cache.
-SOURCE_DATA_TTL = datetime.timedelta(minutes=14)
+# clients can potentially get, is SOURCE_DATA_TTL + FEED_TTL.
+SOURCE_DATA_TTL = datetime.timedelta(minutes=7)
+
+# How long a feed's content can be served by a cache before it must be fetched
+# from podcast-feed-gen again. Does not apply to /all.
+FEED_TTL = datetime.timedelta(minutes=8)
 
 
 # Website which you will be redirected to if you access / on the server.
