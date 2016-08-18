@@ -8,7 +8,22 @@ from .slug_already_in_use import SlugAlreadyInUse
 class SlugList:
     def __init__(self, digas_id, *slug, last_modified=None, connection=None):
         """Class representing a linked list of slugs in which the last slug
-        points to a digas_id.
+        is the canonical slug, which points to a digas_id.
+
+        Example:
+            good-food → best-food → happy-food → 2015
+
+        In this example, if the user accesses /good-food, s/he will be
+        redirected to /happy-food. There, s/he will be served the feed for the
+        show with Digas ID 2015.
+
+        Note that the linked list is just a metaphor. In the database, all slugs
+        are stored in slug_to_slug. They point to a record in slug_to_id, which
+        is the canonical slug with the corresponding Digas ID. The canonical
+        slug is also stored in slug_to_slug. This way, we need not perform
+        recursive search to get the canonical slug. By using SQL's ON UPDATE
+        CASCADE, all slugs will point to the new canonical slug when the slug
+        field is changed in slug_to_id.
 
         This class assumes that you'll either (1) insert a new SlugList to the
         database, or (2) update an existing SlugList, never both in the same
@@ -20,6 +35,10 @@ class SlugList:
 
         Note that there is a real chance that your transaction will be rolled
         back because someone else already has done the same (race-condition).
+
+        Slug is a term that refers to a human-readable part of the URL, usually
+        used to identify an article. In our case, it identifies a show. In the
+        URL http://podcast.example.com/nerdtalk, nerdtalk is the slug.
         """
         self.digas_id = digas_id
         self.slugs = list(slug)
@@ -90,17 +109,17 @@ class SlugList:
                 if row is None:
                     raise NoSuchSlug(slug)
                 canonical_slug = row[0]
-                if canonical_slug is None:
-                    # This slug is the canonical slug
-                    canonical_slug = slug
 
             # Then, find all the other slugs
             with connection.cursor() as cursor:
                 cursor.execute(
-                    "SELECT slug FROM slug_to_slug WHERE canonical_slug = %s",
-                    (canonical_slug,)
+                    "SELECT slug FROM slug_to_slug "
+                    "WHERE canonical_slug = %(canonical_slug)s "
+                    "AND NOT slug = %(canonical_slug)s",
+                    {"canonical_slug": canonical_slug}
                 )
                 if cursor.rowcount > 0:
+                    # Ensure the canonical slug is last
                     slugs = [row[0] for row in cursor.fetchall()] + [canonical_slug]
                 else:
                     slugs = [canonical_slug]
@@ -128,6 +147,10 @@ class SlugList:
         """
         The canonical slug that should be used instead of any other slug
         contained in this SlugList.
+
+        You may assign a new value to this to change the canonical slug. The old
+        canonical slug will still be in the list; your new value will just be
+        appended. You'll need to commit() your changes for them to persist.
         """
         return self.slugs[-1]
 
@@ -139,26 +162,19 @@ class SlugList:
         """Insert this SlugList into the database. This can only be called when
         creating a new SlugList. You are not allowed to change the name of slugs
         after the fact."""
-        # First, insert the canonical slug
-        with self._create_cursor() as cursor:
-            cursor.execute(
-                "INSERT INTO slug_to_slug (slug, canonical_slug) "
-                "VALUES (%s, %s)",
-                (self.canonical_slug, None)
-            )
-        # Now we can insert all the other slugs, since they reference this slug
-        with self._create_cursor() as cursor:
-            cursor.executemany(
-                "INSERT INTO slug_to_slug (slug, canonical_slug) "
-                "VALUES (%s, %s)",
-                [(slug, self.canonical_slug) for slug in self.slugs[:-1]]
-            )
-        # And finally, the mapping to digas_id
+        # First, insert the canonical slug and its mapping to Digas ID
         with self._create_cursor() as cursor:
             cursor.execute(
                 "INSERT INTO slug_to_id (slug, digas_id) "
                 "VALUES (%s, %s)",
                 (self.canonical_slug, self.digas_id)
+            )
+        # Lastly, insert all slugs
+        with self._create_cursor() as cursor:
+            cursor.executemany(
+                "INSERT INTO slug_to_slug (slug, canonical_slug) "
+                "VALUES (%s, %s)",
+                [(slug, self.canonical_slug) for slug in self.slugs]
             )
 
     def commit(self):
@@ -187,7 +203,8 @@ class SlugList:
 
     def append(self, new_slug: str):
         """
-        Add new_slug to the end of this SlugList.
+        Add new_slug to the end of this SlugList. new_slug becomes the new
+        canonical slug which all other slugs will point to.
 
         Can only be called on a SlugList which has been inserted into the
         database.
@@ -213,30 +230,13 @@ class SlugList:
                 raise SlugAlreadyInUse(new_slug + " (canonical slug: " +
                                        (canonical_slug or new_slug) + ")")
 
-        # Remove the existing slug from the list if it's there (to make room
-        # for renaming the old one to the new slug)
-        if already_in_list:
-            with self._create_cursor() as cursor:
-                cursor.execute(
-                    """
-                    DELETE FROM slug_to_slug
-                    WHERE slug = %s
-                    """,
-                    (new_slug,)
-                )
-                if not cursor.rowcount:
-                    raise RuntimeError("Tried to delete a slug which already "
-                                       "existed, but no rows deleted (%s)" %
-                                       cursor.query)
-
         # Rename the current canonical slug to the new slug.
-        # This update will cascade to all slugs which points to the currently
-        # canonical slug as well as slug_to_id, which is why we do it this way.
+        # This update will cascade to all slugs.
         old_canonical_slug = self.canonical_slug
         with self._create_cursor() as cursor:
             cursor.execute(
                 """
-                UPDATE slug_to_slug
+                UPDATE slug_to_id
                 SET slug = %(new_slug)s
                 WHERE slug = %(old_slug)s;
                 """,
@@ -246,28 +246,29 @@ class SlugList:
                 raise RuntimeError("No row matched by update (%s)" %
                                    cursor.query)
 
-        # Now, create the link from the previous canonical slug to the new
-        # canonical slug.
-        with self._create_cursor() as cursor:
-            cursor.execute(
-                """
-                INSERT INTO slug_to_slug
-                    (slug, canonical_slug)
-                VALUES
-                    (%(old_slug)s, %(new_slug)s);
-                """,
-                {'new_slug': new_slug, 'old_slug': old_canonical_slug}
-            )
-            if not cursor.rowcount:
-                raise RuntimeError("No row matched by insert (%s)" %
-                                   cursor.query)
+        # Make sure the new slug is in slug_to_slug
+        if not already_in_list:
+            with self._create_cursor() as cursor:
+                cursor.execute(
+                    """
+                    INSERT INTO slug_to_slug
+                        (slug, canonical_slug)
+                    VALUES
+                        (%(new_slug)s, %(new_slug)s);
+                    """,
+                    {'new_slug': new_slug}
+                )
+                if not cursor.rowcount:
+                    raise RuntimeError("No row matched by insert (%s)" %
+                                       cursor.query)
         # If we got here, we are successful.
         self.slugs.append(new_slug)
 
     def prepend(self, new_slug: str):
         """
         Add new_slug before canonical_slug, thus making it redirect to this
-        list's canonical slug.
+        list's canonical slug. This can be used to add another alias for the
+        canonical slug.
 
         Can only be called on a SlugList which has been inserted into the
         database.
@@ -355,13 +356,7 @@ class SlugList:
             connection.autocommit = True
             with connection.cursor() as cursor:
                 create_table_query =\
-"""-- Table for linked list of slugs
-CREATE TABLE slug_to_slug (
-  slug VARCHAR(50) PRIMARY KEY,
-  canonical_slug VARCHAR(50)
-);
-
--- Function which will automatically update a SlugList's last_modified datetime
+"""-- Function which will automatically update a SlugList's last_modified datetime
 CREATE FUNCTION update_last_modified_function()
 RETURNS TRIGGER
 AS
@@ -375,22 +370,24 @@ language 'plpgsql';
 
 -- Mapping between a canonical slug and its Digas ID
 CREATE TABLE slug_to_id (
-  slug VARCHAR(50) PRIMARY KEY REFERENCES slug_to_slug(slug) ON UPDATE CASCADE,
+  slug VARCHAR(50) PRIMARY KEY,
   digas_id INT NOT NULL UNIQUE,
   last_modified TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT clock_timestamp()
 );
 
--- Automatically update last_changed on update
+-- Automatically update last_modified on update
 CREATE TRIGGER last_modified_on_slug_to_id
 BEFORE UPDATE
 ON slug_to_id
 FOR EACH ROW
 EXECUTE PROCEDURE update_last_modified_function();
 
--- Add reflexive relation in slug_to_slug
-ALTER TABLE slug_to_slug
-  ADD FOREIGN KEY (canonical_slug) REFERENCES slug_to_slug(slug) ON DELETE
-    RESTRICT ON UPDATE CASCADE;
+-- Table for linked list of slugs
+CREATE TABLE slug_to_slug (
+  slug VARCHAR(50) PRIMARY KEY,
+  canonical_slug VARCHAR(50) NOT NULL REFERENCES slug_to_id(slug) ON DELETE
+    RESTRICT ON UPDATE CASCADE
+);
 """
                 cursor.execute(create_table_query)
         finally:
