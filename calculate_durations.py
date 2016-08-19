@@ -134,13 +134,15 @@ def main():
 
 
 def fetch_duration(episode, es, total, constrain, progressbar):
-    media = es.media_load(episode.media.url)
-    if not media.duration or not media.size:
-        episode.media = Media.create_from_server_response(media.url, requests_=es.requests)
-        episode.media.fetch_duration()
-        es.media_save(episode.media)
-    print_progress(episode, total, progressbar)
-    constrain.release()
+    try:
+        media = es.media_load(episode.media.url)
+        if not media.duration or not media.size:
+            episode.media = Media.create_from_server_response(media.url, requests_=es.requests)
+            episode.media.fetch_duration()
+            es.media_save(episode.media)
+    finally:
+        print_progress(episode, total, progressbar)
+        constrain.release()
 
 
 def print_progress(episode, total, progressbar):
