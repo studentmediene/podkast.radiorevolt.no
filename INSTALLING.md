@@ -126,12 +126,14 @@ podcast-feed-gen. That's also why it's a bit clunky.
        1. Copy `upstart/podcast_feed_gen_template.conf` and save it as `upstart/podcast_feed_gen.conf`.
        2. Fill in the missing username and path.
        3. Run `sudo cp upstart/podcast_feed_gen.conf /etc/init/podcast-feed-gen.conf`
+       4. Run `sudo cp upstart/apache2_clean_cache.conf /etc/init/apache2_clean_cache.conf`
 
        [Systemd](https://wiki.archlinux.org/index.php/systemd):
 
        1. Copy `systemd/podcast_feed_gen_template.service` and save it as `systemd/podcast_feed_gen.service`.
        2. Fill in the missing username and path.
-       3. Run `sudo cp ./podcast_feed_gen.service /etc/systemd/system`
+       3. Run `sudo cp systemd/podcast_feed_gen.service /etc/systemd/system`
+       4. Run `sudo cp systemd/apache2_clean_cache.service /etc/systemd/system`
        3. Run `sudo systemctl enable podcast_feed_gen.service`
 
 7. Copy `apache/podcast_feed_gen_template.conf` and save it at `/etc/apache2/sites-available/podcast_feed_gen.conf`
