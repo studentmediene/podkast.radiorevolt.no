@@ -16,11 +16,12 @@ __all__ = [
     "METADATA_SOURCE",
     "BYPASS_EPISODE",
     "BYPASS_SHOW",
-    "ALL_EPISODES_FEED_TITLE",
+    "ALL_EPISODES_FEED_METADATA",
     "DEFAULT_CATEGORY",
     "DEFAULT_EXPLICIT",
     "MARK_OLD_AS_COMPLETE",
 ]
+# TODO: Add fields for metadata for the all episodes feed (see generate_feed.py)
 # Remove the hash symbol and space from the beginning of the following line
 # from .settings_template import *
 
@@ -49,8 +50,14 @@ DEFAULT_EXPLICIT = False
 # alternative without escaping)
 DEFAULT_CATEGORY = Category("Education", "Higher Education")
 
-# Default title for the special feed with episodes from all shows
-ALL_EPISODES_FEED_TITLE = "All podcast episodes from Example Radio"
+# Metadata for the feed with all episodes. See keyword arguments to Show() for
+# allowed keys
+ALL_EPISODES_FEED_METADATA = {
+    "name": "All podcasts from Example Radio",
+    "description": "All podcast episodes from Example Radio",
+    "image": "http://static.example.org/all.png",
+    # Add more if you like, see http://podgen.readthedocs.io/en/latest/user/basic_usage_guide/part_1.html
+}
 
 # URL redirection service
 # This works by defining two mapping functions: one for podcast sound urls, one for article urls.

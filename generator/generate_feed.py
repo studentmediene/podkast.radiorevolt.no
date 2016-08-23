@@ -193,8 +193,11 @@ class PodcastFeedGenerator:
                         # We're not skipping this show, just go on...
                         logger.debug("Ignoring SkipShow", exc_info=True)
 
-    def generate_feed_with_all_episodes(self, title=None):
-        show = Show(name=title or SETTINGS.ALL_EPISODES_FEED_TITLE, id=0)
+    def get_empty_all_episodes_show(self):
+        return Show(id=0, **SETTINGS.ALL_EPISODES_FEED_METADATA)
+
+    def generate_feed_with_all_episodes(self):
+        show = self.get_empty_all_episodes_show()
         show.xslt = self.xslt
         self.prepare_for_batch()
         # Get all episodes
