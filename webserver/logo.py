@@ -1,4 +1,5 @@
 import os.path
+import subprocess
 import logging
 from urllib.parse import urlparse, unquote
 from flask import url_for
@@ -179,7 +180,7 @@ class LocalImage:
             new_image.close()
             original_image.close()
             # Overwrite the possibly existing image, as an atomic action
-            os.replace(new_image.name, self.path)
+            subprocess.check_call(["mv", new_image.name, self.path])
         except Exception:
             if new_image:
                 os.remove(new_image.name)
@@ -205,6 +206,9 @@ class LocalImage:
         shows = show_source.shows.values()
         for show in shows:
             gen.populate_show_metadata(show, False)
+
+        shows = list(shows)
+        shows.append(gen.get_empty_all_episodes_show())
 
         selected_images = [(show, LocalImage(show.image)) for show in shows if show.image]
         if overwrite:
@@ -242,6 +246,9 @@ class LocalImage:
                 continue
 
             selected_images.append((show, LocalImage(show.image)))
+
+        all_episodes_show = gen.get_empty_all_episodes_show()
+        selected_images.append((all_episodes_show, LocalImage(all_episodes_show.image)))
 
         if not overwrite:
             selected_images = [(show, image) for show, image in selected_images if not image.local_copy_exists()]
