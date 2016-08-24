@@ -21,6 +21,7 @@ import datetime
 
 # Add source for replacing image URL
 metadata_sources.SHOW_METADATA_SOURCES.append(logo.ReplaceImageURL)
+# Instance used only for the all episodes feed
 replaceImageURL = logo.ReplaceImageURL(dict(), set(), None)
 
 
@@ -116,8 +117,11 @@ def redirect_to_favicon():
 def output_all_feed():
     gen = get_podcast_feed_generator()
 
-    # TODO: Replace image URL
-    feed = gen.generate_feed_with_all_episodes()
+    show = gen.get_empty_all_episodes_show()
+    gen.populate_all_episodes_feed(show)
+    if replaceImageURL.accepts(show):
+        replaceImageURL.populate(show)
+    feed = show.rss_str(minimize=False)
 
     return _prepare_feed_response(feed, datetime.timedelta(minutes=10))
 
