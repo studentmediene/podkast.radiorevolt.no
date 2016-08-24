@@ -196,8 +196,7 @@ class PodcastFeedGenerator:
     def get_empty_all_episodes_show(self):
         return Show(id=0, **SETTINGS.ALL_EPISODES_FEED_METADATA)
 
-    def generate_feed_with_all_episodes(self):
-        show = self.get_empty_all_episodes_show()
+    def populate_all_episodes_feed(self, show):
         show.xslt = self.xslt
         self.prepare_for_batch()
         # Get all episodes
@@ -219,5 +218,9 @@ class PodcastFeedGenerator:
                 )
                 continue
             show.add_episode(episode)
+
+    def generate_feed_with_all_episodes(self):
+        show = self.get_empty_all_episodes_show()
+        self.populate_all_episodes_feed(show)
 
         return show.rss_str(minimize=not self.pretty_xml)
