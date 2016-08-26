@@ -84,6 +84,7 @@ ALTERNATE_ALL_EPISODES_FEED_NAME = {
     "alleepisoder",
     "allepisodes",
     "*",
+    "alle-podkaster",
 }
 
 
