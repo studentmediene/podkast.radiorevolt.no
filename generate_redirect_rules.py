@@ -7,7 +7,7 @@ from generator.no_episodes_error import NoEpisodesError
 import requests
 
 try:
-    from webserver import feed_server
+    from webserver import feed_server, url_service
 except ImportError:
     print("You must install all the dependencies for the webserver before using this script.", file=sys.stderr)
     sys.exit(1)
@@ -54,7 +54,7 @@ def get_redirect_rule(show, old_url: str, is_temporary: bool) -> str:
 
     old_url = old_url\
         .replace("%i", str(show.id))\
-        .replace("%s", feed_server.get_feed_slug(show))\
+        .replace("%s", url_service.sluggify(show.name))\
         .replace("%t", show.name)
     if "?" in old_url:
         # The URL uses a query string, so we must add rules about that
@@ -65,7 +65,7 @@ def get_redirect_rule(show, old_url: str, is_temporary: bool) -> str:
         # Include an extra newline to separate different rules from each other
         rule += '\nRewriteCond "%{{QUERY_STRING}}" "^{qs}$"\n'.format(qs=re.escape(query_string))
 
-    new_url = feed_server.url_for_feed(show)
+    new_url = feed_server.url_for_feed(url_service.sluggify(show.name))
 
     temporary = "temp" if is_temporary else "permanent"
     rule += 'RewriteRule "^{old}$" "{new}" [R={tmp},L]'.format(old=re.escape(old_url), new=new_url, tmp=temporary)
