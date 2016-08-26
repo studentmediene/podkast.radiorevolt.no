@@ -13,8 +13,6 @@
 
     Additionally, install the following packages if you're planning on using the webserver:
 
-    * apache2-bin
-    * apache2-dev
     * libpq-dev
     * python3-dev
 
@@ -93,6 +91,11 @@ podcast-feed-gen. That's also why it's a bit clunky.
 
 ### Deploying to Apache ###
 
+This guide assumes you're already using Apache on your webserver. Therefore, it will use
+Apache as a reverse proxy, with Gunicorn providing the glue between the Python application
+and HTTP. If you're not already using Apache, you are advised to configure Nginx instead;
+it is much more light-weight. Plenty of guides exist for how to use Nginx with Gunicorn.
+
 1. Create a new user. In this guide it is called `podcastfeedgen`, but you may pick whatever name you prefer.
 
     ```
@@ -117,7 +120,7 @@ podcast-feed-gen. That's also why it's a bit clunky.
 
 4. Make sure debugging is turned off in the configuration files.
 
-5. Make sure the Apache webserver for podcast-feed-gen is started on startup.
+5. Make sure the Gunicorn webserver for podcast-feed-gen is started on startup.
 
    1. Copy `start_server_template.sh` to `start_server.sh` and fill in the variables at the top of the script.
 
@@ -147,9 +150,9 @@ podcast-feed-gen. That's also why it's a bit clunky.
     # Run the following if you have sites-available on your system:
     sudo a2ensite podcast_feed_gen.conf
     # If the following fails, you know you have a configuration error (but the server is still up)
-    apachectl configtest
+    apache2ctl configtest
     # Start actually using the new configuration
-    sudo service apache2 restart
+    apache2ctl graceful
     ```
 
 9. Configure DNS so the desired hostname points to your server. Even if `example.com` points to your server, the same

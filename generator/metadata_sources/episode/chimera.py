@@ -12,6 +12,9 @@ from podgen import htmlencode
 from threading import RLock
 
 
+logger = logging.getLogger(__name__)
+
+
 class Chimera(EpisodeMetadataSource):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -59,9 +62,11 @@ class Chimera(EpisodeMetadataSource):
         try:
             date = datetime.strptime(metadata['public_from'], "%Y-%m-%dT%H:%M:%SZ")
             date = pytz.utc.localize(date)
-            episode.date = date
+            episode.publication_date = date
         except ValueError:
             # published date can be ill-formed
+            logger.info("Couldn't parse date %s", metadata['public_from'],
+                        exc_info=True)
             pass
 
         episode.title = metadata['headline']

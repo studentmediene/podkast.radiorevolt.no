@@ -19,6 +19,11 @@ import os.path
 import logging
 import datetime
 
+# Add source for replacing image URL
+metadata_sources.SHOW_METADATA_SOURCES.append(logo.ReplaceImageURL)
+# Instance used only for the all episodes feed
+replaceImageURL = logo.ReplaceImageURL(dict(), set(), None)
+
 
 # Set up logging so all log messages include request information
 class ContextFilter(logging.Filter):
@@ -111,16 +116,19 @@ def redirect_to_favicon():
 @app.route('/all')
 def output_all_feed():
     gen = get_podcast_feed_generator()
-    gen.register_redirect_services(get_redirect_sound, get_redirect_article)
 
-    feed = gen.generate_feed_with_all_episodes()
+    show = gen.get_empty_all_episodes_show()
+    gen.populate_all_episodes_feed(show)
+    if replaceImageURL.accepts(show):
+        replaceImageURL.populate(show)
+    feed = show.rss_str(minimize=False)
+
     return _prepare_feed_response(feed, datetime.timedelta(minutes=10))
 
 
 @app.route('/<show_name>')
 def output_feed(show_name):
     # Replace image so it fits iTunes' specifications
-    metadata_sources.SHOW_METADATA_SOURCES.append(logo.ReplaceImageURL)
     # Make it pretty, so curious people can learn from it
     gen = get_podcast_feed_generator()
     try:
@@ -137,8 +145,6 @@ def output_feed(show_name):
 
     if not show_name == canonical_slug:
         return redirect(url_for_feed(canonical_slug))
-
-    PodcastFeedGenerator.register_redirect_services(get_redirect_sound, get_redirect_article)
 
     feed = gen.generate_feed(show.id)
     return _prepare_feed_response(feed, settings.FEED_TTL)
@@ -298,3 +304,5 @@ def init_db():
     with sqlite3.connect(settings.REDIRECT_DB_FILE) as c:
         c.execute("CREATE TABLE IF NOT EXISTS sound (original text primary key, proxy text unique)")
         c.execute("CREATE TABLE IF NOT EXISTS article (original text primary key, proxy text unique)")
+
+PodcastFeedGenerator.register_redirect_services(get_redirect_sound, get_redirect_article)

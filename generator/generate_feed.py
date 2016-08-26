@@ -1,4 +1,5 @@
 import logging
+import threading
 
 import copy
 from .metadata_sources.skip_episode import SkipEpisode
@@ -41,6 +42,8 @@ class PodcastFeedGenerator:
         self.hide_progressbar = True if quiet else None
         if quiet:
             set_up_logger.quiet()
+        self.has_prepared_for_batch = False
+        self.prepare_batch_lock = threading.RLock()
 
     @staticmethod
     def register_redirect_services(sound_redirect, article_redirect):
@@ -156,12 +159,17 @@ class PodcastFeedGenerator:
         return feeds
 
     def prepare_for_batch(self):
-        logger.debug("Preparing for processing multiple shows")
-        self.episode_source.populate_all_episodes_list()
-        for source in self.episode_metadata_sources:
-            source.prepare_batch()
-        for source in self.show_metadata_sources:
-            source.prepare_batch()
+        with self.prepare_batch_lock:
+            if self.has_prepared_for_batch:
+                return
+            logger.debug("Preparing for processing multiple shows")
+            self.episode_source.populate_all_episodes_list()
+            for source in self.episode_metadata_sources:
+                source.prepare_batch()
+            for source in self.show_metadata_sources:
+                source.prepare_batch()
+            self.has_prepared_for_batch = True
+            return
 
     def get_show_id_by_name(self, name):
         name = name.lower()
@@ -185,8 +193,10 @@ class PodcastFeedGenerator:
                         # We're not skipping this show, just go on...
                         logger.debug("Ignoring SkipShow", exc_info=True)
 
-    def generate_feed_with_all_episodes(self, title=None):
-        show = Show(name=title or SETTINGS.ALL_EPISODES_FEED_TITLE, id=0)
+    def get_empty_all_episodes_show(self):
+        return Show(id=0, **SETTINGS.ALL_EPISODES_FEED_METADATA)
+
+    def populate_all_episodes_feed(self, show):
         show.xslt = self.xslt
         self.prepare_for_batch()
         # Get all episodes
@@ -208,5 +218,9 @@ class PodcastFeedGenerator:
                 )
                 continue
             show.add_episode(episode)
+
+    def generate_feed_with_all_episodes(self):
+        show = self.get_empty_all_episodes_show()
+        self.populate_all_episodes_feed(show)
 
         return show.rss_str(minimize=not self.pretty_xml)
