@@ -1,7 +1,7 @@
 # Simple webserver framework
 Flask==0.11.1
 # Our own webserver
-mod-wsgi==4.5.4
+gunicorn==19.6.0
 # Image manipulation
 Pillow==3.3.0
 # Database connection (for SlugList)
