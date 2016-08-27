@@ -125,12 +125,11 @@ METADATA_SOURCE = {
     },
 
     # RADIOREVOLT.NO SETTINGS
-    # TODO: Implement metadata source for RadioRevolt.no
-    'RadioRevolt': {
+    'RadioRevolt_no': {
         # Base URL for RADIO REVOLT API (without trailing slash).
         'API_URL': "URL",
 
-        'START_DATE': datetime.date(2000, 1, 1),
+        'START_DATE': datetime.date(2016, 8, 29),
     },
     'ManualChanges': {
         # Path to the configuration file used by ManualChanges for episodes.
