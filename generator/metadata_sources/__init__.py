@@ -9,7 +9,8 @@ from .episode.chimera import Chimera as ChimeraEpisode
 from .show.chimera import Chimera as ChimeraShow
 from .show.manual_changes import ManualChanges as ManualChangesShow
 from .episode.manual_changes import ManualChanges as ManualChangesEpisode
-from .episode.radiorevolt_no import RadioRevolt_no
+from .episode.radiorevolt_no import RadioRevolt_no as RadioRevolt_noEpisode
+from .show.radiorevolt_no import RadioRevolt_no as RadioRevolt_noShow
 
 """Metadata sources.
 
@@ -30,8 +31,8 @@ Attributes:
 
 
 EPISODE_METADATA_SOURCES = [
-    RadioRevolt_no,
     ChimeraEpisode,
+    RadioRevolt_noEpisode,
     ManualChangesEpisode,
     SkipFutureEpisodes,
 ]
@@ -39,5 +40,6 @@ EPISODE_METADATA_SOURCES = [
 
 SHOW_METADATA_SOURCES = [
     ChimeraShow,
+    RadioRevolt_noShow,
     ManualChangesShow
 ]

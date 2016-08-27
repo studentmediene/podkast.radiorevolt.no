@@ -128,7 +128,8 @@ METADATA_SOURCE = {
     'RadioRevolt_no': {
         # Base URL for RADIO REVOLT API (without trailing slash).
         'API_URL': "URL",
-
+        # URL used to construct a show's website; %s will be replaced by its slug
+        'SHOW_WEBSITE_TEMPLATE': "http://example.com/programs/%s/",
         'START_DATE': datetime.date(2016, 8, 29),
     },
     'ManualChanges': {

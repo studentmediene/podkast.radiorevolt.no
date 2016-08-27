@@ -22,15 +22,15 @@ class RadioRevolt_no(EpisodeMetadataSource):
         r = self.requests.get(
             self.settings['API_URL'],
             params={"query": """
-{
-  allEpisodes {
-    podcastUrl,
-    title,
-    lead,
-    createdAt,
-  }
-}
-"""},
+            {
+              allEpisodes {
+                podcastUrl,
+                title,
+                lead,
+                createdAt,
+              }
+            }
+            """},
         )
         r.raise_for_status()
         return r.json()
