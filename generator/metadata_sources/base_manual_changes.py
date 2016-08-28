@@ -35,7 +35,7 @@ class BaseManualChanges(metaclass=ABCMeta):
     def data(self):
         f = None
         try:
-            f = open(self._config_file)
+            f = open(self._config_file, encoding='utf-8')
             return json.load(f)
         except IOError:
             logger.exception("%s is added as a metadata source, but the configuration file "
