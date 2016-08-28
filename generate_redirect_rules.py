@@ -68,7 +68,7 @@ def get_redirect_rule(show, old_url: str, is_temporary: bool) -> str:
     new_url = feed_server.url_for_feed(url_service.sluggify(show.name))
 
     temporary = "temp" if is_temporary else "permanent"
-    rule += 'RewriteRule "^{old}$" "{new}" [R={tmp},L]'.format(old=re.escape(old_url), new=new_url, tmp=temporary)
+    rule += 'RewriteRule "^{old}$" "{new}" [R={tmp},NE,L]'.format(old=re.escape(old_url), new=new_url, tmp=temporary)
     return rule
 
 
