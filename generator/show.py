@@ -91,7 +91,7 @@ class Show(Podcast):
                     # Don't add this episode to the feed
                     logger.info(
                         "Skipping episode named %(name)s (URL: \"%(url)s\")",
-                        {"name": episode.title, "url": episode.sound_url},
+                        {"name": episode.title, "url": episode.media.url},
                         exc_info=True
                     )
                     continue
