@@ -14,6 +14,8 @@ pytest==2.9.2
 Markdown==2.6.6
 # For progress bar
 clint==0.5.1
+# For parsing dates from RadioRevolt.no
+tonyg-rfc3339
 ## The following requirements were added by pip freeze:
 dateutils==0.6.6
 lxml==3.6.1
