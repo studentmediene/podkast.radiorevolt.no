@@ -32,7 +32,7 @@ Attributes:
 
 EPISODE_METADATA_SOURCES = [
     ChimeraEpisode,
-    RadioRevolt_noEpisode,
+    # RadioRevolt_noEpisode,
     ManualChangesEpisode,
     SkipFutureEpisodes,
 ]
