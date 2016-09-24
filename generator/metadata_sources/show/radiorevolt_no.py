@@ -8,11 +8,10 @@ class RadioRevolt_no(ShowMetadataSource):
         super().__init__(*args, **kwargs)
 
     @cached_property
-    def _metadata_by_digas_show_id(self):
+    def _metadata_by_show_name(self):
         data = self._fetch_shows()
         show_list = data['data']['allShows']
-        return {show['digasShowId']: show for show in show_list if
-                show['digasShowId']}
+        return {show['name'].lower(): show for show in show_list}
 
     def _fetch_shows(self):
         r = self.requests.get(
@@ -36,10 +35,10 @@ class RadioRevolt_no(ShowMetadataSource):
 
     def accepts(self, show):
         return super().accepts(show) and \
-            show.id in self._metadata_by_digas_show_id
+            show.name.lower() in self._metadata_by_show_name
 
     def populate(self, show):
-        metadata = self._metadata_by_digas_show_id[show.id]
+        metadata = self._metadata_by_show_name[show.name.lower()]
 
         name = metadata['name']
         image = metadata['image']
