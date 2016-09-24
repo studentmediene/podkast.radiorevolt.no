@@ -193,3 +193,6 @@ webserver/static/images/*
 !webserver/static/images/.keep
 # Rotated log files
 *.log.*.gz
+# Vim
+*.swp
+
