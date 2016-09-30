@@ -79,8 +79,9 @@ class Chimera(EpisodeMetadataSource):
             .convert(markdown_description)
         episode.long_summary = html_description
 
+        # Do not add link
         # article URL is not part of the api, so use search page instead
-        search_string = urllib.parse.urlencode({"q": metadata['headline']})
-        episode.link = "http://dusken.no/search/?" + search_string
+        # search_string = urllib.parse.urlencode({"q": metadata['headline']})
+        # episode.link = "http://dusken.no/search/?" + search_string
 
         episode.image = metadata['image']
