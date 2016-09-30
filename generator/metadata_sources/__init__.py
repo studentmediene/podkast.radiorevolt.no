@@ -40,6 +40,6 @@ EPISODE_METADATA_SOURCES = [
 
 SHOW_METADATA_SOURCES = [
     ChimeraShow,
-    RadioRevolt_noShow,
+    # RadioRevolt_noShow,
     ManualChangesShow
 ]
