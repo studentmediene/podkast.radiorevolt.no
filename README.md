@@ -27,6 +27,8 @@ This project uses Python v3.4 only, and is written so that the podcast feeds can
 
 ## Changelog ##
 
+* October 2nd 2016: New show metadata source; requires new section in `settings.py`
+
 ### 0.2 (not released yet) ###
 
 * Lots of improvements
