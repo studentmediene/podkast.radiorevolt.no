@@ -140,7 +140,11 @@ METADATA_SOURCE = {
         # Path to the configuration file used by ManualChanges for shows.
         # Default is metadata_sources/show/manual_changes.json (relative to this directory).
         'SHOW_CONFIG': os.path.join(os.path.dirname(__file__), "metadata_sources", "show", "manual_changes.json"),
-    }
+    },
+    'SetDefaultImageURL': {
+        # Absolute URL to the default image
+        'IMAGE': "http://example.com/default.png",
+    },
 
 }
 

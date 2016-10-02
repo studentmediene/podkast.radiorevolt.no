@@ -11,6 +11,7 @@ from .show.manual_changes import ManualChanges as ManualChangesShow
 from .episode.manual_changes import ManualChanges as ManualChangesEpisode
 from .episode.radiorevolt_no import RadioRevolt_no as RadioRevolt_noEpisode
 from .show.radiorevolt_no import RadioRevolt_no as RadioRevolt_noShow
+from .show.default_image import SetDefaultImageURL
 
 """Metadata sources.
 
@@ -41,5 +42,6 @@ EPISODE_METADATA_SOURCES = [
 SHOW_METADATA_SOURCES = [
     ChimeraShow,
     # RadioRevolt_noShow,
-    ManualChangesShow
+    ManualChangesShow,
+    SetDefaultImageURL,
 ]
