@@ -33,15 +33,15 @@ Attributes:
 
 EPISODE_METADATA_SOURCES = [
     ChimeraEpisode,
-    # RadioRevolt_noEpisode,
     ManualChangesEpisode,
+    RadioRevolt_noEpisode,
     SkipFutureEpisodes,
 ]
 
 
 SHOW_METADATA_SOURCES = [
     ChimeraShow,
-    # RadioRevolt_noShow,
     ManualChangesShow,
+    RadioRevolt_noShow,
     SetDefaultImageURL,
 ]

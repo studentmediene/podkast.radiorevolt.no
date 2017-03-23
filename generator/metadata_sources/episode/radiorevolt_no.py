@@ -14,23 +14,17 @@ class RadioRevolt_no(EpisodeMetadataSource):
     @cached_property
     def _metadata_by_sound_url(self):
         data = self._fetch_episodes()
-        episode_list = data['data']['allEpisodes']
-        return {episode['podcastUrl']: episode for episode in episode_list if
-                episode['podcastUrl']}
+        episodes = dict()
+        for episode in data:
+            podcast_url = episode['podcastUrl']
+            # Skip all episodes with no associated podcast URL
+            if podcast_url:
+                episodes[podcast_url] = episode
+        return episodes
 
     def _fetch_episodes(self):
         r = self.requests.get(
-            self.settings['API_URL'],
-            params={"query": """
-            {
-              allEpisodes {
-                podcastUrl,
-                title,
-                lead,
-                createdAt,
-              }
-            }
-            """},
+            self.settings['API_URL'] + "/episodes",
         )
         r.raise_for_status()
         return r.json()
@@ -45,7 +39,11 @@ class RadioRevolt_no(EpisodeMetadataSource):
         title = metadata['title']
         lead = metadata['lead']
         date = rfc3339.parse_datetime(metadata['createdAt'])
+        # Slug is not supported yet
+        # link = self.settings['EPISODE_WEBSITE_TEMPLATE'] % metadata['slug']
 
         episode.title = title
-        episode.summary = lead
+        if not episode.summary:
+            episode.summary = lead
         episode.publication_date = max(date, episode.publication_date)
+        # episode.link = link
