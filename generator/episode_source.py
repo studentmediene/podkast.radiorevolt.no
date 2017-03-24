@@ -156,11 +156,15 @@ class EpisodeSource:
             if db:
                 db.close()
 
-
     def episode(self, show, episode_dict):
         return Episode(
             show=show,
-            media=self.media_load(episode_dict['url']),
+            media=Media(
+                episode_dict['url'],
+                episode_dict['filesize'],
+                None,
+                datetime.timedelta(seconds=episode_dict['duration'])
+            ),
             title=episode_dict['title'],
             summary=linkify(htmlencode(episode_dict['comment']))
                 .replace("\n", "<br/>\n"),
