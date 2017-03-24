@@ -1,5 +1,22 @@
 # How to #
 
+## Monitor logs ##
+
+Run `tail -f data/application.log` in a terminal window (when in the application
+directory).
+
+## Application complains about Permission denied ##
+
+Try running the following:
+
+`sudo chown -R podprod data webserver/static/images`
+
+Replace `podprod` with whatever user is used to run the application.
+
+Please note that the application should not be the owner of any other directory
+or file than those mentioned above, in order to minimize consequences of a
+security breach.
+
 ## Upgrade/deploy a new version ##
 
 You might want to have a staging server which is identical to the production server, and first try to upgrade the
