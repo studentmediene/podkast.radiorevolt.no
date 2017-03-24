@@ -29,7 +29,15 @@ This project uses Python v3.4 only, and is written so that the podcast feeds can
 
 * October 2nd 2016: New show metadata source; requires new section in `settings.py`
 
-### 0.2 (not released yet) ###
+### 0.3 ###
+
+* `calculate_durations.py` is ditched, since we now have better ways of getting
+  the filesize and duration (they are now given in the Radio REST API). This
+  means that cronjobs involving that script must be removed, if you don't want
+  constant errors.
+* Correct time of day is now used, instead of the earlier placeholder (noon).
+
+### 0.2 ###
 
 * Lots of improvements
 * Switched from feedgen to podgen (so you must run
@@ -56,8 +64,6 @@ This project uses Python v3.4 only, and is written so that the podcast feeds can
     <dd>Output special RSS feed with all episodes from all shows in a single feed.</dd>
     <dt>batch_generate_feed.py</dt>
     <dd>Write RSS feeds for all known podcasts.</dd>
-    <dt>calculate_durations.py</dt>
-    <dd>Write duration information for episodes which don't have it (time consuming!).</dd>
     <dt>server.py</dt>
     <dd>Run web server which generates podcast feeds as they're requested.</dd>
     <dt>generate_redirect_rules.py</dt>

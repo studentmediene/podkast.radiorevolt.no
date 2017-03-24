@@ -113,50 +113,6 @@ class EpisodeSource:
                 raise e
         return self.episodes_by_show[show.id]
 
-    def media_load(self, sound_url):
-        """Return a Media object for a given sound url."""
-        db = None
-        try:
-            # Create a new database connection (a new one each time, because
-            # of threading)
-            db = sqlite3.connect(SETTINGS['MEDIA_OBJECTS_DB'])
-            db.execute("PRAGMA busy_timeout = 30000")
-            # Try to fetch the media object
-            c = db.execute("SELECT obj FROM media WHERE id=?", (sound_url,))
-            value = c.fetchone()
-            c.close()
-            # Did we get it?
-            if value:
-                return pickle.loads(value[0])
-            else:
-                # Nope, we have to live without size and duration
-                return Media(sound_url)
-        finally:
-            if db:
-                db.close()
-
-    def media_save(self, media_obj):
-        db = sqlite3.connect(SETTINGS['MEDIA_OBJECTS_DB'])
-        db.execute("PRAGMA busy_timeout = 30000")
-        try:
-            update = self.media_load(media_obj.url).duration
-
-            if not update:
-                try:
-                    db.execute("INSERT INTO media (id, obj) VALUES (:id, :obj)",
-                               {"id": media_obj.url, "obj": pickle.dumps(media_obj)})
-                except sqlite3.IntegrityError:
-                    # There is already an entry for this episode – someone else
-                    # has saved while we were busy, so just update it
-                    update = True
-            if update:
-                db.execute("UPDATE media SET obj=:obj WHERE id=:id",
-                           {"id": media_obj.url, "obj": pickle.dumps(media_obj)})
-            db.commit()
-        finally:
-            if db:
-                db.close()
-
     def episode(self, show, episode_dict):
         # Find the publication date
         publication_datetime_str = str(episode_dict['dato']) + " 00:00:00"
