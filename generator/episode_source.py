@@ -9,6 +9,7 @@ import sqlite3
 from podgen import Media, Person, htmlencode
 import pickle
 import re
+import pytz
 
 
 _urlfinderregex = re.compile(r'http([^\.\s]+\.[^\.\s<>]*)+[^\.\s<>]{2,}')
@@ -157,6 +158,23 @@ class EpisodeSource:
                 db.close()
 
     def episode(self, show, episode_dict):
+        # Find the publication date
+        publication_datetime_str = str(episode_dict['dato']) + " 00:00:00"
+        publication_datetime_format = "%Y%m%d %H:%M:%S"
+        # Start out with midnight
+        publication_date = datetime.datetime.strptime(
+            publication_datetime_str,
+            publication_datetime_format
+        )
+        # Then go to the specified time
+        publication_datetime_naive = \
+            publication_date + datetime.timedelta(seconds=episode_dict['time'])
+        # And associate a timezone with that datetime
+        timezone = pytz.timezone("Europe/Oslo")
+        publication_datetime_aware = \
+            timezone.localize(publication_datetime_naive)
+
+        # Create our episode object
         return Episode(
             show=show,
             media=Media(
@@ -168,8 +186,7 @@ class EpisodeSource:
             title=episode_dict['title'],
             summary=linkify(htmlencode(episode_dict['comment']))
                 .replace("\n", "<br/>\n"),
-            publication_date=datetime.datetime.strptime(str(episode_dict['dato']) + " 12:00:00 " + time.strftime("%z"),
-                                            "%Y%m%d %H:%M:%S %z"),
+            publication_date=publication_datetime_aware,
             authors=[Person(name=episode_dict['author'])] if episode_dict['author'] else [],
         )
 
