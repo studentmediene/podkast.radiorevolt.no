@@ -95,9 +95,6 @@ EPISODE_SOURCE = {
     # Base URL for the Radio Rest API (without trailing slash). Example: "http://example.org/v1"
     # Reuse value from SHOW_SOURCE
     'RADIO_REST_API_URL': SHOW_SOURCE['RADIO_REST_API_URL'],
-    # Where to store the database file for caching episode size and duration.
-    # A new one will be created if it doesn't exist.
-    'MEDIA_OBJECTS_DB': os.path.join(current_folder, "..", "data", "media_obj.db")
 }
 
 # METADATA SOURCE SETTINGS - key must match the class name.

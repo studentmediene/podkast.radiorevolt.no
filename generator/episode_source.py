@@ -145,13 +145,3 @@ class EpisodeSource:
             publication_date=publication_datetime_aware,
             authors=[Person(name=episode_dict['author'])] if episode_dict['author'] else [],
         )
-
-
-def create_media_table():
-    _create_table = sqlite3.connect(SETTINGS['MEDIA_OBJECTS_DB'])
-    _create_table.execute(
-        "create table if not exists media (id text primary key, obj blob)")
-
-    _create_table.close()
-
-create_media_table()
