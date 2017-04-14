@@ -1,0 +1,31 @@
+// Assumes you have set up cache directory for nginx in /var/cache/nginx
+uwsgi_cache_path /var/cache/nginx 
+    levels=1:2 
+    keys_zone=podcast_cache:10m 
+    max_size=2g 
+    inactive=60m 
+    use_temp_path=off;
+
+server {
+    // Change which port nginx shall accept connections on:
+    listen <port>;
+    listen [::]:<port>;
+
+    // Caching for the podcast feeds
+    uwsgi_cache podcast_cache;
+    uwsgi_cache_use_stale error timeout http_500 http_503 updating;
+    uwsgi_cache_lock on;
+    uwsgi_cache_key $uri;
+
+    location / {
+	include uwsgi_params;
+	// Fill in the path to podkast.radiorevolt.no application:
+        uwsgi_pass unix:/path/to/podkast.radiorevolt.no/data/uwsgi.sock;
+    }
+
+    location /static/ {
+	// Fill in path to podkast.radiorevolt.no application:
+        alias /path/to/podkast.radiorevolt.no/webserver/static/;
+        autoindex off;
+    }
+}
