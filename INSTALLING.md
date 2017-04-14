@@ -3,6 +3,8 @@
 
 ## Getting it up and running ##
 
+**TODO:** Make this a guide for CentOS.
+
 1. Install the following packages (assuming Ubuntu/Debian):
 
     * libxml2
@@ -27,8 +29,9 @@
     * tk8.5-dev
 
     More generally, you need to satisfy the dependencies of the packages listed in the requirement files (see below).
+    See `centos_packages.txt` for a list of packages to install for CentOS.
 
-2. Install build dependencies for python and its lxml-bindings by running `sudo apt-get build-dep python3-lxml` (still assuming Ubuntu/Debian)
+2. Install build dependencies for python and its lxml-bindings by running `sudo apt-get build-dep python3-lxml` (still assuming Ubuntu/Debian) (or don't)
 
 3. [Use virtualenv!](https://iamzed.com/2009/05/07/a-primer-on-virtualenv/)
 
