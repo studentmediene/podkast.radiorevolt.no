@@ -11,6 +11,8 @@ server {
     listen <port>;
     listen [::]:<port>;
 
+    access_log /var/log/nginx/podkast.access.log  main;
+
     // Caching for the podcast feeds
     uwsgi_cache podcast_cache;
     uwsgi_cache_use_stale error timeout http_500 http_503 updating;
