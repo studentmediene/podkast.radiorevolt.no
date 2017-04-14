@@ -55,6 +55,7 @@
 
 5. Copy `generator/settings_template.py` to `generator/settings.py` and fill in settings.
 6. Do the same with `webserver/settings_template.py` if you intend to use the provided web server.
+7. Do the same with `podkast.radiorevolt.no_template.ini`, to configure uWSGI.
 7. If you haven't already, you'll need to set up a PostgreSQL server, user and
    database (again, if you'll use the provided web server).
 

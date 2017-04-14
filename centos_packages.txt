@@ -1,0 +1,14 @@
+libxml2
+libxml2-devel
+postgresql
+postgresql-server
+libxslt-devel
+libjpeg-turbo
+libjpeg-turbo-devel
+zlib-devel
+freetype-devel
+lcms2-devel
+libwebp-devel
+tcl
+tk
+postgresql-devel

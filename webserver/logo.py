@@ -1,4 +1,5 @@
 import os.path
+import stat
 import subprocess
 import logging
 from urllib.parse import urlparse, unquote
@@ -181,6 +182,7 @@ class LocalImage:
             original_image.close()
             # Overwrite the possibly existing image, as an atomic action
             subprocess.check_call(["mv", new_image.name, self.path])
+            os.chmod(self.path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IROTH)
         except Exception:
             if new_image:
                 os.remove(new_image.name)

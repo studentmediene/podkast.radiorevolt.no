@@ -3,7 +3,8 @@ Description=Frond-end serving fresh podcast feeds
 
 [Service]
 Type=simple
-ExecStart=/bin/sh "sudo -u <username> <path>/start_server.sh"
+User=<username>
+ExecStart=/usr/bin/make -C <path>/podkast.radiorevolt.no
 Restart=always
 
 [Install]
