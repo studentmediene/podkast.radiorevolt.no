@@ -12,11 +12,11 @@
     "author_email": "Email address of the author. Defaults to the show's editorial_email.",
     "explicit": "(remove quotes) true if this episode is not appropiate for children, false if this show is appropiate, null if it's undecided. Setting this overrides the show's explicit value for this episode only."
   },
-  "http://pappagorg.radiorevolt.no/podkast/Nerdeprat%20%23057%20-%20Rollespill.MP3":
+  "https://filer.radiorevolt.no/podkast/Nerdeprat%20%23057%20-%20Rollespill.MP3":
   {
     "publication_date": "2016-11-09 19:49:00 +0100"
   },
-  "http://pappagorg.radiorevolt.no/podkast/Garasjen%20tar%20skjegget.MP3":
+  "https://filer.radiorevolt.no/podkast/Garasjen%20tar%20skjegget.MP3":
   {
     "publication_date": "2016-11-29 18:00:00 +0100"
   }

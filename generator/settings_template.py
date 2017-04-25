@@ -76,7 +76,7 @@ CANCEL = threading.Event()
 # SHOW SOURCE SETTINGS
 
 SHOW_SOURCE = {
-    # Base URL for the Radio Rest API (without trailing slash). Example: "http://example.org/v1"
+    # Base URL for the Radio Rest API (without trailing slash). Example: "http://example.org/v2"
     'RADIO_REST_API_URL': "URL HERE",
 
     # Username for authenticating with the Radio Rest API
@@ -92,7 +92,7 @@ SHOW_SOURCE = {
 current_folder = os.path.dirname(__file__)
 
 EPISODE_SOURCE = {
-    # Base URL for the Radio Rest API (without trailing slash). Example: "http://example.org/v1"
+    # Base URL for the Radio Rest API (without trailing slash). Example: "http://example.org/v2"
     # Reuse value from SHOW_SOURCE
     'RADIO_REST_API_URL': SHOW_SOURCE['RADIO_REST_API_URL'],
 }

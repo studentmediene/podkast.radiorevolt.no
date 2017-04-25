@@ -4,10 +4,7 @@ from .no_episodes_error import NoEpisodesError
 from .episode import Episode
 import threading
 import datetime
-import time
-import sqlite3
 from podgen import Media, Person, htmlencode
-import pickle
 import re
 import pytz
 
@@ -139,6 +136,8 @@ class EpisodeSource:
                 None,
                 datetime.timedelta(seconds=episode_dict['duration'])
             ),
+            id="radiorevolt.no/podkast/episode/" + str(episode_dict['id']),
+            deprecated_url=episode_dict['deprecated_url'],
             title=episode_dict['title'],
             summary=linkify(htmlencode(episode_dict['comment']))
                 .replace("\n", "<br/>\n"),

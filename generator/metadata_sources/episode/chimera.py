@@ -52,10 +52,10 @@ class Chimera(EpisodeMetadataSource):
         return {episode['podcast_url']: episode for episode in episodes}
 
     def accepts(self, episode) -> bool:
-        return super().accepts(episode) and episode.media.url in self._get_episodes(episode.show.id)
+        return super().accepts(episode) and episode.deprecated_url in self._get_episodes(episode.show.id)
 
     def populate(self, episode) -> None:
-        metadata = self._get_episodes(episode.show.id)[episode.media.url]
+        metadata = self._get_episodes(episode.show.id)[episode.deprecated_url]
         if not metadata['is_published']:
             raise SkipEpisode
 
