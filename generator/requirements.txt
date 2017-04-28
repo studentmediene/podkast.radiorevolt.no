@@ -1,3 +1,7 @@
+--trusted-host pypi-radio.smint.no
+--extra-index-url http://pypi-radio.smint.no/
+# Get settings from parameter files
+pypar==1.0.0
 # Easily send HTTP requests
 requests==2.11.0
 # Easily generate podcast feeds
