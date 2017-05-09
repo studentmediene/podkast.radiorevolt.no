@@ -328,5 +328,9 @@
     "2695": {
         "image": "https://radiorevolt.no/media/uploads/images/Krenket_svart_gjennomsiktig_1-1.png",
         "description": "Gjermund, Mina og Ellen tar deg med på en reise i studentlivet, hver Torsdag fra klokken 16:00-17:00. Skam, fylla, kollektiv-stories og mye mere! Så her er det bare å skru på radioen og kose seg!"
+    },
+    "2697": {
+        "image": "https://radiorevolt.no/media/django-summernote/2017-05-09/2ab13803-73e4-4d2b-96d7-5f27b4a6838d.png",
+        "description": "Dusken podkast er studentavisen Under Duskens helt egen podkast. Podkasten vil komme ut annenhver uke, samme som papiravisen, og vil gå i dybden på et utvalg av saker du finner i siste nummer. I hver episode får du sjansen til å bli kjent med journalistene som har skrevet sakene, kildene som blir intervjuet i bladet, og du får innblikk i hvordan vi produserer avisen. Dette er en podkast for studenter, av studenter."
     }
 }
