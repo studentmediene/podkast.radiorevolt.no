@@ -1,7 +1,7 @@
 # Easily send HTTP requests
-requests==2.11.0
+requests==2.11.1
 # Easily generate podcast feeds
-podgen==1.0.0b4
+podgen==1.0.0
 # Get duration of an MP3 file
 tinytag==0.16.0
 # Easily cache properties which could take some time to calculate
@@ -11,17 +11,28 @@ pytz==2016.6.1
 # Testing without boilerplate
 pytest==2.9.2
 # For Chimera episode source
-Markdown==2.6.6
+Markdown==2.6.8
 # For progress bar
 clint==0.5.1
 # For parsing dates from RadioRevolt.no
-tonyg-rfc3339
+tonyg-rfc3339==0.1
 ## The following requirements were added by pip freeze:
-dateutils==0.6.6
-lxml==3.6.1
-py==1.4.31
-python-dateutil==2.5.3
-six==1.10.0
 args==0.1.0
-## The following requirements were added by pip freeze:
-future==0.15.2
+click==6.6
+dateutils==0.6.6
+feedgen==0.3.2
+Flask==0.11.1
+future==0.16.0
+gunicorn==19.6.0
+itsdangerous==0.24
+Jinja2==2.8
+lxml==3.7.3
+MarkupSafe==0.23
+mod-wsgi==4.5.4
+Pillow==3.3.0
+pkg-resources==0.0.0
+psycopg2==2.6.2
+py==1.4.33
+python-dateutil==2.6.0
+six==1.10.0
+Werkzeug==0.11.10

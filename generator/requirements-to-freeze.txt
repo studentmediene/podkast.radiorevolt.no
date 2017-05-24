@@ -1,0 +1,18 @@
+# Easily send HTTP requests
+requests~=2.11.0
+# Easily generate podcast feeds
+podgen~=1.0.0
+# Get duration of an MP3 file
+tinytag~=0.16.0
+# Easily cache properties which could take some time to calculate
+cached-property~=1.3.0
+# Make it possible to work with timezones
+pytz~=2016.6.1
+# Testing without boilerplate
+pytest~=2.9.2
+# For Chimera episode source
+Markdown~=2.6.6
+# For progress bar
+clint~=0.5.1
+# For parsing dates from RadioRevolt.no
+tonyg-rfc3339
