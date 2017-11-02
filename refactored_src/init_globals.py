@@ -1,6 +1,10 @@
+"""
+This module binds the stateful data retrievers to their settings.
+"""
 import requests
 
-from show_source import ShowSource
+from .show_source import ShowSource
+from .episode_source import EpisodeSource
 
 
 def init_globals(new_global_dict: dict, settings):
@@ -9,6 +13,7 @@ def init_globals(new_global_dict: dict, settings):
     new_globals = {
         "requests": requests_session,
         "show_source": create_show_source(requests_session, settings),
+        "episode_source": create_episode_source(requests_session, settings),
     }
 
     new_global_dict.update(new_globals)
@@ -32,3 +37,8 @@ def create_show_source(requests_session, settings):
     )
 
 
+def create_episode_source(requests_session, settings):
+    return EpisodeSource(
+        requests_session,
+        settings['rest_api']['url']
+    )

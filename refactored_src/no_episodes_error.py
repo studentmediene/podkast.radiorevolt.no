@@ -1,0 +1,2 @@
+class NoEpisodesError(Exception):
+    pass
