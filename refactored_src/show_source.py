@@ -2,7 +2,7 @@ import datetime
 
 import requests
 import requests.auth
-from feed_utils.show import Show
+from .feed_utils.show import Show
 from cached_property import threaded_cached_property as cached_property
 
 

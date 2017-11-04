@@ -53,7 +53,7 @@ def customize_logger():
     set_up_logger.rotatingHandler.addFilter(ContextFilter())
 
 
-def customize_flask(app, debug=False, update_global_func):
+def customize_flask(app, update_global_func, debug=False):
     # Make sure everything works when behind Apache proxy
     app.wsgi_app = ProxyFix(app.wsgi_app)
     # Set debug level to whatever the settings say

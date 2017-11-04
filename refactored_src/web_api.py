@@ -62,3 +62,4 @@ def api_help():
            + "</pre>"
 
 def register_api_routes(app, settings):
+    pass

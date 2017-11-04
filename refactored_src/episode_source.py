@@ -6,7 +6,7 @@ import datetime
 from podgen import Media, Person, htmlencode
 import pytz
 
-from utils.linkify import linkify
+from .utils.linkify import linkify
 
 
 class EpisodeSource:

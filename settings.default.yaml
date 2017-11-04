@@ -1,0 +1,28 @@
+rest_api:
+  url: https://api.example.com/v2
+  username: hackme
+  password: hackme
+
+processors:
+  example:
+    bypass:
+      - "hei"
+      - "hallo"
+  Testing:
+    bypass:
+      - "your mum"
+      - "Hei der"
+    api: "http://example.com/api"
+
+pipelines:
+  show:
+    default: []
+      # More to come
+  episode:
+    default:
+      - Testing:
+          start_date: 2017-09-01
+          end_date: 2017-09-30
+    spotify: []
+
+source_data_ttl: 900  # 15 minutes
