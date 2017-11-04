@@ -37,7 +37,7 @@ def update_global_if_stale():
             init_globals(new_global_dict, settings)
 
             now = datetime.datetime.now(datetime.timezone.utc)
-            ttl = datetime.timedelta(seconds=settings['source_data_ttl'])
+            ttl = datetime.timedelta(seconds=settings['caching']['source_data_ttl'])
             new_expire_time = now + ttl
 
             global_values = (new_global_dict, new_expire_time)

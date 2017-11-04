@@ -47,7 +47,7 @@ def create_show_source(requests_session, settings):
     return ShowSource(
         requests_session,
         api_settings['url'],
-        api_settings['username'],
+        api_settings['user'],
         api_settings['password']
     )
 

@@ -1,9 +1,41 @@
+# Connection settings for the Radio REST API
 rest_api:
+  # URL at which the API can be found
   url: https://api.example.com/v2
-  username: hackme
+  # Username and password used to authenticate with the API
+  user: hackme
   password: hackme
 
+# Connection settings for the PostgreSQL database
+db:
+  # The host where the database is located. Remove the line if the host is
+  # localhost.
+  host: "db.example.com"
+  # Port to use for connections. 5432 is the default.
+  port: 5432
+  # Database to use
+  database: podcastdb
+  # Username and password used to authenticate with the database
+  user: hackme
+  password: hackme
+
+# Global settings for the episode and show processors.
 processors:
+  # When a processor exists as both a show and an episode processor, its
+  # global settings will be shared between the two versions.
+
+  # Some settings are observed by all processors. They are:
+  # bypass_show: List of show IDs to bypass (for show processors).
+  # bypass_episode: List of episode URLs to bypass (for episode processors).
+  # first_date: YYYY-MM-DD for the first date of episodes to process. Beginning
+  #   of time assumed if not present.
+  # last_date: YYYY-MM-DD for the last date of episodes to process. End of time
+  #   assumed if not present.
+
+  # Format:
+  # ClassName:
+  #   setting1: value1
+  #   setting2: value2
   example:
     bypass:
       - "hei"
@@ -14,15 +46,92 @@ processors:
       - "Hei der"
     api: "http://example.com/api"
 
+
+# Configuration of the processing pipelines
+
+# Each pipeline represents one sequence of processors which are applied one
+# after another on either shows or episodes. They do stuff like find metadata
+# or hold back episodes which should not be published.
+
+# We have different pipelines. Their use is described below.
+
+# You may set local settings for the processors that are set up, which override
+# their global settings (see above). This way, you may use a processor multiple
+# times, but with different settings. This is true even within the same
+# pipeline. Observed settings are the same, except for bypass_show and
+# bypass_episode which are simply named bypass.
+# Note that the overwriting logic is dead simple, so if you define a bypass list
+# here, it will overwrite the entire bypass list defined globally, so you'll
+# need to list them all again.
+
+# All classes defined inside the episode_processors and show_processors
+# directories are automatically available for use as processors.
+
+# Format:
+# pipelines:
+#   show or episode:
+#     name_of_pipeline:
+#       - Processor1ClassName:
+#           setting1: value1
+#           setting2: value2
+#           ...
+#       - Processor2ClassName:
+#           setting1: value1
+#           setting2: value2
+#           ...
+#       ...
+#     name_of_pipeline_2:
+#        ...
 pipelines:
+  # Pipelines for shows
   show:
+    # The pipeline used for all shows.
     default: []
       # More to come
+  # Pipelines for episodes
   episode:
+    # The pipeline used for all episodes.
     default:
       - Testing:
           start_date: 2017-09-01
           end_date: 2017-09-30
+    # The pipeline applied after default, for feeds intended for Spotify
     spotify: []
 
-source_data_ttl: 900  # 15 minutes
+# Settings related to caching (reusing results for some time).
+# The time before a change in the data propagates to clients is
+# somewhere between min(source_data_ttl, feed_ttl) and
+# source_data_ttl + feed_ttl.
+caching:
+  # Number of seconds to cache data obtained from outside
+  source_data_ttl: 840  # 14 minutes
+  # Number of seconds to let clients and the webserver cache the feed
+  feed_ttl: 960  # 16 minutes
+  # Number to multiply feed_ttl by when serving a show marked as complete
+  completed_ttl_factor: 10.0
+
+# Settings used for the part which ensures clients go through us to obtain
+# an episode, so this host can be used to log such traffic.
+redirector:
+  # For the time being, this is separate from PostgreSQL and must point to
+  # the sqlite file.
+  db_file: /path/to/data/redirects.db
+
+# Miscellaneous settings concerning the webserver
+web:
+  # URL to redirect to when the user accesses /
+  official_website: https://example.com
+
+# Miscellaneous settings for the feed generation
+feed:
+  # Information about who owns this podcast (this will be public!)
+  owner:
+    name: "Example Radio"
+    mail: "it@example.org"
+  # Metadata for the special feed with all episodes. You may use any Podcast
+  # attributes, as documented in http://podgen.readthedocs.io/en/latest/user/basic_usage_guide/part_1.html
+  metadata_all_episodes:
+    name: "All podcasts for Example Radio"
+    description: "All podcast episodes from Example Radio, in one feed."
+    image: "http://static.example.org/all.png"
+
