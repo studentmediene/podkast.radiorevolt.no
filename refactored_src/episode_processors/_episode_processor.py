@@ -1,5 +1,4 @@
 from abc import ABCMeta, abstractmethod
-from ..utils.setting_parsers import parse_date
 
 
 __all__ = ["EpisodeProcessor"]
