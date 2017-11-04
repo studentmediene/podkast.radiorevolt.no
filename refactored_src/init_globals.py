@@ -29,6 +29,8 @@ def init_globals(new_global_dict: dict, settings):
                 requests_session, settings, "spotify"
             ),
         },
+        "url_service": create_url_service(settings),
+        "redirector": create_redirector(settings),
     }
 
     new_global_dict.update(new_globals)

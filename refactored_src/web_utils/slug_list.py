@@ -1,6 +1,5 @@
 import psycopg2.extensions
 
-from . import settings
 from .no_such_slug import NoSuchSlug
 from .slug_already_in_use import SlugAlreadyInUse
 
