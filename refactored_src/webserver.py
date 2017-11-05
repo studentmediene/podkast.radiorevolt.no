@@ -4,10 +4,10 @@ import logging
 
 from flask import Flask
 
-#from .flask_customization import customize_flask, customize_logger
-#from .web_api import register_api_routes
-#from .redirects import register_episode_redirect, register_article_redirect
-#from .web_feed import register_feed_routes
+from .flask_customization import customize_flask, customize_logger
+from .web_api import register_api_routes
+from .redirects import register_episode_redirect, register_article_redirect
+from .web_feed import register_feed_routes
 from .settings_loader import load_settings
 from .init_globals import init_globals
 
