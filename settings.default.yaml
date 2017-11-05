@@ -109,6 +109,9 @@ caching:
   feed_ttl: 960  # 16 minutes
   # Number to multiply feed_ttl by when serving a show marked as complete
   completed_ttl_factor: 10.0
+  # Number of seconds to let clients and the webserver cache the all episodes
+  # feed
+  all_episodes_ttl: 600  # 10 minutes
 
 # Settings used for the part which ensures clients go through us to obtain
 # an episode, so this host can be used to log such traffic.

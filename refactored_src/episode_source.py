@@ -83,6 +83,23 @@ class EpisodeSource:
                                                    for episode_dict in self._get_episode_data(show)]
         return self.episodes_by_show[show.id]
 
+    def get_all_episodes_list(self, show_source):
+        """List of Episode objects, from all shows."""
+        self.populate_all_episodes_list()
+
+        episodes = self.all_episodes
+        episodes = filter(lambda e: e['program_defnr'] != 0, episodes)
+        # Create tuple out of iterator, so it can be used twice
+        episodes = tuple(episodes)
+
+        shows = map(lambda e: e['program_defnr'], episodes)
+        shows = map(lambda s: show_source.shows[s], shows)
+
+        # See https://docs.python.org/3.4/library/functions.html#map to
+        # understand
+        final_episodes = map(self.episode, shows, episodes)
+        return list(final_episodes)
+
     def episode(self, show, episode_dict):
         # Find the publication date
         publication_datetime_str = str(episode_dict['dato']) + " 00:00:00"

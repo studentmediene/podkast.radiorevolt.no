@@ -1,6 +1,6 @@
 import logging
 
-from flask import request
+from flask import request, url_for, redirect, Flask
 from werkzeug.contrib.fixers import ProxyFix
 
 from . import set_up_logger
@@ -53,10 +53,29 @@ def customize_logger():
     set_up_logger.rotatingHandler.addFilter(ContextFilter())
 
 
-def customize_flask(app, update_global_func, debug=False):
+def ignore_get():
+    if request.base_url != request.url:
+        return redirect(request.base_url, 301)
+
+
+def redirect_to_favicon():
+    return redirect(url_for("static", filename="favicon.ico"))
+
+
+def customize_flask(app: Flask, update_global_func, debug=False):
     # Make sure everything works when behind Apache proxy
     app.wsgi_app = ProxyFix(app.wsgi_app)
     # Set debug level to whatever the settings say
     app.debug = debug
     # Make sure we do not use stale data
     app.before_request(update_global_func)
+    # Redirect so we remove query strings (or else, you could circumvent the
+    # cache by using arbitrary get parameters)
+    app.before_request(ignore_get)
+    # Ensure the favicon is available at /favicon.ico (we have no other way of
+    # specifying a favicon when serving an XML document)
+    app.add_url_rule(
+        "/favicon.ico",
+        "redirect_to_favicon",
+        redirect_to_favicon
+    )
