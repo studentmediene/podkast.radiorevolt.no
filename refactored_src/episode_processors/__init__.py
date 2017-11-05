@@ -1,5 +1,6 @@
 from ..utils.find_modules import find_modules as _find_modules
 from ._episode_processor import EpisodeProcessor
+from ._skip_episode import SkipEpisode
 import logging as _logging
 
 _modules = _find_modules(__file__)

@@ -1,0 +1,2 @@
+class SkipShow(BaseException):
+    pass

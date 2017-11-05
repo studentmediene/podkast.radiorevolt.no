@@ -1,0 +1,2 @@
+class SkipEpisode(BaseException):
+    pass
