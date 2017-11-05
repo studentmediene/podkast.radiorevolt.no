@@ -14,7 +14,7 @@ from .web_utils.redirector import Redirector
 from .redirects import SOUND_REDIRECT_ENDPOINT, ARTICLE_REDIRECT_ENDPOINT
 
 
-def init_globals(new_global_dict: dict, settings):
+def init_globals(new_global_dict: dict, settings, get_global):
     requests_session = create_requests()
     url_service = create_url_service(settings)
 
@@ -24,13 +24,13 @@ def init_globals(new_global_dict: dict, settings):
         "episode_source": create_episode_source(requests_session, settings),
         "processors": {
             "show_default": create_show_processors(
-                requests_session, settings, "default"
+                requests_session, settings, get_global, "default"
             ),
             "ep_default": create_episode_processors(
-                requests_session, settings, "default"
+                requests_session, settings, get_global, "default"
             ),
             "ep_spotify": create_episode_processors(
-                requests_session, settings, "spotify"
+                requests_session, settings, get_global, "spotify"
             ),
         },
         "url_service": url_service,
@@ -65,15 +65,15 @@ def create_episode_source(requests_session, settings):
     )
 
 
-def create_episode_processors(requests_session, settings, pipeline):
-    return create_processors(requests_session, settings, "episode", episode_processors, pipeline)
+def create_episode_processors(requests_session, settings, get_global, pipeline):
+    return create_processors(requests_session, settings, get_global, "episode", episode_processors, pipeline)
 
 
-def create_show_processors(requests_session, settings, pipeline):
-    return create_processors(requests_session, settings, "show", show_processors, pipeline)
+def create_show_processors(requests_session, settings, get_global, pipeline):
+    return create_processors(requests_session, settings, get_global, "show", show_processors, pipeline)
 
 
-def create_processors(requests_session, settings, pipeline_type, package, pipeline):
+def create_processors(requests_session, settings, get_global, pipeline_type, package, pipeline):
     # Each pipeline is a list of dict, iterate over the list
     pipeline_conf = settings['pipelines'][pipeline_type][pipeline]
     initialized_processors = []
@@ -103,7 +103,7 @@ def create_processors(requests_session, settings, pipeline_type, package, pipeli
             raise RuntimeError("The class {0} in pipeline {2}.{1} was not found. Available classes: {3}"
                                .format(class_name, pipeline, pipeline_type, available_classes))
         # Use it
-        processor = processor_func(processor_conf, processor_conf['bypass'], requests_session)
+        processor = processor_func(processor_conf, processor_conf['bypass'], requests_session, get_global)
         initialized_processors.append(processor)
 
 

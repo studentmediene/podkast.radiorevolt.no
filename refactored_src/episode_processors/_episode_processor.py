@@ -11,7 +11,7 @@ class EpisodeProcessor(metaclass=ABCMeta):
     end_date_key = "end_date"
 
 
-    def __init__(self, settings, bypass, requests_session):
+    def __init__(self, settings, bypass, requests_session, get_global):
         """Initialize new episode metadata source.
 
         The default implementation sets self.settings to the value of settings, and self.bypass to the value of bypass.
@@ -20,6 +20,10 @@ class EpisodeProcessor(metaclass=ABCMeta):
             settings (dict): Settings for this metadata source, taken from generator/settings.py.
             bypass (set): Set of episode URLs which this metadata source should bypass (ie. not accept)
             requests_session: Requests session which will be used when making requests to other servers.
+            get_global: Function for obtaining the global instances of classes
+                like EpisodeSource, ShowSource, Redirector etc. Should
+                normally not be necessary, but some special processors might
+                need them.
         """
         self.settings = settings
         """dict: Dictionary with the settings for this episode metadata source (fetched from generator/settings.py)."""
@@ -27,6 +31,9 @@ class EpisodeProcessor(metaclass=ABCMeta):
         """set: Set of episode.sound_url addresses which this source must bypass (ie. not accept)."""
         self.requests = requests_session
         """Requests session which shall be used when making requests to other servers."""
+        self.get_global = get_global
+        """Function for obtaining instances of ShowSource, EpisodeSource etc.
+        For special purpose processors only."""
 
     @abstractmethod
     def accepts(self, episode) -> bool:

@@ -6,7 +6,7 @@ __all__ = ["ShowProcessor"]
 
 class ShowProcessor(metaclass=ABCMeta):
     """Class which provides metadata for a subset of all shows."""
-    def __init__(self, settings, bypass, requests_session):
+    def __init__(self, settings, bypass, requests_session, get_global):
         """Initialize this show metadata source.
 
         The default implementation populates self.settings and self.bypass with values from the arguments.
@@ -15,6 +15,10 @@ class ShowProcessor(metaclass=ABCMeta):
             settings (dict): Settings for this metadata source, taken from generator/settings.py.
             bypass (set): Set of show_ids (DigAS ID) which this metadata source should bypass (ie. not accept).
             requests_session: Requests session which will be used when making requests to other servers.
+            get_global: Function for obtaining the global instances of classes
+                like EpisodeSource, ShowSource, Redirector etc. Should
+                normally not be necessary, but some special processors might
+                need them.
         """
         self.settings = settings
         """dict: Settings for this metadata source, taken from generator/settings.py."""

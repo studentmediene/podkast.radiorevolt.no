@@ -34,7 +34,7 @@ def update_global_if_stale():
         if global_dict is None or has_expired():
             logging.info("global_values is stale, creating anew…")
             new_global_dict = dict()
-            init_globals(new_global_dict, settings)
+            init_globals(new_global_dict, settings, get_global_func)
 
             now = datetime.datetime.now(datetime.timezone.utc)
             ttl = datetime.timedelta(seconds=settings['caching']['source_data_ttl'])
