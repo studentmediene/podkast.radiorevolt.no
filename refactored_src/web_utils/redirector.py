@@ -184,3 +184,23 @@ class Redirector:
                       "(original text primary key, proxy text unique)")
             c.execute("CREATE TABLE IF NOT EXISTS article "
                       "(original text primary key, proxy text unique)")
+
+    def get_all_sound(self) -> dict:
+        """Get dictionary with intermediate ID as key and original URL as value.
+        """
+        return self._get_all("sound")
+
+    def get_all_article(self) -> dict:
+        """Get dictionary with intermediate ID as key and original URL as value.
+        """
+        return self._get_all("article")
+
+    def _get_all(self, table):
+        result = dict()
+        with sqlite3.connect(self.db_file) as c:
+            r = c.execute("SELECT proxy, original FROM {}".format(table))
+
+            for row in r:
+                result[row[0]] = row[1]
+
+        return result

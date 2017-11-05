@@ -1,55 +1,33 @@
-from flask import abort, url_for, jsonify
-import sqlite3
+from flask import abort, url_for, jsonify, Flask
 
 from .feed_utils.no_such_show_error import NoSuchShowError
-from .webserver_utils import url_for_feed
-from . import url_service
+from .web_feed import url_for_feed
 
 
-@app.route('/api/url/<show>')
-def api_url_show_wrapper(get_global):
-    def api_url_show(show):
-        try:
-            return url_for_feed(url_service.create_slug_for(int(show), get_global['']))
-        except (NoSuchShowError, ValueError):
-            abort(404)
-    return api_url_show
+def api_url_show(show, url_service):
+    try:
+        return url_for_feed(url_service.create_slug_for(int(show)))
+    except (NoSuchShowError, ValueError):
+        abort(404)
 
-
-@app.route('/api/url/')
 def api_url_help():
     return "<pre>Format:\n/api/url/&lt;DigAS ID&gt;</pre>"
 
 
-@app.route('/api/slug/')
 def api_slug_help():
     return "<pre>Format:\n/api/slug/&lt;show name&gt;</pre>"
 
 
-@app.route('/api/slug/<show_name>')
-def api_slug_name(show_name):
-    return url_for('output_feed', show_name=url_service.sluggify(show_name),
-                   _external=True)
+def api_slug_name(show_name, url_service):
+    return url_for_feed(url_service.sluggify(show_name))
 
 
-@app.route('/api/id/')
-def api_id():
-    json_dict = {"episode": dict(), "article": dict()}
-    with sqlite3.connect(settings.REDIRECT_DB_FILE) as c:
-        r = c.execute("SELECT proxy, original FROM sound")
-
-        for row in r:
-            json_dict['episode'][row[0]] = row[1]
-
-        r = c.execute("SELECT proxy, original FROM article")
-
-        for row in r:
-            json_dict['article'][row[0]] = row[1]
+def api_id(redirector):
+    json_dict = {"episode": redirector.get_all_sound(), "article": redirector.get_all_article()}
 
     return jsonify(**json_dict)
 
 
-@app.route('/api/')
 def api_help():
     alternatives = [
         ("URL from Digas ID:", "/api/url/"),
@@ -61,5 +39,55 @@ def api_help():
            ("\n".join(["{0:<20}{1}".format(i[0], i[1]) for i in alternatives])) \
            + "</pre>"
 
-def register_api_routes(app, settings):
-    pass
+
+def register_api_routes(app: Flask, settings, get_global):
+    # Functions for giving functions access to some globals, letting them
+    # access globals through the get_global in this context, creating closures
+    def inject_url_service(func):
+        def func_with_url_service(*args, **kwargs):
+            kwargs['url_service'] = get_global('url_service')
+            return func(*args, **kwargs)
+        return func_with_url_service
+
+    def inject_redirector(func):
+        def func_with_redirector(*args, **kwargs):
+            kwargs['redirector'] = get_global('redirector')
+            return func(*args, **kwargs)
+        return func_with_redirector
+
+    # Define which URLs maps to what functions
+    app.add_url_rule(
+        "/api/url/<show>",
+        "api_url_show",
+        inject_url_service(api_url_show)
+    )
+
+    app.add_url_rule(
+        "/api/url/",
+        "api_url_help",
+        api_url_help
+    )
+
+    app.add_url_rule(
+        "/api/slug/",
+        "api_slug_help",
+        api_slug_help
+    )
+
+    app.add_url_rule(
+        "/api/slug/<show_name>",
+        "api_slug_name",
+        inject_url_service(api_slug_name)
+    )
+
+    app.add_url_rule(
+        "/api/id/",
+        "api_id",
+        inject_redirector(api_id)
+    )
+
+    app.add_url_rule(
+        "/api/",
+        "api_help",
+        api_help
+    )
