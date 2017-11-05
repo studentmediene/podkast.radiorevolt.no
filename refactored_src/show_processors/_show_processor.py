@@ -26,6 +26,10 @@ class ShowProcessor(metaclass=ABCMeta):
         """set: Set of show_ids (DigAS ID) which this metadata source should bypass (that is, not accept)."""
         self.requests = requests_session
         """Requests session which shall be used when making requests to other servers."""
+        self.get_global = get_global
+        """Function for obtaining instances of ShowSource, EpisodeSource etc.
+        For special purpose processors only."""
+
 
     @abstractmethod
     def accepts(self, show) -> bool:
