@@ -6,6 +6,7 @@ from itertools import filterfalse
 import requests
 from flask import url_for
 
+from .web_utils.url_service import UrlService
 from .show_source import ShowSource
 from .episode_source import EpisodeSource
 from . import episode_processors
@@ -16,11 +17,12 @@ from .redirects import SOUND_REDIRECT_ENDPOINT, ARTICLE_REDIRECT_ENDPOINT
 
 def init_globals(new_global_dict: dict, settings, get_global):
     requests_session = create_requests()
-    url_service = create_url_service(settings)
+    show_source = create_show_source(requests_session, settings)
+    url_service = create_url_service(settings, show_source)
 
     new_globals = {
         "requests": requests_session,
-        "show_source": create_show_source(requests_session, settings),
+        "show_source": show_source,
         "episode_source": create_episode_source(requests_session, settings),
         "processors": {
             "show_default": create_show_processors(
@@ -46,6 +48,10 @@ def create_requests():
         "User-Agent": "podcast-feed-gen",
     })
     return requests_obj
+
+
+def create_url_service(settings, show_source):
+    return UrlService(settings['db'], show_source)
 
 
 def create_show_source(requests_session, settings):

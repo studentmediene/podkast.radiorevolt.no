@@ -5,7 +5,7 @@ from .slug_already_in_use import SlugAlreadyInUse
 
 
 class SlugList:
-    def __init__(self, digas_id, *slug, last_modified=None, connection=None):
+    def __init__(self, digas_id, *slug, connection, last_modified=None):
         """Class representing a linked list of slugs in which the last slug
         is the canonical slug, which points to a digas_id.
 
@@ -42,46 +42,35 @@ class SlugList:
         self.digas_id = digas_id
         self.slugs = list(slug)
         self.last_modified = last_modified
-
-        if not connection:
-            connection = self._create_connection()
         self.connection = connection
 
     @classmethod
-    def from_id(cls, digas_id: int, connection=None):
+    def from_id(cls, digas_id: int, connection):
         """Return the SlugList that points to the given digas_id.
 
         Args:
             digas_id (int): The Digas ID which the SlugList shall match.
-            connection (psycopg2.extensions.connection): Connection to use. A
-                new will be created if this is not given. The connection will
-                be closed when you call commit or abort on the resulting
-                SlugList.
+            connection (psycopg2.extensions.connection): Connection to use.
+                The connection will be closed when you call commit or abort on
+                the resulting SlugList.
 
         Returns:
             SlugList: The SlugList that points to the given digas_id.
         """
-        connection_provided = connection is not None
-        connection = connection or cls._create_connection()
-        try:
-            with connection.cursor() as cursor:
-                cursor.execute(
-                    "SELECT slug FROM slug_to_id WHERE digas_id = %s;",
-                    (digas_id,)
-                )
-                if not cursor.rowcount:
-                    raise NoSuchSlug("with digas_id = %s" % digas_id)
-                row = cursor.fetchone()
-                slug = row[0]
-        except:
-            if not connection_provided:
-                connection.close()
-            raise
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT slug FROM slug_to_id WHERE digas_id = %s;",
+                (digas_id,)
+            )
+            if not cursor.rowcount:
+                raise NoSuchSlug("with digas_id = %s" % digas_id)
+            row = cursor.fetchone()
+            slug = row[0]
 
         return cls.from_slug(slug, connection)
 
     @classmethod
-    def from_slug(cls, slug: str, connection=None):
+    def from_slug(cls, slug: str, connection):
         """
         Return the SlugList that slug is a part of.
 
@@ -95,51 +84,44 @@ class SlugList:
         Returns:
             SlugList: The SlugList which contains the given slug.
         """
-        connection_provided = connection is not None
-        connection = connection or cls._create_connection()
-        try:
-            # First, find the canonical slug
-            with connection.cursor() as cursor:
-                cursor.execute(
-                    "SELECT canonical_slug FROM slug_to_slug WHERE slug = %s",
-                    (slug,)
-                )
-                row = cursor.fetchone()
-                if row is None:
-                    raise NoSuchSlug(slug)
-                canonical_slug = row[0]
+        # First, find the canonical slug
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT canonical_slug FROM slug_to_slug WHERE slug = %s",
+                (slug,)
+            )
+            row = cursor.fetchone()
+            if row is None:
+                raise NoSuchSlug(slug)
+            canonical_slug = row[0]
 
-            # Then, find all the other slugs
-            with connection.cursor() as cursor:
-                cursor.execute(
-                    "SELECT slug FROM slug_to_slug "
-                    "WHERE canonical_slug = %(canonical_slug)s "
-                    "AND NOT slug = %(canonical_slug)s",
-                    {"canonical_slug": canonical_slug}
-                )
-                if cursor.rowcount > 0:
-                    # Ensure the canonical slug is last
-                    slugs = [row[0] for row in cursor.fetchall()] + [canonical_slug]
-                else:
-                    slugs = [canonical_slug]
+        # Then, find all the other slugs
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT slug FROM slug_to_slug "
+                "WHERE canonical_slug = %(canonical_slug)s "
+                "AND NOT slug = %(canonical_slug)s",
+                {"canonical_slug": canonical_slug}
+            )
+            if cursor.rowcount > 0:
+                # Ensure the canonical slug is last
+                slugs = [row[0] for row in cursor.fetchall()] + [canonical_slug]
+            else:
+                slugs = [canonical_slug]
 
-            # Finally, find the digas_id
-            with connection.cursor() as cursor:
-                cursor.execute(
-                    "SELECT digas_id, last_modified FROM slug_to_id WHERE slug = %s",
-                    (canonical_slug,)
-                )
-                row = cursor.fetchone()
-                digas_id = row[0]
-                last_modified = row[1]
+        # Finally, find the digas_id
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT digas_id, last_modified FROM slug_to_id WHERE slug = %s",
+                (canonical_slug,)
+            )
+            row = cursor.fetchone()
+            digas_id = row[0]
+            last_modified = row[1]
 
             # Create a new instance of this class, with the data fetched from the db
             return cls(digas_id, *slugs, last_modified=last_modified,
                        connection=connection)
-        except:
-            if not connection_provided:
-                connection.close()
-            raise
 
     @property
     def canonical_slug(self):
@@ -303,26 +285,6 @@ class SlugList:
         # We were successful
         self.slugs.insert(-1, new_slug)
 
-    @classmethod
-    def _create_connection(cls) -> psycopg2.extensions.connection:
-        """
-        Create and return a connection to the database.
-
-        The parameters in settings.py are used to determine host, port,
-        database, user and password. The connection has its isolation level set
-        to "Serializable".
-
-        Returns:
-            psycopg2.extensions.connection: Connection to the database.
-        """
-        conn = psycopg2.connect(
-            **settings.URL_DB_CONNECTION_PARAMS
-        )
-        conn.set_session(
-            isolation_level=psycopg2.extensions.ISOLATION_LEVEL_SERIALIZABLE
-        )
-        return conn
-
     def _create_cursor(self) -> psycopg2.extensions.cursor:
         """
         Create and return a Cursor, using this instance's connection.
@@ -334,7 +296,7 @@ class SlugList:
         return self.connection.cursor()
 
     @classmethod
-    def init_db(cls, connection=None):
+    def init_db(cls, connection):
         """
         Initialize the database, by creating the necessary tables and such.
 
@@ -349,12 +311,9 @@ class SlugList:
                 A new connection using the parameters in settings.py will be
                 created if this is not supplied.
         """
-        connection_was_provided = connection is not None
-        connection = connection or cls._create_connection()
-        try:
-            connection.autocommit = True
-            with connection.cursor() as cursor:
-                create_table_query =\
+        connection.autocommit = True
+        with connection.cursor() as cursor:
+            create_table_query =\
 """-- Function which will automatically update a SlugList's last_modified datetime
 CREATE FUNCTION update_last_modified_function()
 RETURNS TRIGGER
@@ -388,7 +347,4 @@ CREATE TABLE slug_to_slug (
     RESTRICT ON UPDATE CASCADE
 );
 """
-                cursor.execute(create_table_query)
-        finally:
-            if not connection_was_provided:
-                connection.close()
+            cursor.execute(create_table_query)

@@ -4,10 +4,10 @@ from psycopg2.extensions import TransactionRollbackError
 from time import sleep
 from random import randint
 
-from generator.generate_feed import PodcastFeedGenerator
-from .slug_list import SlugList
+from .slug_list_factory import SlugListFactory
 from .no_such_slug import NoSuchSlug
 from .slug_already_in_use import SlugAlreadyInUse
+from .slug_list import SlugList
 from generator import NoSuchShowError
 
 
@@ -16,13 +16,17 @@ logger = logging.getLogger(__name__)
 
 class UrlService:
 
-    def get_canonical_slug_for_slug(self, slug: str, gen: PodcastFeedGenerator, level=0, connection=None) -> str:
+    split_on_non_word = re.compile(r"(?:[^\w\d]|_)+")
+
+    def __init__(self, db_settings, show_source):
+        self.slug_list_factory = SlugListFactory(db_settings)
+        self.show_source = show_source
+
+    def get_canonical_slug_for_slug(self, slug: str, level=0, connection=None):
         """Get the slug which shall be used for the given slug.
 
         Args:
             slug (str): The slug which we shall find the canonical slug for.
-            gen (PodcastFeedGenerator): Instance used to query for the show's
-                actual name.
 
         Returns:
             (int, str): Tuple containing the Digas ID and the canonical slug which
@@ -36,13 +40,13 @@ class UrlService:
         slug = slug.strip().lower()
         sluglist = None
         connection_provided = connection is not None
-        connection = connection or SlugList._create_connection()
+        connection = connection or self.slug_list_factory.create_connection()
         try:
             try:
-                sluglist = SlugList.from_slug(slug, connection)
-                self.invalidate_list_of_shows_if_old(gen, sluglist)
+                sluglist = self.slug_list_factory.from_slug(slug, connection)
+                self.invalidate_list_of_shows_if_old(sluglist)
                 stored_canonical_slug = sluglist.canonical_slug
-                actual_canonical_slug = self.create_slug_for(sluglist.digas_id, gen)
+                actual_canonical_slug = self.create_slug_for(sluglist.digas_id)
 
                 if stored_canonical_slug != actual_canonical_slug:
                     # This show has gotten a new name
@@ -70,7 +74,7 @@ class UrlService:
             except NoSuchSlug:
                 # There is no record of this slug in the database.
                 # Is it an actual slug for a show, or is this a 404?
-                digas_id = get_show_with_slug(slug, gen)
+                digas_id = self.get_show_with_slug(slug)
                 # No exception, so there is a show with this slug.
                 # (Additional note about multiple instances of PodcastFeedGenerator:
                 #   A change in show name won't be applied before a new instance of
@@ -88,14 +92,14 @@ class UrlService:
 
                 try:
                     # Assuming the show already is present in the database
-                    sluglist = SlugList.from_id(digas_id, connection)
+                    sluglist = self.slug_list_factory.from_id(digas_id, connection)
                     logger.info("Change in slug: %s shall redirect to %s",
                                 sluglist.canonical_slug,
                                 slug)
                     sluglist.canonical_slug = slug
                 except NoSuchSlug:
                     # Nope, add it in the database.
-                    sluglist = SlugList(digas_id, slug, connection=connection)
+                    sluglist = self.slug_list_factory.create(digas_id, slug, connection=connection)
                     logger.info("Adding slug %s (Digas ID %s) to the database",
                                 slug,
                                 digas_id)
@@ -120,9 +124,8 @@ class UrlService:
             # instances won't bash their heads against each other forever
             sleep(randint(0, 2**level) / 100)
             # Try again; should work in most cases
-            return get_canonical_slug_for_slug(
+            return self.get_canonical_slug_for_slug(
                 slug,
-                gen,
                 level + 1
             )
 
@@ -132,45 +135,37 @@ class UrlService:
                 connection.close()
             raise
 
-
     def invalidate_list_of_shows_if_old(
             self,
-            gen: PodcastFeedGenerator,
             sluglist: SlugList
     ):
-        fetched_at = gen.show_source.last_fetched
+        fetched_at = self.show_source.last_fetched
         last_modified_at = sluglist.last_modified
 
         if fetched_at is None:
             return
 
         if fetched_at < last_modified_at:
-            if gen.show_source.get_show_names:
-                del gen.show_source.get_show_names
-            if gen.show_source.shows:
-                del gen.show_source.shows
+            if self.show_source.get_show_names:
+                del self.show_source.get_show_names
+            if self.show_source.shows:
+                del self.show_source.shows
         return
 
-
-    def create_slug_for(self, digas_id: int, gen: PodcastFeedGenerator) -> str:
+    def create_slug_for(self, digas_id: int) -> str:
         """Create slug for the given show, using the show's name.
 
         Args:
             digas_id (int): The Digas ID of the show we shall create the slug for.
-            gen (PodcastFeedGenerator): Instance used to query for the show's name.
 
         Returns:
             str: The slug which the given show shall have.
         """
         try:
-            show = gen.show_source.shows[digas_id]
+            show = self.show_source.shows[digas_id]
         except KeyError as e:
             raise NoSuchShowError(digas_id) from e
-        return sluggify(show.name)
-
-
-    split_on_non_word = re.compile(r"(?:[^\w\d]|_)+")
-
+        return self.sluggify(show.name)
 
     @classmethod
     def sluggify(cls, name: str) -> str:
@@ -182,15 +177,13 @@ class UrlService:
         Returns:
             str: name, converted into a URL- and human-friendly slug.
         """
-        return "-".join([word for word in split_on_non_word.split(name.strip().lower()) if word])
+        return "-".join([word for word in cls.split_on_non_word.split(name.strip().lower()) if word])
 
-
-    def get_show_with_slug(self, slug: str, gen: PodcastFeedGenerator) -> int:
+    def get_show_with_slug(self, slug: str) -> int:
         """Return the digas ID of the show whose actual slug equals the given slug.
 
         Args:
             slug (str): The slug the resulting show shall have.
-            gen (PodcastFeedGenerator): Instance used to query for the shows' name.
 
         Returns:
             int: The Digas ID of the show with the given slug.
@@ -198,10 +191,10 @@ class UrlService:
         Raises:
             NoSuchShowError: If there is no matching show.
         """
-        shows = gen.show_source.get_show_names
+        shows = self.show_source.get_show_names
         show_slugs = \
             {
-                sluggify(show.name): show
+                self.sluggify(show.name): show
                 for name, show in shows.items()
             }
         try:
