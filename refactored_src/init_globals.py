@@ -4,15 +4,19 @@ This module binds the stateful data retrievers to their settings.
 from itertools import filterfalse
 
 import requests
+from flask import url_for
 
 from .show_source import ShowSource
 from .episode_source import EpisodeSource
 from . import episode_processors
 from . import show_processors
+from .web_utils.redirector import Redirector
+from .redirects import SOUND_REDIRECT_ENDPOINT, ARTICLE_REDIRECT_ENDPOINT
 
 
 def init_globals(new_global_dict: dict, settings):
     requests_session = create_requests()
+    url_service = create_url_service(settings)
 
     new_globals = {
         "requests": requests_session,
@@ -29,8 +33,8 @@ def init_globals(new_global_dict: dict, settings):
                 requests_session, settings, "spotify"
             ),
         },
-        "url_service": create_url_service(settings),
-        "redirector": create_redirector(settings),
+        "url_service": url_service,
+        "redirector": create_redirector(settings, url_service),
     }
 
     new_global_dict.update(new_globals)
@@ -110,3 +114,13 @@ def get_available_classes(package):
                           classes)
     classes = filter(lambda c: c[0].isupper(), classes)
     return list(classes)
+
+
+def create_redirector(settings, url_service):
+    return Redirector(
+        settings['redirector']['db_file'],
+        url_service,
+        ARTICLE_REDIRECT_ENDPOINT,
+        SOUND_REDIRECT_ENDPOINT,
+        url_for
+    )
