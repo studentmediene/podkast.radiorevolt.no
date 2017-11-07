@@ -2,9 +2,9 @@ from . import EpisodeProcessor
 
 
 class Testing(EpisodeProcessor):
-    def __init__(self, settings, bypass, requests_session):
+    def __init__(self, settings, bypass, requests_session, *args, **kwargs):
         print(repr(settings))
-        super().__init__(settings, bypass, requests_session)
+        super().__init__(settings, bypass, requests_session, *args, **kwargs)
 
     def accepts(self, episode) -> bool:
         return True

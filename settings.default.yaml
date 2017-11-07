@@ -138,3 +138,10 @@ feed:
     description: "All podcast episodes from Example Radio, in one feed."
     image: "http://static.example.org/all.png"
 
+# Show names which map to the special "all episodes" feed
+# (the canonical name is "all", these will all redirect there)
+all_episodes_show_aliases:
+  - alleepisoder
+  - allepisodes
+  - "*"
+  - alle-podkaster

@@ -1,4 +1,4 @@
-from flask import request, redirect, url_for, abort, make_response
+from flask import request, redirect, url_for, abort, make_response, Flask
 
 from .feed_utils.no_such_show_error import NoSuchShowError
 from .feed_utils.show import Show
@@ -60,5 +60,30 @@ def _prepare_feed_response(show, max_age):
     return resp
 
 
-# TODO: Implement function for registering feed functions in Flask
-# TODO: Implement url_for_feed
+def url_for_feed(slug):
+    return url_for("output_feed", show_name=slug, _external=True)
+
+
+def register_feed_routes(app: Flask, settings, get_global):
+    def do_output_feed(show_name):
+        return output_feed(
+            show_name,
+            settings['caching']['feed_ttl'],
+            settings['caching']['completed_ttl_factor'],
+            settings['all_episodes_show_aliases'],
+            get_global('url_service'),
+            get_global('show_source'),
+            get_global('episode_source'),
+            get_global('processors'),
+        )
+    app.add_url_rule("/<show_name>", "output_feed", do_output_feed)
+
+    def do_output_all_feed():
+        return output_all_feed(
+            settings['feed']['metadata_all_episodes'],
+            settings['caching']['all_episodes_ttl'],
+            get_global('show_source'),
+            get_global('episode_source'),
+            get_global('processors'),
+        )
+    app.add_url_rule("/all", "output_all_feed", do_output_all_feed)
