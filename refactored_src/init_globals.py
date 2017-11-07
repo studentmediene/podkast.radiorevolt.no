@@ -111,6 +111,7 @@ def create_processors(requests_session, settings, get_global, pipeline_type, pac
         # Use it
         processor = processor_func(processor_conf, processor_conf['bypass'], requests_session, get_global)
         initialized_processors.append(processor)
+    return initialized_processors
 
 
 def get_available_classes(package):

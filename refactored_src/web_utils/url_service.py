@@ -8,7 +8,7 @@ from .slug_list_factory import SlugListFactory
 from .no_such_slug import NoSuchSlug
 from .slug_already_in_use import SlugAlreadyInUse
 from .slug_list import SlugList
-from generator import NoSuchShowError
+from ..feed_utils.no_such_show_error import NoSuchShowError
 
 
 logger = logging.getLogger(__name__)

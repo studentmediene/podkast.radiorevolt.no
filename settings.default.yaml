@@ -46,6 +46,26 @@ processors:
       - "Hei der"
     api: "http://example.com/api"
 
+  SetDefaults:
+    description: "Podcast from Example Radio"
+    category:
+      category: Education
+      subcategory: Higher Education
+    language: no
+    website: "http://example.org"
+    authors:
+      - name: Example Radio
+        email: example@example.org
+    web_master:
+      name: Example Radio
+      email: example@example.org
+    explicit: true
+    owner:
+      name: Example Radio
+      email: example@example.org
+
+
+
 
 # Configuration of the processing pipelines
 
@@ -86,7 +106,8 @@ pipelines:
   # Pipelines for shows
   show:
     # The pipeline used for all shows.
-    default: []
+    default:
+      - SetDefaults: {}
       # More to come
   # Pipelines for episodes
   episode:

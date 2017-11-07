@@ -14,7 +14,7 @@ def prepare_processors_for_batch(processors):
     This should be done if we will generate more than one feed.
     """
     for processor in processors:
-        processor.prepare_for_batch()
+        processor.prepare_batch()
 
 
 def run_show_pipeline(

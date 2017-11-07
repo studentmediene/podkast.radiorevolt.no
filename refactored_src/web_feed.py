@@ -40,14 +40,14 @@ def output_feed(show_name, feed_ttl, completed_ttl_factor, alternate_all_episode
     populated_episodes = run_episode_pipeline(
         episodes, processors['ep_default']
     )
-    show.episodes = populated_episodes
+    populated_show.episodes = populated_episodes
 
-    if show.complete:
+    if populated_show.complete:
         ttl = feed_ttl * completed_ttl_factor
     else:
         ttl = feed_ttl
 
-    return _prepare_feed_response(show, ttl)
+    return _prepare_feed_response(populated_show, ttl)
 
 
 def _prepare_feed_response(show, max_age):

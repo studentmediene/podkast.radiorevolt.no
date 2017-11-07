@@ -62,7 +62,11 @@ def redirect_to_favicon():
     return redirect(url_for("static", filename="favicon.ico"))
 
 
-def customize_flask(app: Flask, update_global_func, debug=False):
+def redirect_to_website(official_website):
+    return redirect(official_website)
+
+
+def customize_flask(app: Flask, update_global_func, official_website, debug=False):
     # Make sure everything works when behind Apache proxy
     app.wsgi_app = ProxyFix(app.wsgi_app)
     # Set debug level to whatever the settings say
@@ -78,4 +82,14 @@ def customize_flask(app: Flask, update_global_func, debug=False):
         "/favicon.ico",
         "redirect_to_favicon",
         redirect_to_favicon
+    )
+
+    # Ensure / redirects to official website
+    def do_redirect_to_website():
+        return redirect_to_website(official_website)
+
+    app.add_url_rule(
+        "/",
+        "redirect_to_website",
+        do_redirect_to_website,
     )

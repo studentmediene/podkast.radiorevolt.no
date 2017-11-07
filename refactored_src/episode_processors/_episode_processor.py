@@ -1,5 +1,7 @@
 from abc import ABCMeta, abstractmethod
+from datetime import datetime, time, timezone
 
+from ..utils.date2dt import date2dt
 
 __all__ = ["EpisodeProcessor"]
 
@@ -55,8 +57,8 @@ class EpisodeProcessor(metaclass=ABCMeta):
         elif self.start_date_key in self.settings \
                 or self.end_date_key in self.settings:
             # Settings contains START_DATE and END_DATE, put them to use
-            start = self.settings.get(self.start_date_key)
-            end = self.settings.get(self.end_date_key)
+            start = date2dt(self.settings.get(self.start_date_key))
+            end = date2dt(self.settings.get(self.end_date_key))
 
             if start and end:
                 # Both are present, date must be between them
