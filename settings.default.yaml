@@ -116,6 +116,7 @@ pipelines:
       - Testing:
           start_date: 2017-09-01
           end_date: 2017-09-30
+      - SetDerivedDefaults: {}
     # The pipeline applied after default, for feeds intended for Spotify
     spotify: []
 
