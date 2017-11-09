@@ -1,5 +1,6 @@
 from flask import request, redirect, url_for, abort, make_response, Flask
 
+from .no_episodes_error import NoEpisodesError
 from .feed_utils.no_such_show_error import NoSuchShowError
 from .feed_utils.show import Show
 from .feed_utils.populate import run_episode_pipeline, run_show_pipeline
@@ -36,7 +37,10 @@ def output_feed(show_name, feed_ttl, completed_ttl_factor, alternate_all_episode
         show_instance, processors['show_default']
     )
 
-    episodes = episode_source.episode_list(populated_show)
+    try:
+        episodes = episode_source.episode_list(populated_show)
+    except NoEpisodesError:
+        episodes = []
     populated_episodes = run_episode_pipeline(
         episodes, processors['ep_default']
     )
