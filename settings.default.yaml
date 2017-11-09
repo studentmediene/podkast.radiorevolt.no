@@ -113,6 +113,7 @@ pipelines:
     # The pipeline used for all shows.
     default:
       - SetDefaults: {}
+      # TODO: Re-implement all existing show processors
       # More to come
   # Pipelines for episodes
   episode:
@@ -125,6 +126,9 @@ pipelines:
       - ManualChanges: {}
       - SkipFutureEpisodes: {}
       - SetDerivedDefaults: {}
+      # TODO: Make it so you don't need to make dictionary in pipelines
+      # TODO: Remove Testing
+      # TODO: Implement SkipAll
     # The pipeline applied after default, for feeds intended for Spotify
     spotify: []
 
