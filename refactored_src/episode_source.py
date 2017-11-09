@@ -129,7 +129,7 @@ class EpisodeSource:
             id="radiorevolt.no/podkast/episode/" + str(episode_dict['id']),
             deprecated_url=episode_dict['deprecated_url'],
             title=episode_dict['title'],
-            summary=linkify(htmlencode(episode_dict['comment']))
+            long_summary=linkify(htmlencode(episode_dict['comment']))
                 .replace("\n", "<br/>\n"),
             publication_date=publication_datetime_aware,
             authors=[Person(name=episode_dict['author'])] if episode_dict['author'] else [],
