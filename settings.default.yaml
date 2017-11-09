@@ -27,9 +27,9 @@ processors:
   # Some settings are observed by all processors. They are:
   # bypass_show: List of show IDs to bypass (for show processors).
   # bypass_episode: List of episode URLs to bypass (for episode processors).
-  # first_date: YYYY-MM-DD for the first date of episodes to process. Beginning
+  # start_date: YYYY-MM-DD for the first date of episodes to process. Beginning
   #   of time assumed if not present.
-  # last_date: YYYY-MM-DD for the last date of episodes to process. End of time
+  # end_date: YYYY-MM-DD for the last date of episodes to process. End of time
   #   assumed if not present.
 
   # Format:
@@ -64,7 +64,9 @@ processors:
       name: Example Radio
       email: example@example.org
 
-
+  Chimera:
+    api: http://example.org/radio/api
+    start_date: 2013-02-28  # Derived from when Filmofil has native Chimera-metadata
 
 
 # Configuration of the processing pipelines
@@ -116,6 +118,7 @@ pipelines:
       - Testing:
           start_date: 2017-09-01
           end_date: 2017-09-30
+      - Chimera: {}
       - SetDerivedDefaults: {}
     # The pipeline applied after default, for feeds intended for Spotify
     spotify: []
