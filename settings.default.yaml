@@ -68,6 +68,9 @@ processors:
     api: http://example.org/radio/api
     start_date: 2013-02-28  # Derived from when Filmofil has native Chimera-metadata
 
+  ManualChanges:
+    episode_file: manual_changes.json
+
 
 # Configuration of the processing pipelines
 
@@ -119,6 +122,7 @@ pipelines:
           start_date: 2017-09-01
           end_date: 2017-09-30
       - Chimera: {}
+      - ManualChanges: {}
       - SetDerivedDefaults: {}
     # The pipeline applied after default, for feeds intended for Spotify
     spotify: []
