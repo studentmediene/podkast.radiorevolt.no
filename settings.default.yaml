@@ -123,6 +123,7 @@ pipelines:
           end_date: 2017-09-30
       - Chimera: {}
       - ManualChanges: {}
+      - SkipFutureEpisodes: {}
       - SetDerivedDefaults: {}
     # The pipeline applied after default, for feeds intended for Spotify
     spotify: []
