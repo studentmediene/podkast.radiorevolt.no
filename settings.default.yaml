@@ -48,6 +48,7 @@ processors:
 
   SetDefaults:
     description: "Podcast from Example Radio"
+    image: "http://example.com/default.png"
     category:
       category: Education
       subcategory: Higher Education
@@ -59,7 +60,7 @@ processors:
     web_master:
       name: Example Radio
       email: example@example.org
-    explicit: true
+    explicit: false
     owner:
       name: Example Radio
       email: example@example.org
