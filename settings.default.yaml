@@ -120,14 +120,20 @@ processors:
 pipelines:
   # Pipelines for shows
   show:
-    # The pipeline used for all shows.
+    # The pipeline used as basis for some other pipelines, and when processing
+    # podcast images in process_images.py.
     default:
       - Chimera
       - SetDefaults
       - ManualChanges
-    # The pipeline used for the special all episodes feed.
+    # The pipeline used for the special all episodes feed (without default).
     all_feed:
       - SetDefaults
+    # The pipeline applied after default or all_feed, when creating feeds for consumption
+    # by users or Spotify.
+    web:
+      - UseLocalImage
+
   # Pipelines for episodes
   episode:
     # The pipeline used for all episodes.
