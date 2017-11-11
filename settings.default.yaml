@@ -123,7 +123,6 @@ pipelines:
     # The pipeline used for all shows.
     default:
       - Chimera
-      - Kapina
       - SetDefaults
       - ManualChanges
       # More to come
