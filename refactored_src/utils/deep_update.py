@@ -5,7 +5,7 @@ import copy
 __all__ = ["deep_update"]
 
 
-def deep_update(orig_dict, other):
+def deep_update(orig_dict, other, allow_new: bool=False):
     """Create copy of orig_dict with values overwritten by those in other.
 
     Values are updated in a deep manner, which means that dictionaries in
@@ -17,6 +17,9 @@ def deep_update(orig_dict, other):
     Args:
         orig_dict: Original dictionary to start with.
         other: Dictionary which should overwrite values in orig_dict.
+        allow_new: Boolean which determines whether a key in other which is not
+            found in orig_dict should result in a ValueError (False, the
+            default) or be set without error (True).
 
     Returns:
         A new dictionary where values found in other use their value from other,
@@ -32,8 +35,16 @@ def deep_update(orig_dict, other):
             orig_dict.get(key, {}),
             collections.Mapping
         )
-        if new_is_mapping and old_is_mapping_if_exists:
-            orig_dict[key] = deep_update(orig_dict[key], value)
+        old_exists = key in orig_dict
+        if new_is_mapping and old_exists and old_is_mapping_if_exists:
+            orig_dict[key] = deep_update(orig_dict[key], value, allow_new)
         else:
-            orig_dict[key] = value
+            if not allow_new and not old_exists:
+                raise ValueError(
+                    "Key {!r} in other dictionary was not found in the "
+                    "original dictionary. It is likely spelled wrong or is "
+                    "incorrect. (Set allow_new to True if the intent was to "
+                    "allow setting new values.)".format(key))
+            else:
+                orig_dict[key] = value
     return orig_dict
