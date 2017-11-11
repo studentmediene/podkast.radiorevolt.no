@@ -126,9 +126,10 @@ pipelines:
       - ManualChanges
       - SkipFutureEpisodes
       - SetDerivedDefaults
-      # TODO: Implement SkipAll
     # The pipeline applied after default, for feeds intended for Spotify
-    spotify: []
+    spotify:
+      - SkipAll:
+          end_date: 2017-11-05
 
 # Settings related to caching (reusing results for some time).
 # The time before a change in the data propagates to clients is
