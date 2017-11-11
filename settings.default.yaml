@@ -71,6 +71,7 @@ processors:
 
   ManualChanges:
     episode_file: manual_changes.json
+    show_file: manual_changes.json
 
 
 # Configuration of the processing pipelines
@@ -118,8 +119,7 @@ pipelines:
     default:
       - Chimera
       - SetDefaults
-      # TODO: Re-implement chimera show processor
-      # TODO: Re-implement manual changes show processor
+      - ManualChanges
       # TODO: Copy over radiorevolt_no show processor
       # More to come
   # Pipelines for episodes

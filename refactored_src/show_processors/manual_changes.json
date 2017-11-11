@@ -1,0 +1,344 @@
+{
+  "digas_show_id (in quotes)":
+  {
+    "IMPORTANT": "Those are ALL the properties you can set, but please don't actually use them all! You need only overwrite a few fields, since data for the rest is found automatically by other metadata sources. Properties you omit will not be touched. Start with an empty plate and add only the properties not fetched from elsewhere.",
+    "name": "Name of the show",
+    "subtitle": "Short description (couple words) describing the show.",
+    "description": "Long description, which is used when you hover the i icon in iTunes.",
+    "image": "URL for image which will be used for this show. It must be PNG or JPEG, and it must be between 1400x1400 and 3000x3000 pixels in resolution.",
+    "category": ["iTunes category for this show. See https://help.apple.com/itc/podcasts_connect/#/itc9267a2f12 for available categories.",
+                 "iTunes sub-category for this show (can be omitted). See https://help.apple.com/itc/podcasts_connect/#/itc9267a2f12 for available sub-categories."],
+    "language": "Language of this show. Use one of the two-letter values found in http://www.loc.gov/standards/iso639-2/php/code_list.php.",
+    "website": "This show's website.",
+    "authors": [{"name": "Name of the author.", "email": "Email of the author"}],
+    "explicit": "(remove quotes) true if this show is explicit, false if this show is clean",
+    "complete": "(remove quotes) true if there won't be more episodes in this show, false otherwise",
+    "web_master": {"name": "Name for whoever is responsible for the technical aspect of the feed",
+                   "email": "That person's email"}
+  },
+  "2592": {
+    "category": ["Games & Hobbies", "Video Games"],
+    "description": "I spillmagasinet Nerdeprat tar vi opp ukas nyheter og informerer deg om de spillene du burde spille ‒ spesielt de du kanskje har gått glipp av. Vi diskuterer også tema rundt spill og nerdekultur, med akademisk og humoristisk tilnærming, og spiller aktuelle låter fra dataspill. Du hører oss live hver onsdag, fra 16 til 18. (Podkastintro er 'Traces' fra spillet Transistor, av Darren Korb.)",
+    "website": "https://radiorevolt.no/programmer/nerdeprat"
+  },
+    "": {
+        "category": [
+            "Government & Organizations",
+            "Non-Profit"
+        ]
+    },
+    "2680": {
+        "category": [
+            "Comedy"
+        ],
+	"image": "https://filer.radiorevolt.no/bilder/husker_du_20171108.png",
+        "description": "Hva husker vi aller best fra barndommen? Hver torsdag kl. 17-18 går Endre, Mina og Rikke tilbake i tid og snakker løst og fast om alt som gir oss en skikkelig nostalgisk følelse."
+    },
+    "2609": {
+        "category": [
+            "Comedy"
+        ]
+    },
+    "2438": {
+        "category": [
+            "Music"
+        ]
+    },
+    "2590": {
+        "category": [
+            "Comedy"
+        ]
+    },
+    "2649": {
+        "category": [
+            "News & Politics"
+        ],
+        "image": "https://radiorevolt.no/media/uploads/images/Revoltmorgen.png"
+    },
+    "2651": {
+        "category": [
+            "Comedy"
+        ]
+    },
+    "2650": {
+        "category": [
+            "Education",
+            "Higher Education"
+        ]
+    },
+    "2467": {
+        "category": [
+            "Comedy"
+        ]
+    },
+    "232": {
+        "category": [
+            "TV & Film"
+        ]
+    },
+    "2345": {
+        "category": [
+            "Comedy"
+        ]
+    },
+    "2541": {
+        "category": [
+            "Society & Culture",
+            "Philosophy"
+        ]
+    },
+    "2341": {
+        "category": [
+            "Arts",
+            "Fashion & Beauty"
+        ]
+    },
+    "2340": {
+        "category": [
+            "Society & Culture",
+            "History"
+        ]
+    },
+    "1980": {
+        "category": [
+            "Arts",
+            "Literature"
+        ]
+    },
+    "2003": {
+        "category": [
+            "Arts",
+            "Food"
+        ]
+    },
+    "2560": {
+        "category": [
+            "News & Politics"
+        ]
+    },
+    "1615": {
+        "category": [
+            "Games & Hobbies",
+            "Video Games"
+        ]
+    },
+    "2380": {
+        "category": [
+            "Comedy"
+        ]
+    },
+    "2383": {
+        "category": [
+            "Health",
+            "Alternative Health"
+        ]
+    },
+    "2539": {
+        "category": [
+            "Comedy"
+        ]
+    },
+    "1520": {
+        "category": [
+            "Music"
+        ]
+    },
+    "2245": {
+        "category": [
+            "Comedy"
+        ]
+    },
+    "2247": {
+        "category": [
+            "Comedy"
+        ]
+    },
+    "2241": {
+        "category": [
+            "Music"
+        ]
+    },
+    "2242": {
+        "category": [
+            "Comedy"
+        ]
+    },
+    "2465": {
+        "category": [
+            "Technology"
+        ]
+    },
+    "2611": {
+        "category": [
+            "Comedy"
+        ],
+        "image": "http://pappagorg.radiorevolt.no/bilder/skammekroken.jpg"
+    },
+    "2607": {
+        "category": [
+            "News & Politics"
+        ]
+    },
+    "2447": {
+        "category": [
+            "Comedy"
+        ]
+    },
+    "2445": {
+        "category": [
+            "Arts",
+            "Food"
+        ]
+    },
+    "2608": {
+        "category": [
+            "Health"
+        ]
+    },
+    "2424": {
+        "category": [
+            "Comedy"
+        ]
+    },
+    "2347": {
+        "category": [
+            "Comedy"
+        ]
+    },
+    "2589": {
+        "category": [
+            "Science & Medicine",
+            "Social Sciences"
+        ]
+    },
+    "2425": {
+        "category": [
+            "Society & Culture"
+        ]
+    },
+    "1957": {
+        "category": [
+            "Science & Medicine",
+            "Natural Sciences"
+        ]
+    },
+    "1977": {
+        "category": [
+            "News & Politics"
+        ]
+    },
+    "2338": {
+        "category": [
+            "Arts",
+            "Literature"
+        ]
+    },
+    "2339": {
+        "category": [
+            "Comedy"
+        ]
+    },
+    "2233": {
+        "category": [
+            "Comedy"
+        ]
+    },
+    "2494": {
+        "category": [
+            "Comedy"
+        ]
+    },
+    "2002": {
+        "category": [
+            "News & Politics"
+        ]
+    },
+    "2410": {
+        "category": [
+            "Society & Culture"
+        ]
+    },
+    "2413": {
+        "category": [
+            "Sports & Recreation",
+            "Amateur"
+        ]
+    },
+    "2412": {
+        "category": [
+            "News & Politics"
+        ]
+    },
+    "2414": {
+        "category": [
+            "Education",
+            "Training"
+        ]
+    },
+    "1617": {
+        "category": [
+            "Arts",
+            "Performing Arts"
+        ]
+    },
+    "2251": {
+        "category": [
+            "Comedy"
+        ]
+    },
+    "2350": {
+        "category": [
+            "Arts",
+            "Literature"
+        ]
+    },
+    "2511": {
+        "category": [
+            "Technology",
+            "Tech News"
+        ]
+    },
+    "2512": {
+        "category": [
+            "Sports & Recreation",
+            "Professional"
+        ]
+    },
+    "2250": {
+        "category": [
+            "Government & Organizations",
+            "Local"
+        ]
+    },
+    "2674": {
+        "category": [
+            "Society & Culture",
+            "Places & Travel"
+        ],
+        "image": "https://filer.radiorevolt.no/bilder/Rødmaling.png",
+        "description": "Skulle du gjerne vært bedre kjent i Trondheim? Charlotte, Håvard, Victor og Lise Lotte reiser byen rundt for å gi deg menneskemøter, nye opplevelser  og tips til hva du kan gjøre. Bli med å male byen rød hver søndag fra 15.00-16.00 på Radio Revolt."
+    },
+    "2694": {
+        "category": [
+            "Comedy"
+        ],
+        "image": "https://radiorevolt.no/media/uploads/images/76prosent.jpg",
+        "description": "67% sikkert er et vitenskapsprogram uten viten. Hver mandag tar Grete Faanes, Linn Jarvie og Karsten Nordnes for seg spørsmål man vanligvis ville googlet. Lurer du på om pingviner har knær? Eller om Paralympics har egne parkeringsplasser for de som ikke er handikappet? Vi vet ikke svaret, men vi diskuterer oss frem til et svar du kan være 67% sikker på."
+    },
+    "2676": {
+        "image": "https://radiorevolt.no/media/uploads/images/Radio_005.jpg",
+        "description": "Preben og Marie stiller de store spørsmålene: Hvem er jeg? Og hvordan blei jeg slik? De inviterer ulike gjester for diskutere ytre og indre påvirkninger av din personlighet og hvordan vi er ser på oss selv etter millenniums skiftet. Er vi fornøyd med den vi er? I en tid hvor selvrealisering er så viktig."
+    },
+    "2673": {
+        "image": "https://radiorevolt.no/media/uploads/images/satirikon-logo.png",
+        "description": "Radio Revolts humormagasin, med innslag av aktualitet og generell egosentrisme. Vi gir deg sketsjer, absurditeter av ymse slag, og en og annen meningsytring! (hahah, neida) Tre komikere gire deg ukentlig innhold av varierende mengde og kvalitet, de heter: Ingeborg Albert Rikheim, Gøran Rømo Mogaard og Eivind Skrødal. Du finner oss her, i Itunes eller en annen podkast-app samt i DAB-radioen din klokka 19:00 på torsdager."
+    },
+    "2695": {
+        "image": "https://radiorevolt.no/media/uploads/images/Krenket_svart_gjennomsiktig_1-1.png",
+        "description": "Gjermund, Mina og Ellen tar deg med på en reise i studentlivet, hver Torsdag fra klokken 16:00-17:00. Skam, fylla, kollektiv-stories og mye mere! Så her er det bare å skru på radioen og kose seg!"
+    },
+    "2697": {
+        "image": "https://radiorevolt.no/media/django-summernote/2017-05-09/2ab13803-73e4-4d2b-96d7-5f27b4a6838d.png",
+        "description": "Dusken podkast er studentavisen Under Duskens helt egen podkast. Podkasten vil komme ut annenhver uke, samme som papiravisen, og vil gå i dybden på et utvalg av saker du finner i siste nummer. I hver episode får du sjansen til å bli kjent med journalistene som har skrevet sakene, kildene som blir intervjuet i bladet, og du får innblikk i hvordan vi produserer avisen. Dette er en podkast for studenter, av studenter."
+    }
+}
