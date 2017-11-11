@@ -5,9 +5,9 @@ SOUND_REDIRECT_ENDPOINT = "redirect_episode"
 ARTICLE_REDIRECT_ENDPOINT = "redirect_article"
 
 
-def redirect_episode(show, episode, title, url_service):
+def redirect_episode(show, episode, title, redirector):
     try:
-        url = redirect(url_service.get_original_sound(episode))
+        url = redirect(redirector.get_original_sound(episode))
         if not url:
             raise ValueError("No episode with the given ID was found")
         return url
@@ -15,9 +15,9 @@ def redirect_episode(show, episode, title, url_service):
         abort(404)
 
 
-def redirect_article(show, article, url_service):
+def redirect_article(show, article, redirector):
     try:
-        url = redirect(url_service.get_original_article(article))
+        url = redirect(redirector.get_original_article(article))
         if not url:
             raise ValueError("No article with the given ID was found")
         return url
@@ -27,7 +27,7 @@ def redirect_article(show, article, url_service):
 
 def register_episode_redirect(app: Flask, settings, get_global):
     def do_redirect_episode(*args, **kwargs):
-        kwargs['url_service'] = get_global('url_service')
+        kwargs['redirector'] = get_global('redirector')
         return redirect_episode(*args, **kwargs)
 
     app.add_url_rule(
@@ -39,7 +39,7 @@ def register_episode_redirect(app: Flask, settings, get_global):
 
 def register_article_redirect(app: Flask, settings, get_global):
     def do_redirect_article(*args, **kwargs):
-        kwargs['url_service'] = get_global('url_service')
+        kwargs['redirector'] = get_global('redirector')
         return redirect_article(*args, **kwargs)
 
     app.add_url_rule(
