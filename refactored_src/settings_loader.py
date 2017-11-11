@@ -52,9 +52,10 @@ def load_settings():
         "yaml": yaml_load_settings,
     }
 
-    try:
-        return method_mappings[method.lower()]()
-    except KeyError as e:
+    method_normalized = method.lower()
+    if method_normalized in method_mappings:
+        return method_mappings[method_normalized]()
+    else:
         raise KeyError(
             "The {} environment variable is not set to a recognized "
             "method, but is rather set to {!r}. Recognized methods: "
@@ -64,4 +65,4 @@ def load_settings():
                 method,
                 list(method_mappings.keys())
             )
-        ) from e
+        )
