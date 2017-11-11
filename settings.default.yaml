@@ -105,6 +105,9 @@ processors:
 #           setting2: value2
 #           ...
 #       ...
+#       - Processor3ClassNameWithoutLocalSettings
+#       - Processor4ClassNameWithoutLocalSettings
+#       ...
 #     name_of_pipeline_2:
 #        ...
 pipelines:
@@ -112,7 +115,7 @@ pipelines:
   show:
     # The pipeline used for all shows.
     default:
-      - SetDefaults: {}
+      - SetDefaults
       # TODO: Re-implement all existing show processors
       # More to come
   # Pipelines for episodes
@@ -122,11 +125,10 @@ pipelines:
       - Testing:
           start_date: 2017-09-01
           end_date: 2017-09-30
-      - Chimera: {}
-      - ManualChanges: {}
-      - SkipFutureEpisodes: {}
-      - SetDerivedDefaults: {}
-      # TODO: Make it so you don't need to make dictionary in pipelines
+      - Chimera
+      - ManualChanges
+      - SkipFutureEpisodes
+      - SetDerivedDefaults
       # TODO: Remove Testing
       # TODO: Implement SkipAll
     # The pipeline applied after default, for feeds intended for Spotify

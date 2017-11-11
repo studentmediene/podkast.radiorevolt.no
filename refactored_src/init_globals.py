@@ -85,8 +85,21 @@ def create_processors(requests_session, settings, get_global, pipeline_type, pac
     initialized_processors = []
     for entry in pipeline_conf:
         # Each entry in a pipeline is a dictionary with a single key: value pair
-        # The key is the class to use, the value is the configuration (dict)
-        class_name, local_processor_conf = next(iter(entry.items()))
+        # The key is the class to use, the value is the configuration (dict).
+        # However, if there is nothing to configure, the entry may be just the
+        # class name, which then makes the entry a string.
+        if isinstance(entry, dict):
+            class_name, local_processor_conf = next(iter(entry.items()))
+        elif isinstance(entry, str):
+            # Just a string, which means no local configuration
+            class_name = entry
+            local_processor_conf = {}
+        else:
+            raise RuntimeError(
+                "Did not understand the entry {!r} in pipeline {}.{}. Entry "
+                "must be either a dictionary with a single item, or a string."
+                .format(entry, pipeline_type, pipeline)
+            )
 
         # Create configuration for this processor, starting with empty dict,
         # overwriting with global processor config and finally config for this
