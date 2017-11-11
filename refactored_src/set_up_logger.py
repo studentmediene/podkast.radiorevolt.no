@@ -28,7 +28,7 @@ def set_up_logger():
     %(levelname)s: %(message)s''')
 
     def format_warnings(message, category, filename, lineno, line=None):
-        return "(%s) %s" % (category.__name__, message)
+        return "(%s in %s:%s) %s%s" % (category.__name__, filename, lineno, message, "\n" + line if line else "")
     warnings.formatwarning = format_warnings
     warnings.filterwarnings("always")
     warnings.filterwarnings("ignore", message="unclosed <socket.socket",

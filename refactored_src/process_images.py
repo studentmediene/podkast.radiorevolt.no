@@ -58,7 +58,7 @@ ShowImagePair = namedtuple("ShowImagePair", ["show", "image"])
 
 def get_shows(require_episodes, force, globals):
     show_source = globals['show_source']
-    shows = show_source.shows.values()
+    shows = show_source.get_all_shows()
 
     populated_shows = []
     for show in shows:

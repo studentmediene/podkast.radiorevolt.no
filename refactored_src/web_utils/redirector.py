@@ -94,6 +94,7 @@ class Redirector:
             Intermediate URL listeners should use to access this episode's
             sound file.
         """
+        return self._get_redirect_url_for_sound(episode, self._get_url_hash(original_url))
         with sqlite3.connect(self.db_file) as c:
             try:
                 r = c.execute("SELECT proxy FROM sound WHERE original=?", (original_url,))

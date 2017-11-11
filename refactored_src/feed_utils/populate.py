@@ -42,7 +42,6 @@ def run_show_pipeline(
             mask_skip_show was False.
     """
     # Leave original show untouched
-    show = copy.deepcopy(show)
     for processor in processor_list:
         if processor.accepts(show):
             try:
@@ -117,11 +116,9 @@ def _run_episode_pipeline_on_single_episode(
             SkipEpisode when populating the episode (to indicate it should not
             be included in the feed).
     """
-    # Leave original episode untouched
-    episode = copy.deepcopy(episode)
     logger.debug(
-        "Processing episode {episodename} (from {showname})"
-            .format(episodename=episode.title, showname=episode.show.name)
+        "Processing episode %(episodename)s (from %(showname)s)",
+        {"episodename": episode.title, "showname": episode.show.name}
     )
     for processor in processor_list:
         if processor.accepts(episode):

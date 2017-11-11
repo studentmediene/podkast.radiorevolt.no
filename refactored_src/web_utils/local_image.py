@@ -92,7 +92,6 @@ class LocalImage:
         # Skip resizing if there's no change in size
         new_img = cls._create_resized_image(img, round(new_width), round(new_height)) if (new_width, new_height) != img.size else img
         new_img = cls._create_white_bg_image(new_img)
-        new_img.show()
         new_img.save(new_image, "png", optimize=True)
 
     @staticmethod
@@ -108,6 +107,8 @@ class LocalImage:
         new_width = max(width, height)
         new_height = new_width
         white_img = Image.new("RGBA", (new_width, new_height), (255, 255, 255, 255))
+        if not image.mode == "RGBA":
+            image = image.convert("RGBA")
         # Put original (potentially transparent) image over white background
         white_img.paste(
             image,

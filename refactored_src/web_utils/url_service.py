@@ -146,10 +146,7 @@ class UrlService:
             return
 
         if fetched_at < last_modified_at:
-            if self.show_source.get_show_names:
-                del self.show_source.get_show_names
-            if self.show_source.shows:
-                del self.show_source.shows
+            self.show_source.invalidate()
         return
 
     def create_slug_for(self, digas_id: int) -> str:
@@ -162,7 +159,7 @@ class UrlService:
             str: The slug which the given show shall have.
         """
         try:
-            show = self.show_source.shows[digas_id]
+            show = self.show_source.get_show(digas_id)
         except KeyError as e:
             raise NoSuchShowError(digas_id) from e
         return self.sluggify(show.name)
@@ -191,13 +188,13 @@ class UrlService:
         Raises:
             NoSuchShowError: If there is no matching show.
         """
-        shows = self.show_source.get_show_names
+        shows = self.show_source.show_names
         show_slugs = \
             {
-                self.sluggify(show.name): show
+                self.sluggify(name): show
                 for name, show in shows.items()
             }
         try:
-            return show_slugs[slug].id
+            return show_slugs[slug]
         except KeyError as e:
             raise NoSuchShowError from e

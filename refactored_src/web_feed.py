@@ -30,7 +30,7 @@ def output_feed(show_name, feed_ttl, completed_ttl_factor, alternate_all_episode
             return redirect(url_for("output_all_feed"))
         else:
             abort(404)
-    show_instance = show_source.shows[show]
+    show_instance = show_source.get_show(show)
 
     if not show_name == canonical_slug:
         return redirect(url_for_feed(canonical_slug))

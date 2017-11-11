@@ -79,9 +79,11 @@ class EpisodeSource:
     def episode_list(self, show):
         """List of Episode objects for the given show."""
         if show.id not in self.episodes_by_show:
-            self.episodes_by_show[show.id] = [self.episode(show, episode_dict)
-                                                   for episode_dict in self._get_episode_data(show)]
-        return self.episodes_by_show[show.id]
+            self.episodes_by_show[show.id] = self._get_episode_data(show)
+        # We don't save the Episode objects, this way changes done during
+        # episode processing do not carry over to the next processing.
+        return [self.episode(show, episode_dict)
+                for episode_dict in self.episodes_by_show[show.id]]
 
     def get_all_episodes_list(self, show_source):
         """List of Episode objects, from all shows."""

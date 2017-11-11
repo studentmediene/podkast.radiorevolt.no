@@ -20,6 +20,7 @@ settings = load_settings()
 
 global_values = (None, None)
 create_global_lock = threading.RLock()
+logger = logging.getLogger(__name__)
 
 
 def get_global_func(*args, **kwargs):
@@ -35,7 +36,7 @@ def update_global_if_stale():
             return datetime.datetime.now(datetime.timezone.utc) > expires_at
 
         if global_dict is None or has_expired():
-            logging.info("global_values is stale, creating anew…")
+            logger.info("global_values is stale, creating anew…")
             new_global_dict = dict()
             init_globals(new_global_dict, settings, get_global_func)
             prepare_processors_for_batch(itertools.chain.from_iterable(new_global_dict['processors'].values()))
@@ -45,6 +46,8 @@ def update_global_if_stale():
             new_expire_time = now + ttl
 
             global_values = (new_global_dict, new_expire_time)
+        else:
+            logger.debug("keeping global_values")
 
 
 update_global_if_stale()
@@ -86,6 +89,11 @@ def main():
         app.debug = True
     app.run(host=host, port=port)
 
+app.testing = True
+test_client = app.test_client()
+test_client.get('/nerdeprat')
+
+app.testing = False
 
 if __name__ == '__main__':
     main()
