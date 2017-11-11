@@ -136,6 +136,7 @@ pipelines:
       - ManualChanges
       - SkipFutureEpisodes
       - SetDerivedDefaults
+      - RedirectorProcessor
     # The pipeline applied after default, for feeds intended for Spotify
     spotify:
       - SkipAll:
