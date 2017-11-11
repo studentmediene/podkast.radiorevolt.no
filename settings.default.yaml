@@ -116,11 +116,11 @@ pipelines:
   show:
     # The pipeline used for all shows.
     default:
+      - Chimera
       - SetDefaults
       # TODO: Re-implement chimera show processor
       # TODO: Re-implement manual changes show processor
       # TODO: Copy over radiorevolt_no show processor
-      # TODO: Implement setting default image
       # More to come
   # Pipelines for episodes
   episode:
