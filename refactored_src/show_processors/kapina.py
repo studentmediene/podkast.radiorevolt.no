@@ -3,7 +3,7 @@ from cached_property import threaded_cached_property as cached_property
 from . import ShowProcessor
 
 
-class RadioRevolt_no(ShowProcessor):
+class Kapina(ShowProcessor):
     """
     Class for fetching metadata from Kapina. Note that Kapina has very limited
     support for fetching data for podcasts, since there is NO information about

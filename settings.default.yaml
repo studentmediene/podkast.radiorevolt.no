@@ -73,7 +73,7 @@ processors:
     episode_file: manual_changes.json
     show_file: manual_changes.json
 
-  RadioRevolt_no:
+  Kapina:
     api: https://example.com/graphql/
     show_url_template: https://example.com/programmer/%s
     image_template: https://example.com%s
@@ -123,7 +123,7 @@ pipelines:
     # The pipeline used for all shows.
     default:
       - Chimera
-      - RadioRevolt_no
+      - Kapina
       - SetDefaults
       - ManualChanges
       # More to come
