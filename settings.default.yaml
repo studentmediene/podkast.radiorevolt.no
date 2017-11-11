@@ -125,7 +125,9 @@ pipelines:
       - Chimera
       - SetDefaults
       - ManualChanges
-      # More to come
+    # The pipeline used for the special all episodes feed.
+    all_feed:
+      - SetDefaults
   # Pipelines for episodes
   episode:
     # The pipeline used for all episodes.

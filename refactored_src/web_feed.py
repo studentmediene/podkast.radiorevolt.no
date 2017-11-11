@@ -12,6 +12,7 @@ def xslt_url():
 
 def output_all_feed(all_episodes_settings, all_episodes_ttl, show_source, episode_source, processors):
     show = Show(id=0, **all_episodes_settings)
+    show = run_show_pipeline(show, processors['show_all_feed'])
     episodes = episode_source.get_all_episodes_list(show_source)
     episodes = run_episode_pipeline(episodes, processors['ep_default'])
     show.episodes = episodes

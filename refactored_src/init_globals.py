@@ -34,6 +34,9 @@ def init_globals(new_global_dict: dict, settings, get_global):
             "ep_spotify": create_episode_processors(
                 requests_session, settings, get_global, "spotify"
             ),
+            "show_all_feed": create_show_processors(
+                requests_session, settings, get_global, "all_feed"
+            ),
         },
         "url_service": url_service,
         "redirector": create_redirector(settings, url_service),
