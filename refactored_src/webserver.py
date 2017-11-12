@@ -19,7 +19,6 @@ settings = load_settings()
 
 global_values = (None, None)
 create_global_lock = threading.RLock()
-logger = logging.getLogger(__name__)
 
 
 def get_global_func(*args, **kwargs):
@@ -36,6 +35,8 @@ def update_global_if_stale():
 
         if global_dict is None or has_expired():
             logger.info("global_values is stale, creating anew…")
+            if global_dict:
+                global_dict['requests'].close()
             new_global_dict = dict()
             init_globals(new_global_dict, settings, get_global_func)
             prepare_pipelines_for_batch(new_global_dict['processors']['show'])
@@ -50,9 +51,12 @@ def update_global_if_stale():
             logger.debug("keeping global_values")
 
 
-update_global_if_stale()
-
 customize_logger()
+# Hack: logger doesn't seem to work unless something is logged to the root
+# logger
+logging.info("Starting up podkast.radiorevolt.no application")
+logger = logging.getLogger(__name__)
+update_global_if_stale()
 customize_flask(
     app,
     update_global_if_stale,
@@ -89,6 +93,8 @@ def main():
         app.debug = True
     app.run(host=host, port=port)
 
+# Try to create a feed, so that any configuration errors are obvious (and
+# SystemD marks the service as failed).
 app.testing = True
 test_client = app.test_client()
 test_client.get('/nerdeprat')
