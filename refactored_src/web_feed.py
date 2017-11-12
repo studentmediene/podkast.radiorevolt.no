@@ -38,6 +38,12 @@ def output_feed(show_name, feed_ttl, completed_ttl_factor, alternate_all_episode
         show_instance, processors['show']['web']
     )
 
+    is_completed = show_instance.complete
+    # VERY IMPORTANT! We don't want Itunes to stop refreshing a show just
+    # because it's not running right now, because it might very well return
+    # some day. So don't mark any show as completed.
+    populated_show.complete = False
+
     try:
         episodes = episode_source.episode_list(populated_show)
     except NoEpisodesError:
@@ -47,8 +53,8 @@ def output_feed(show_name, feed_ttl, completed_ttl_factor, alternate_all_episode
     )
     populated_show.episodes = populated_episodes
 
-    if populated_show.complete:
-        ttl = feed_ttl * completed_ttl_factor
+    if is_completed:
+        ttl = round(feed_ttl * completed_ttl_factor)
     else:
         ttl = feed_ttl
 
