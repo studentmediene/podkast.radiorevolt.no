@@ -95,7 +95,7 @@ class EpisodeSource:
         episodes = tuple(episodes)
 
         shows = map(lambda e: e['program_defnr'], episodes)
-        shows = map(lambda s: show_source.shows[s], shows)
+        shows = map(lambda s: show_source.get_show(s), shows)
 
         # See https://docs.python.org/3.4/library/functions.html#map to
         # understand
