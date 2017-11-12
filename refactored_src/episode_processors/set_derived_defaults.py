@@ -1,3 +1,5 @@
+import re
+
 from . import EpisodeProcessor
 
 
@@ -9,6 +11,8 @@ class SetDerivedDefaults(EpisodeProcessor):
     latter exists and not the first. Secondly, the episode's ID is set to the
     media URL if it's not set already.
     """
+    html_tags = re.compile(r"</?[A-Z][^>]*>", flags=re.IGNORECASE)
+
     def accepts(self, episode) -> bool:
         return super().accepts(episode)
 
@@ -18,6 +22,8 @@ class SetDerivedDefaults(EpisodeProcessor):
         if not has_summary and has_long_summary:
             # Use the first line in long description (or everything if there's no newline)
             first_newline = episode.long_summary.find("\n")
-            episode.summary = episode.long_summary[:first_newline] if first_newline != -1 else episode.long_summary
+            short_summary = episode.long_summary[:first_newline] if first_newline != -1 else episode.long_summary
+            short_summary = self.html_tags.sub("", short_summary)
+            episode.summary = short_summary
         if episode.id is None:
             episode.id = episode.media.url
