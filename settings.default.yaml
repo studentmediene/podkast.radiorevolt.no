@@ -168,6 +168,7 @@ caching:
 redirector:
   # For the time being, this is separate from PostgreSQL and must point to
   # the sqlite file.
+  # TODO: Specify the db_file relative to some directory
   db_file: /path/to/data/redirects.db
 
 # Miscellaneous settings concerning the webserver
