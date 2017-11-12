@@ -28,6 +28,7 @@ class SetDefaults(ShowProcessor):
         owner:
           name: Name of owner
           email: Email of owner
+        image: URL of podcast image to use.
     """
     def accepts(self, show) -> bool:
         return super().accepts(show)
