@@ -36,47 +36,37 @@ processors:
   # ClassName:
   #   setting1: value1
   #   setting2: value2
-  example:
-    bypass:
-      - "hei"
-      - "hallo"
-  Testing:
-    bypass:
-      - "your mum"
-      - "Hei der"
-    api: "http://example.com/api"
+  Chimera:
+    api: https://filer.radiorevolt.no/dusken_radio_api_legacy
+    start_date: 2013-02-28  # Derived from when Filmofil has native Chimera-metadata
 
   SetDefaults:
-    description: "Podcast from Example Radio"
-    image: "http://example.com/default.png"
+    description: Podkast fra Radio Revolt
+    image: "http://filer.radiorevolt.no/bilder/default_podkastlogo.png"
     category:
       category: Education
       subcategory: Higher Education
     language: no
-    website: "http://example.org"
+    website: "https://radiorevolt.no/"
     authors:
-      - name: Example Radio
-        email: example@example.org
+      - name: Radio Revolt
+        email: radioredaktor@studentmediene.no
     web_master:
-      name: Example Radio
-      email: example@example.org
-    explicit: false
+      name: Radio Revolt
+      email: teknisk@studentmediene.no
     owner:
-      name: Example Radio
-      email: example@example.org
+      name: Radio Revolt
+      email: teknisk@studentmediene.no
+    explicit: false
 
-  Chimera:
-    api: http://example.org/radio/api
-    start_date: 2013-02-28  # Derived from when Filmofil has native Chimera-metadata
+  Kapina:
+    api: https://radiorevolt.no/graphql/
+    show_url_template: https://radiorevolt.no/programmer/%s
+    image_template: https://radiorevolt.no%s
 
   ManualChanges:
     episode_file: manual_changes.json
     show_file: manual_changes.json
-
-  Kapina:
-    api: https://example.com/graphql/
-    show_url_template: https://example.com/programmer/%s
-    image_template: https://example.com%s
 
 
 # Configuration of the processing pipelines
@@ -194,20 +184,20 @@ redirector:
 # Miscellaneous settings concerning the webserver
 web:
   # URL to redirect to when the user accesses /
-  official_website: https://example.com
+  official_website: https://radiorevolt.no
 
 # Miscellaneous settings for the feed generation
 feed:
   # Information about who owns this podcast (this will be public!)
   owner:
-    name: "Example Radio"
-    mail: "it@example.org"
+    name: "Radio Revolt"
+    mail: "it@radiorevolt.no"
   # Metadata for the special feed with all episodes. You may use any Podcast
   # attributes, as documented in http://podgen.readthedocs.io/en/latest/user/basic_usage_guide/part_1.html
   metadata_all_episodes:
-    name: "All podcasts for Example Radio"
-    description: "All podcast episodes from Example Radio, in one feed."
-    image: "http://static.example.org/all.png"
+    name: "Alle podkastene til Radio Revolt"
+    description: "Alle podkastepisodene fra Radio Revolt, samlet i én podkast."
+    image: null
 
 # Show names which map to the special "all episodes" feed
 # (the canonical name is "all", these will all redirect there)
