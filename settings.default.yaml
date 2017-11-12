@@ -99,6 +99,12 @@ processors:
 # All classes defined inside the episode_processors and show_processors
 # directories are automatically available for use as processors.
 
+# It is possible to reuse pipelines inside another pipeline. This is done by
+# writing the pipeline's name in place of a processor class name. You may also
+# create additional pipelines for the purpose of sharing them among multiple
+# pipelines, but their name should start with an underscore to signal that they
+# are not used directly by the application.
+
 # Format:
 # pipelines:
 #   show or episode:
@@ -111,6 +117,7 @@ processors:
 #           setting1: value1
 #           setting2: value2
 #           ...
+#       - name_of_other_pipeline
 #       ...
 #       - Processor3ClassNameWithoutLocalSettings
 #       - Processor4ClassNameWithoutLocalSettings
@@ -120,33 +127,46 @@ processors:
 pipelines:
   # Pipelines for shows
   show:
-    # The pipeline used as basis for some other pipelines, and when processing
-    # podcast images in process_images.py.
-    default:
+    # Pipeline used when serving feeds for listeners
+    web:
+      - _basis
+      - UseLocalImage
+
+    # Pipeline used when serving the special "all episodes" feed for listeners.
+    all_feed:
+      - SetDefaults
+
+    # Pipeline used when processing shows to look for images which needs to be
+    # processed. The UseLocalImage processor should not occur here, since it
+    # would interfere with the image processing.
+    image_processing:
+      - _basis
+
+    # Internal pipeline shared by web and image_processing
+    _basis:
       - Chimera
       - SetDefaults
       - ManualChanges
-    # The pipeline used for the special all episodes feed (without default).
-    all_feed:
-      - SetDefaults
-    # The pipeline applied after default or all_feed, when creating feeds for consumption
-    # by users or Spotify.
-    web:
-      - UseLocalImage
 
   # Pipelines for episodes
   episode:
-    # The pipeline used for all episodes.
-    default:
+    # The pipeline used for episodes when serving feeds directly to listeners.
+    web:
+      - _basis
+
+    # Pipeline used when serving feeds to be relayed by Spotify.
+    spotify:
+      - SkipAll:
+          end_date: 2017-11-05
+      - _basis
+
+    # Internal pipeline shared by web and spotify
+    _basis:
       - Chimera
       - ManualChanges
       - SkipFutureEpisodes
       - SetDerivedDefaults
       - RedirectorProcessor
-    # The pipeline applied after default, for feeds intended for Spotify
-    spotify:
-      - SkipAll:
-          end_date: 2017-11-05
 
 # Settings related to caching (reusing results for some time).
 # The time before a change in the data propagates to clients is

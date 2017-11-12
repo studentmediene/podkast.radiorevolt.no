@@ -2,11 +2,10 @@ import threading
 import argparse
 import datetime
 import logging
-import itertools
 
 from flask import Flask
 
-from .feed_utils.populate import prepare_processors_for_batch
+from .feed_utils.populate import prepare_pipelines_for_batch
 from .flask_customization import customize_flask, customize_logger
 from .web_api import register_api_routes
 from .redirects import register_episode_redirect, register_article_redirect
@@ -39,7 +38,8 @@ def update_global_if_stale():
             logger.info("global_values is stale, creating anew…")
             new_global_dict = dict()
             init_globals(new_global_dict, settings, get_global_func)
-            prepare_processors_for_batch(itertools.chain.from_iterable(new_global_dict['processors'].values()))
+            prepare_pipelines_for_batch(new_global_dict['processors']['show'])
+            prepare_pipelines_for_batch(new_global_dict['processors']['episode'])
 
             now = datetime.datetime.now(datetime.timezone.utc)
             ttl = datetime.timedelta(seconds=settings['caching']['source_data_ttl'])

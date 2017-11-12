@@ -1,11 +1,24 @@
 import logging
-import copy
+from typing import Mapping, Iterable
+import itertools
 
 from ..show_processors import SkipShow
 from ..episode_processors import SkipEpisode
 
 
 logger = logging.getLogger(__name__)
+
+
+def prepare_pipelines_for_batch(pipelines):
+    """Tell all processors in the given pipelines to prepare for batch
+    processing.
+
+    This should be done if we will generate more than one feed, using all
+    (or more than one) pipeline.
+    """
+    all_processors = itertools.chain.from_iterable(pipelines.values())
+    processors_no_duplicates = set(all_processors)
+    prepare_processors_for_batch(processors_no_duplicates)
 
 
 def prepare_processors_for_batch(processors):

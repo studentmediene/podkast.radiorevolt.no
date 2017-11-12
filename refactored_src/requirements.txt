@@ -1,3 +1,5 @@
+# Allow more static typing
+typing==3.6.2
 # Easily send HTTP requests
 requests==2.11.1
 # Easily generate podcast feeds
@@ -19,6 +21,7 @@ tonyg-rfc3339==0.1
 # Simple webserver framework
 Flask==0.11.1
 # Our own webserver
+uWSGI==2.0.15
 # Image manipulation
 Pillow==3.3.0
 # Database connection (for SlugList)
@@ -38,5 +41,4 @@ MarkupSafe==0.23
 py==1.4.33
 python-dateutil==2.6.0
 six==1.10.0
-uWSGI==2.0.15
 Werkzeug==0.11.10

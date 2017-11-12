@@ -12,10 +12,9 @@ def xslt_url():
 
 def output_all_feed(all_episodes_settings, all_episodes_ttl, show_source, episode_source, processors):
     show = Show(id=0, **all_episodes_settings)
-    show = run_show_pipeline(show, processors['show_all_feed'])
-    show = run_show_pipeline(show, processors['show_web'])
+    show = run_show_pipeline(show, processors['show']['all_feed'])
     episodes = episode_source.get_all_episodes_list(show_source)
-    episodes = run_episode_pipeline(episodes, processors['ep_default'])
+    episodes = run_episode_pipeline(episodes, processors['episode']['web'])
     show.episodes = episodes
     return _prepare_feed_response(show, all_episodes_ttl)
 
@@ -36,10 +35,7 @@ def output_feed(show_name, feed_ttl, completed_ttl_factor, alternate_all_episode
         return redirect(url_for_feed(canonical_slug))
 
     populated_show = run_show_pipeline(
-        show_instance, processors['show_default']
-    )
-    populated_show = run_show_pipeline(
-        populated_show, processors['show_web']
+        show_instance, processors['show']['web']
     )
 
     try:
@@ -47,7 +43,7 @@ def output_feed(show_name, feed_ttl, completed_ttl_factor, alternate_all_episode
     except NoEpisodesError:
         episodes = []
     populated_episodes = run_episode_pipeline(
-        episodes, processors['ep_default']
+        episodes, processors['episode']['web']
     )
     populated_show.episodes = populated_episodes
 

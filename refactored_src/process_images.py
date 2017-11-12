@@ -1,7 +1,6 @@
 import argparse
 import logging
 from collections import namedtuple
-import itertools
 
 from clint.textui import progress
 
@@ -45,7 +44,9 @@ def main():
     init_globals(globals, settings, globals.get)
 
     try:
-        prepare_processors_for_batch(itertools.chain.from_iterable(globals['processors'].values()))
+        prepare_processors_for_batch(
+            globals['processors']['show']['image_processing']
+        )
 
         shows = get_shows(require_episodes, force, globals)
         process_images(shows, quiet)
@@ -62,7 +63,10 @@ def get_shows(require_episodes, force, globals):
 
     populated_shows = []
     for show in shows:
-        populated_show = run_show_pipeline(show, globals['processors']['show_default'])
+        populated_show = run_show_pipeline(
+            show,
+            globals['processors']['show']['image_processing']
+        )
         populated_shows.append(populated_show)
 
     shows_w_image = list(filter(lambda s: s.image, populated_shows))
