@@ -46,7 +46,7 @@ processors:
     category:
       category: Education
       subcategory: Higher Education
-    language: no
+    language: "no"  # "no" without quotes would be parsed as boolean false
     website: "https://radiorevolt.no/"
     authors:
       - name: Radio Revolt
