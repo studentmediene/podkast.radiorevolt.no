@@ -4,10 +4,10 @@ This module binds the stateful data retrievers to their settings.
 import requests
 from flask import url_for
 
-from episode_source import EpisodeSource
+from feed_utils.episode_source import EpisodeSource
 from feed_utils.init_pipelines import create_show_pipelines,\
     create_episode_pipelines
-from show_source import ShowSource
+from feed_utils.show_source import ShowSource
 from views.redirects import SOUND_REDIRECT_ENDPOINT, ARTICLE_REDIRECT_ENDPOINT
 from web_utils.redirector import Redirector
 from web_utils.url_service import UrlService

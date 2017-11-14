@@ -1,13 +1,12 @@
-from time import strptime
 import logging
-from os.path import dirname
+from time import strptime
 
-from podgen import Person, Category
 from cached_property import threaded_cached_property as cached_property
+from os.path import dirname
+from podgen import Person, Category
 
+from feed_utils.base_manual_changes import BaseManualChanges
 from show_processors import ShowProcessor
-from base_manual_changes import BaseManualChanges
-
 
 logger = logging.getLogger(__name__)
 
