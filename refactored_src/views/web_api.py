@@ -1,7 +1,7 @@
 from flask import abort, jsonify, Flask
 
 from feed_utils.no_such_show_error import NoSuchShowError
-from web_feed import url_for_feed
+from views.web_feed import url_for_feed
 
 
 def api_url_show(show, url_service):

@@ -4,13 +4,13 @@ This module binds the stateful data retrievers to their settings.
 import requests
 from flask import url_for
 
-from web_utils.url_service import UrlService
-from show_source import ShowSource
 from episode_source import EpisodeSource
-from web_utils.redirector import Redirector
-from redirects import SOUND_REDIRECT_ENDPOINT, ARTICLE_REDIRECT_ENDPOINT
 from feed_utils.init_pipelines import create_show_pipelines,\
     create_episode_pipelines
+from show_source import ShowSource
+from views.redirects import SOUND_REDIRECT_ENDPOINT, ARTICLE_REDIRECT_ENDPOINT
+from web_utils.redirector import Redirector
+from web_utils.url_service import UrlService
 
 
 def init_globals(new_global_dict: dict, settings: dict, get_global) -> None:
