@@ -6,9 +6,9 @@ import threading
 from flask import Flask
 
 from feed_utils.populate import prepare_pipelines_for_batch
-from flask_customization import customize_flask, customize_logger
 from init_globals import init_globals
-from settings_loader import load_settings
+from utils.settings_loader import load_settings
+from utils.flask_customization import customize_flask, customize_logger
 from views.redirects import register_episode_redirect, register_article_redirect
 from views.web_api import register_api_routes
 from views.web_feed import register_feed_routes

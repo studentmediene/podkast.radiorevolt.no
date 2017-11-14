@@ -55,7 +55,7 @@ def set_up_logger():
 
     # Save everything in this log, limit to 30 days
     rotatingHandler = logging.handlers.TimedRotatingFileHandler(
-        os.path.join(os.path.dirname(__file__), "..", "data", "application.log"),
+        os.path.join(os.path.dirname(__file__), "..", "..", "data", "application.log"),
         when="midnight",
         backupCount=30,
     )
@@ -69,7 +69,7 @@ def set_up_logger():
 
     # Duplicate the important records in a separate file, with more backups
     rotatingImportantHandler = logging.handlers.TimedRotatingFileHandler(
-        os.path.join(os.path.dirname(__file__), "..", "data",
+        os.path.join(os.path.dirname(__file__), "..", "..", "data",
                      "application.warnings.log"),
         when="midnight",
         backupCount=180,

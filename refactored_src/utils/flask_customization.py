@@ -3,7 +3,7 @@ import logging
 from flask import request, url_for, redirect, Flask
 from werkzeug.contrib.fixers import ProxyFix
 
-import set_up_logger
+from utils import set_up_logger
 
 
 # Set up logging so all log messages include request information

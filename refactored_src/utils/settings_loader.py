@@ -14,6 +14,7 @@ YAML_CONFIG_FILE_ENVIRONMENT_VARIABLE = "PODCAST_YAML_FILE"
 DEFAULT_YAML_CONFIG_FILE = os.path.abspath(os.path.join(
     os.path.dirname(__file__),
     "..",
+    "..",
     "settings.default.yaml"
 ))
 
@@ -31,7 +32,7 @@ def yaml_load_settings():
     default_config_file = DEFAULT_YAML_CONFIG_FILE
     config_file = os.environ.get(
         YAML_CONFIG_FILE_ENVIRONMENT_VARIABLE,
-        abspath(join(dirname(__file__), "..", "settings.yaml"))
+        abspath(join(dirname(__file__), "..", "..", "settings.yaml"))
     )
     settings = yaml_load_settings_from_file(default_config_file)
     if config_file and os.path.isfile(config_file):
