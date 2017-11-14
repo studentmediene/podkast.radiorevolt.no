@@ -111,7 +111,9 @@ class Redirector:
         """Utility function for obtaining the intermediate URL for an episode,
         using the intermediate identifier we've found."""
         filename = os.path.basename(
-            urllib.parse.urlparse(episode.media.url).path
+            urllib.parse.unquote(       # Flask quotes for us, don't do it twice
+                urllib.parse.urlparse(episode.media.url).path
+            )
         )
         return self.url_for(
             self.sound_redirect_endpoint,
