@@ -1,6 +1,6 @@
-from . import ShowProcessor
-import requests
 from cached_property import threaded_cached_property as cached_property
+
+from show_processors import ShowProcessor
 
 ORIG_IMAGE_PREFIX = "http://dusken.no/media/thumbs/uploads/images/"
 ORIG_IMAGE_SUFFIX = ".170x170_q85_crop_upscale.jpg"

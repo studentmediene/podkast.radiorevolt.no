@@ -4,7 +4,7 @@ import logging
 
 import yaml
 
-from .utils.deep_update import deep_update
+from utils.deep_update import deep_update
 
 
 logger = logging.getLogger(__name__)

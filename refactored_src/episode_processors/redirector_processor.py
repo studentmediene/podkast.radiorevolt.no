@@ -1,4 +1,4 @@
-from . import EpisodeProcessor
+from episode_processors import EpisodeProcessor
 
 
 class RedirectorProcessor(EpisodeProcessor):

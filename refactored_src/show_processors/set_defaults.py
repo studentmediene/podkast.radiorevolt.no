@@ -1,6 +1,6 @@
 from podgen import Category, Person
 
-from . import ShowProcessor
+from show_processors import ShowProcessor
 
 
 __all__ = ["SetDefaults"]

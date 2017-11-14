@@ -1,6 +1,6 @@
 import re
 
-from . import EpisodeProcessor
+from episode_processors import EpisodeProcessor
 
 
 class SetDerivedDefaults(EpisodeProcessor):

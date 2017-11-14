@@ -23,5 +23,6 @@ def find_modules(filepath):
     modules = filterfalse(lambda f: f == "__init__.py", modules)
     modules = filterfalse(lambda f: f.startswith("_"), modules)
     modules = map(lambda f: f[:-3], modules)
-    modules = map(lambda f: "." + f, modules)
+    package = basename(dirname(filepath))
+    modules = map(lambda f: "{}.{}".format(package, f), modules)
     return modules

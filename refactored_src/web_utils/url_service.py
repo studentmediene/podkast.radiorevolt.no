@@ -1,14 +1,15 @@
 import logging
 import re
-from psycopg2.extensions import TransactionRollbackError
 from time import sleep
 from random import randint
 
-from .slug_list_factory import SlugListFactory
-from .no_such_slug import NoSuchSlug
-from .slug_already_in_use import SlugAlreadyInUse
-from .slug_list import SlugList
-from ..feed_utils.no_such_show_error import NoSuchShowError
+from psycopg2.extensions import TransactionRollbackError
+
+from web_utils.slug_list_factory import SlugListFactory
+from web_utils.no_such_slug import NoSuchSlug
+from web_utils.slug_already_in_use import SlugAlreadyInUse
+from web_utils.slug_list import SlugList
+from feed_utils.no_such_show_error import NoSuchShowError
 
 
 logger = logging.getLogger(__name__)

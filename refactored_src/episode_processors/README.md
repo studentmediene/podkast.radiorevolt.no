@@ -7,7 +7,7 @@ The processors are placed one after another in _pipelines_.
 ## How to create your own
 
 1. Create a new Python module in this folder, like `example.py`.
-2. Import `EpisodeProcessor` from `._episode_processor`.
+2. Import `EpisodeProcessor` from `episode_processors`.
 3. Create your episode processor as a class which extends `EpisodeProcessor`.
 4. Override and implement `__init__`, call the superclass' constructor and define additional attributes you need.
 5. Override and implement `prepare_batch`, where you download and parse any data you need from external resources, but only if that saves time versus doing it one by one.

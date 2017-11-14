@@ -1,5 +1,5 @@
 import psycopg2.extensions
-from .slug_list import SlugList
+from web_utils.slug_list import SlugList
 
 
 class SlugListFactory:

@@ -1,15 +1,12 @@
 import logging
-from . import SkipEpisode, EpisodeProcessor
-from datetime import datetime
-from pytz import timezone
-import pytz
-import requests
-from markdown import Markdown
-import urllib.parse
-from cached_property import threaded_cached_property as cached_property
-from sys import stderr
-from podgen import htmlencode
 from threading import RLock
+from datetime import datetime
+
+import pytz
+from markdown import Markdown
+from cached_property import threaded_cached_property as cached_property
+
+from episode_processors import SkipEpisode, EpisodeProcessor
 
 
 logger = logging.getLogger(__name__)

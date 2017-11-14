@@ -1,7 +1,6 @@
 from abc import ABCMeta, abstractmethod
-from datetime import datetime, time, timezone
 
-from ..utils.date2dt import date2dt
+from utils.date2dt import date2dt
 
 __all__ = ["EpisodeProcessor"]
 
@@ -11,7 +10,6 @@ class EpisodeProcessor(metaclass=ABCMeta):
 
     start_date_key = "start_date"
     end_date_key = "end_date"
-
 
     def __init__(self, settings, bypass, requests_session, get_global):
         """Initialize new episode metadata source.

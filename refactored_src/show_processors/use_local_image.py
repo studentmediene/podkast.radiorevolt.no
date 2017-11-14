@@ -1,5 +1,5 @@
-from . import ShowProcessor
-from ..web_utils.local_image import LocalImage
+from show_processors import ShowProcessor
+from web_utils.local_image import LocalImage
 
 
 class UseLocalImage(ShowProcessor):

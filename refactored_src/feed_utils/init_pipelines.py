@@ -4,10 +4,10 @@ from itertools import filterfalse
 from typing import List, Mapping, Dict, Sequence, Set, Union, cast
 import requests
 
-from ..episode_processors import EpisodeProcessor
-from ..show_processors import ShowProcessor
-from .. import episode_processors
-from .. import show_processors
+import episode_processors
+import show_processors
+from episode_processors import EpisodeProcessor
+from show_processors import ShowProcessor
 
 ShowPipelines = Mapping[str, Sequence[ShowProcessor]]
 EpisodePipelines = Mapping[str, Sequence[EpisodeProcessor]]

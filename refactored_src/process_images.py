@@ -4,12 +4,12 @@ from collections import namedtuple
 
 from clint.textui import progress
 
-from .no_episodes_error import NoEpisodesError
-from . import set_up_logger
-from .settings_loader import load_settings
-from .init_globals import init_globals
-from .web_utils.local_image import LocalImage, ImageIsTooSmall
-from .feed_utils.populate import prepare_processors_for_batch, run_show_pipeline
+from no_episodes_error import NoEpisodesError
+import set_up_logger
+from settings_loader import load_settings
+from init_globals import init_globals
+from web_utils.local_image import LocalImage, ImageIsTooSmall
+from feed_utils.populate import prepare_processors_for_batch, run_show_pipeline
 
 logger = logging.getLogger("process_images")
 

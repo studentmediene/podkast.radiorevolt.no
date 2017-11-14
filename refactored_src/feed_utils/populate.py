@@ -1,9 +1,8 @@
 import logging
-from typing import Mapping, Iterable
 import itertools
 
-from ..show_processors import SkipShow
-from ..episode_processors import SkipEpisode
+from show_processors import SkipShow
+from episode_processors import SkipEpisode
 
 
 logger = logging.getLogger(__name__)

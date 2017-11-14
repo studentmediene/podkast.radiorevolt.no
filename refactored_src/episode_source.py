@@ -1,12 +1,12 @@
 import requests
-from .no_episodes_error import NoEpisodesError
-from .feed_utils.episode import Episode
+from no_episodes_error import NoEpisodesError
+from feed_utils.episode import Episode
 import threading
 import datetime
 from podgen import Media, Person, htmlencode
 import pytz
 
-from .utils.linkify import linkify
+from utils.linkify import linkify
 
 
 class EpisodeSource:

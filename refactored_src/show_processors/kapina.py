@@ -1,6 +1,6 @@
 from cached_property import threaded_cached_property as cached_property
 
-from . import ShowProcessor
+from show_processors import ShowProcessor
 
 
 class Kapina(ShowProcessor):

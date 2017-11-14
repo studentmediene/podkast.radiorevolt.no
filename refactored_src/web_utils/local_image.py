@@ -1,19 +1,17 @@
-import os.path
-import stat
-import subprocess
 import logging
+import subprocess
 from urllib.parse import urlparse, unquote
-from flask import url_for
-from PIL import Image
-import requests
 import io
+import os.path
+import requests
+import stat
 import tempfile
-from warnings import warn
 import warnings
-from cached_property import threaded_cached_property as cached_property
-from clint.textui import progress
-from ..no_episodes_error import NoEpisodesError
+from warnings import warn
 
+from PIL import Image
+from cached_property import threaded_cached_property as cached_property
+from flask import url_for
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())

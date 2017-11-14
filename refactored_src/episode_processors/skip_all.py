@@ -1,4 +1,4 @@
-from . import EpisodeProcessor, SkipEpisode
+from episode_processors import EpisodeProcessor, SkipEpisode
 
 
 class SkipAll(EpisodeProcessor):
