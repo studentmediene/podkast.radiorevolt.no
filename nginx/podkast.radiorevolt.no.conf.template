@@ -27,7 +27,7 @@ server {
 
     location /static/ {
 	// Fill in path to podkast.radiorevolt.no application:
-        alias /path/to/podkast.radiorevolt.no/webserver/static/;
+        alias /path/to/podkast.radiorevolt.no/src/static/;
         autoindex off;
     }
 }
