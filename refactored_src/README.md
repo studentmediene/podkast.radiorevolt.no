@@ -2,6 +2,63 @@
 
 Webserver for å servere podkaster.
 
+## Oppsett
+
+### Pakker som må installeres
+
+#### CentOS
+
+    sudo yum install libxml2 libxml2-devel postgresql postgresql-server libxslt-devel libjpeg-turbo libjpeg-turbo-devel zlib-devel freetype-devel lcms2-devel libwebp-devel tcl tk postgresql-devel python3-devel
+
+#### Ubuntu/Debian
+
+    
+    sudo apt install libxml2 libxml2-dev libxslt1.1 libxslt1-dev python3-lxml libpq-dev python3-dev libtiff5-dev libjpeg8-dev zlib1g-dev libfreetype6-dev libwebp-dev tcl8.5-dev tk8.5-dev
+
+#### Andre
+
+Generelt må du bare oppfylle kravene som stilles av pakkene i `requirements-to-freeze.txt`.
+
+### Videre oppsett
+
+1. Sett opp et virtualenv kalt `venv` inne i `src`: `virtualenv -p python3.4 src/venv`
+2. Aktiver virtualenv: `. src/venv/bin/activate`
+3. Installer avhengigheter: `pip install -r src/requirements.txt`
+4. Lag en tom fil kalt `settings.yaml`, og overskriv følgende innstillinger fra
+   `settings.default.yaml` (se sistnevnte for format, du trenger ikke spesifisere
+   andre innstillinger enn akkurat de du overskriver):
+   * rest_api.url
+   * rest_api.user
+   * rest_api.password
+   * db.host
+   * db.port
+   * db.database
+   * db.user
+   * db.password
+   * redirector.db_file
+5. Sett opp uWSGI-innstillingene: Kopier `podkast.radiorevolt.no.template.ini`, endre filstien til `socket`
+   så den peker til `data`-mappen og lagre som `podkast.radiorevolt.no.ini`.
+6. Sett opp PostgreSQL-server ved hjelp av nyeste backup fra forrige eller
+   kjørende instans av podkastapplikasjonen. Det skal også finnes en SQL-fil
+   i dette repoet som kan brukes til utvikling, men bruker du det i prod risikerer
+   vi at noen URLer som folk bruker slutter å fungere.
+7. Sett opp egen bruker for podkastsystemet, som du deretter gir skrivetilgang
+   til `data`-mappa og `src/static/images`-mappa.
+8. Sett opp en cron-jobb som kjører `make -C sti/til/podkast.radiorevolt.no/src images` hvert 5. til 10. minutt som denne brukeren.
+9. Bruk filene i `nginx` og `systemd`-mappene som utgangspunkt til å lage en
+   konfigurasjon for Nginx (webserver) og SystemD-tjenesten (automatisk oppstart,
+   legges i `/etc/systemd/system`).
+
+For utviklingsformål kan du kjøre `app.py` direkte for å få en
+utviklingsserver på port 5000 til vanlig (bruk `--help` for å se tilgjengelige
+innstillinger).
+
+Ellers kan du bruker `make` til å kjøre programmene, som aktiverer virtualenv og
+kjører programmet i riktig mappe. `make` kjører uWSGI-serveren (som Nginx kan
+koble seg til), og `make images` kjører skriptet som laster ned og behandler
+programbilder. Bruk `-C sti/til/src` hvis du kjører `make` fra en annen mappe enn
+`src/`.
+    
 ## Funksjon
 
 En stor andel av Radio Revolts lyttere bruker podkaster til å konsumere
@@ -29,7 +86,7 @@ dimensjoner.
 ## Teknologi
 
 * Python v3.4
-* uWSGI som lag mellom webserver og applikasjonen
+* uWSGI som lag mellom webserver (nginx) og applikasjonen
 * sqlite som database for episode-URLer (dette er tenkt å endres)
 * PostgreSQL som database for podkast-URLer
 * SystemD for å kjøre tjenesten
@@ -79,7 +136,7 @@ pipelines og processors i innstillingene.
 <dl>
     <dt>webserver.py</dt>
     <dd>Hovedapplikasjonens inngang. Orkestrerer og setter alt sammen.</dd>
-    <dt>web_feed.py</dt>
+    <dt>views/web_feed.py</dt>
     <dd>Generering av podkastene.</dd>
     <dt>init_globals.py</dt>
     <dd>Lager instanser av alle datakildene som brukes av webapplikasjonen.
@@ -87,12 +144,35 @@ pipelines og processors i innstillingene.
     <dt>feed_utils/init_pipelines.py</dt>
     <dd>Setter opp pipelines (pipe-and-filter arkitektur) for å prosessere
     podkaster og episoder.</dd>
-    <dt>settings_loader.py</dt>
+    <dt>utils/settings_loader.py</dt>
     <dd>Laster inn innstillingene, by default fra settings.default.yaml og
     settings.yaml. Har muligheter til å utvides med andre måter å finne
     innstillinger på.</dd>
     <dt>process_images.py</dt>
     <dd>Skript som må kjøres jevnlig for å laste ned og behandle podkastbilder.</dd>
 </dl>
+
+### Python-pakker under src/
+
+<dl>
+    <dt>episode_processors</dt>
+    <dd>Processors som behandler episoder og noe infrastruktur rundt dette.</dd>
+    <dt>feed_utils</dt>
+    <dd>Diverse nyttige verktøy for å gjøre ting på feedene.</dd>
+    <dt>show_processors</dt>
+    <dd>Processors som behandler podkaster/programmer og noe infrastruktur rundt dette.</dd>
+    <dt>static</dt>
+    <dd>Diverse filer som serveres av Nginx direkte, under URIet <code>/static</code>.</dd>
+    <dt>utils</dt>
+    <dd>Nyttige verktøy som ikke er direkte relatert til feeds eller webserveren.</dd>
+    <dt>views</dt>
+    <dd>Moduler og funksjoner som behandler HTTP-forespørsler.</dd>
+    <dt>web_utils</dt>
+    <dd>Nyttige verktøy for å håndtere URLer og webserver-delen av applikasjonen.</dd>
+</dl>
+
+## Utvikling
+
+Kodestil: [Google Python Coding Style Guide](https://google.github.io/styleguide/pyguide.html), inkludert [pylint](https://www.pylint.org/). Skjønt, sistnevnte har ikke vært brukt så lenge, så mye følger ikke helt standarden. Da tar man gjerne og gjør det finere rundt der man gjør endringer :)
 
 
