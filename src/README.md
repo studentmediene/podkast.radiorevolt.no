@@ -1,7 +1,25 @@
 # podkast.radiorevolt.no
 
-Webserver for å servere podkaster.
+Webserver for å servere podkaster. Se [Confluence](https://confluence.smint.no/display/TEK/podkast.radiorevolt.no) for generell info (intern link).
 
+_This new documentation is written primarily for internal usage and is therefore in Norwegian. The project itself is in English, though, as any code should be, so you may be able to find some details in the embedded documentation._
+
+## Endringer
+
+### v2.0
+
+Hele applikasjonen er reorganisert. Mye av den samme koden er å finne igjen, men med en annen mappe- og filstruktur. Koden fungerer også annerledes, siden informasjon flyter på en måte som kan kalles "trickle down", i den forstand at ingen globale variabler aksesseres direkte, de blir i stedet gitt "ovenfra" gjennom funksjonsparametre. Dette gjør koden mer forutsigbar, lettere å forstå og modulær, man kan f. eks. bytte til en annen måte å hente innstillinger på uten å gjøre store endringer.
+
+Formålet med reorganiseringen er å plassere mye av makta i view-koden som genererer feeden. Dermed kan koden der ta beslutninger som f. eks. hvilken pipeline som skal brukes, som er nødvendig for å lage egen Spotify-feed. Videre er innstillingene endret kraftig, slik at de er mye lettere å handskes med. Mesteparten av innstillingene har vi på Git, så overskriver man det man må lokalt.
+
+For å migrere:
+1. oppdater filstiene i SystemD unit-fila (`src` som mappe for `make`),
+2. crontab (samme som for SystemD) og
+3. Nginx (static-mappa).
+4. Lag en ny virtualenv inne i `src`-mappa og 
+5. installer avhengighetene i `requirements.txt`-fila.
+6. Migrer de lokale innstillingene fra `generator/settings.py` og `webserver/settings.py` til `settings.yaml`, skjønt de fleste er allerede migrert til `settings.default.yaml` (les deg opp på innstillingene først).
+7. Gi skrivetilgang til `src/static/images` for brukeren applikasjonen kjører som. for brukeren applikasjonen kjører som.
 ## Oppsett
 
 ### Pakker som må installeres
