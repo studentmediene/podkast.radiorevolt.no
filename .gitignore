@@ -193,8 +193,8 @@ podkast.radiorevolt.no.ini
 # Local images
 webserver/static/images/*
 !webserver/static/images/.keep
-refactored_src/static/images/*
-!refactored_src/static/images/.keep
+src/static/images/*
+!src/static/images/.keep
 # Rotated log files
 *.log.*.gz
 # Vim
