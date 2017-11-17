@@ -2,14 +2,15 @@
 
 ## Monitor logs ##
 
-Run `tail -f data/application.log` in a terminal window (when in the application
-directory).
+Run `tail -F data/application.log` in a terminal window (when in the application
+directory). Replace `application.log` with `application.warnings.log` to see
+only warnings and errors.
 
 ## Application complains about Permission denied ##
 
 Try running the following:
 
-`sudo chown -R podprod data webserver/static/images`
+`sudo chown -R podprod data src/static/images`
 
 Replace `podprod` with whatever user is used to run the application.
 
@@ -17,17 +18,35 @@ Please note that the application should not be the owner of any other directory
 or file than those mentioned above, in order to minimize consequences of a
 security breach.
 
+## Change name of show
+
+Simply change the name in DigAS. You should monitor the logs for warnings and
+errors.
+
+## Add support for an alternate version of feeds
+
+This is how the Spotify feed is set up.
+
+1. Add pipeline name to `ALLOWED_PIPELINES` in `src/views/web_feed.py`.
+2. Add pipeline to the set given to `validate_pipelines` in the functions
+   `create_show_pipelines` and `create_episode_pipelines` found in
+   `src/feed_utils/init_pipelines.py`.
+3. Add configuration for this pipeline in `settings.default.yaml`, with an
+   explanatory comment.
+4. Test out the application. You should be able to access this pipeline through
+   `/<pipeline-name>/<show-name>`.
+
 ## Upgrade/deploy a new version ##
 
 You might want to have a staging server which is identical to the production server, and first try to upgrade the
 staging server before upgrading the production server.
 
-1. Change directory so you're in the folder which contains the folder where podcast-feed-gen is installed.
+1. Change directory so you're in the folder which contains the folder where this application is installed.
 
-2. Make a copy of the podcast-feed-gen folder:
+2. Make a copy of the podkast.radiorevolt.no folder:
 
     ```sh
-    cp -p -R podcast-feed-gen upgrade-podcast-feed-gen
+    cp -p -R podkast.radiorevolt.no upgrade-podkast.radiorevolt.no
     ```
 
     You might have to run this with sudo.
@@ -44,7 +63,7 @@ staging server before upgrading the production server.
     rm -R venv
     ```
 
-5. Set up the `virtualenv` and install the required packages, following the instructions in `INSTALLING.md`.
+5. Set up the `virtualenv` and install the required packages, following the instructions in `README.md`.
 
 6. Download the newest changes:
 
@@ -62,7 +81,7 @@ staging server before upgrading the production server.
 7. Go through the changelog and/or release notes, and make the required changes to the configuration files (remember,
    the local non-template files aren't changed). You may also need to install or upgrade existing dependencies.
 
-8. Make yourself the owner of the data directory, so you can run the tests:
+8. Make yourself the owner of the data directory, so you can run the tests (note: no tests exist, this is outdated. Instead, run python src/app.py --bind 0.0.0.0:9000 or something to test out the application.):
 
     ```sh
     sudo chown -R YOUR_USERNAME:YOUR_USERNAME data
