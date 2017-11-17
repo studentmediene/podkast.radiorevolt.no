@@ -20,6 +20,30 @@ def output_all_feed(all_episodes_settings, all_episodes_ttl, show_source, episod
 
 
 def output_feed(show_name, feed_ttl, completed_ttl_factor, alternate_all_episodes_uri, url_service, show_source, episode_source, processors):
+    return output_special_feed(DEFAULT_PIPELINE, show_name, feed_ttl, completed_ttl_factor, alternate_all_episodes_uri, url_service, show_source, episode_source, processors)
+
+
+ALLOWED_PIPELINES = {
+    'web',
+    'spotify',
+}
+DEFAULT_PIPELINE = 'web'
+
+
+def output_special_feed(pipeline, show_name, feed_ttl, completed_ttl_factor, alternate_all_episodes_uri, url_service, show_source, episode_source, processors):
+    if pipeline not in ALLOWED_PIPELINES:
+        abort(404, 'Pipeline "{}" not recognized'.format(pipeline))
+
+    if pipeline in processors['show']:
+        show_pipeline = pipeline
+    else:
+        show_pipeline = DEFAULT_PIPELINE
+
+    if pipeline in processors['episode']:
+        episode_pipeline = pipeline
+    else:
+        episode_pipeline = DEFAULT_PIPELINE
+
     try:
         show, canonical_slug = \
             url_service.get_canonical_slug_for_slug(show_name)
@@ -32,10 +56,10 @@ def output_feed(show_name, feed_ttl, completed_ttl_factor, alternate_all_episode
     show_instance = show_source.get_show(show)
 
     if not show_name == canonical_slug:
-        return redirect(url_for_feed(canonical_slug))
+        return redirect(url_for_feed(canonical_slug, pipeline))
 
     populated_show = run_show_pipeline(
-        show_instance, processors['show']['web']
+        show_instance, processors['show'][show_pipeline]
     )
 
     is_completed = show_instance.complete
@@ -49,7 +73,7 @@ def output_feed(show_name, feed_ttl, completed_ttl_factor, alternate_all_episode
     except NoEpisodesError:
         episodes = []
     populated_episodes = run_episode_pipeline(
-        episodes, processors['episode']['web']
+        episodes, processors['episode'][episode_pipeline]
     )
     populated_show.episodes = populated_episodes
 
@@ -71,23 +95,32 @@ def _prepare_feed_response(show, max_age):
     return resp
 
 
-def url_for_feed(slug):
-    return url_for("output_feed", show_name=slug, _external=True)
+def url_for_feed(slug, pipeline=None):
+    if not pipeline or pipeline == DEFAULT_PIPELINE:
+        return url_for("output_feed", show_name=slug, _external=True)
+    else:
+        return url_for(
+            "output_special_feed",
+            show_name=slug,
+            pipeline=pipeline,
+            _external=True
+        )
 
 
 def register_feed_routes(app: Flask, settings, get_global):
-    def do_output_feed(show_name):
-        return output_feed(
-            show_name,
-            settings['caching']['feed_ttl'],
-            settings['caching']['completed_ttl_factor'],
-            settings['all_episodes_show_aliases'],
-            get_global('url_service'),
-            get_global('show_source'),
-            get_global('episode_source'),
-            get_global('processors'),
-        )
-    app.add_url_rule("/<show_name>", "output_feed", do_output_feed)
+    def inject_feed_arguments(func):
+        def run_func(*args, **kwargs):
+            kwargs['feed_ttl'] = settings['caching']['feed_ttl']
+            kwargs['completed_ttl_factor'] = settings['caching']['completed_ttl_factor']
+            kwargs['alternate_all_episodes_uri'] = settings['all_episodes_show_aliases']
+            kwargs['url_service'] = get_global('url_service')
+            kwargs['show_source'] = get_global('show_source')
+            kwargs['episode_source'] = get_global('episode_source')
+            kwargs['processors'] = get_global('processors')
+            return func(*args, **kwargs)
+        return run_func
+    app.add_url_rule("/<show_name>", "output_feed", inject_feed_arguments(output_feed))
+    app.add_url_rule("/<pipeline>/<show_name>", "output_special_feed", inject_feed_arguments(output_special_feed))
 
     def do_output_all_feed():
         return output_all_feed(
