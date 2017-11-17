@@ -1,2 +1,0 @@
-class NoSuchShowError(Exception):
-    pass
