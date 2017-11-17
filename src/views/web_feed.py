@@ -23,6 +23,8 @@ def output_feed(show_name, feed_ttl, completed_ttl_factor, alternate_all_episode
     return output_special_feed(DEFAULT_PIPELINE, show_name, feed_ttl, completed_ttl_factor, alternate_all_episodes_uri, url_service, show_source, episode_source, processors)
 
 
+# Note: when adding pipelines here, you must also change init_pipelines.py so
+# the validation of the configuration includes the new pipeline
 ALLOWED_PIPELINES = {
     'web',
     'spotify',
