@@ -19,7 +19,8 @@ For å migrere:
 4. Lag en ny virtualenv inne i `src`-mappa og 
 5. installer avhengighetene i `requirements.txt`-fila.
 6. Migrer de lokale innstillingene fra `generator/settings.py` og `webserver/settings.py` til `settings.yaml`, skjønt de fleste er allerede migrert til `settings.default.yaml` (les deg opp på innstillingene først).
-7. Gi skrivetilgang til `src/static/images` for brukeren applikasjonen kjører som. for brukeren applikasjonen kjører som.
+7. Gi skrivetilgang til `src/static/images` for brukeren applikasjonen kjører som.
+
 ## Oppsett
 
 ### Pakker som må installeres
@@ -74,7 +75,7 @@ innstillinger).
 Ellers kan du bruker `make` til å kjøre programmene, som aktiverer virtualenv og
 kjører programmet i riktig mappe. `make` kjører uWSGI-serveren (som Nginx kan
 koble seg til), og `make images` kjører skriptet som laster ned og behandler
-programbilder. Bruk `-C sti/til/src` hvis du kjører `make` fra en annen mappe enn
+programbilder. Bruk `-C sti/til/podkast.radiorevolt.no/src` hvis du kjører `make` fra en annen mappe enn
 `src/`.
     
 ## Funksjon
