@@ -80,8 +80,7 @@ processors:
 # You may set local settings for the processors that are set up, which override
 # their global settings (see above). This way, you may use a processor multiple
 # times, but with different settings. This is true even within the same
-# pipeline. Observed settings are the same, except for bypass_show and
-# bypass_episode which are simply named bypass.
+# pipeline. Observed settings are the same.
 # Note that the overwriting logic is dead simple, so if you define a bypass list
 # here, it will overwrite the entire bypass list defined globally, so you'll
 # need to list them all again.

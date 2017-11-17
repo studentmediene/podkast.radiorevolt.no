@@ -11,7 +11,7 @@ class EpisodeProcessor(metaclass=ABCMeta):
     start_date_key = "start_date"
     end_date_key = "end_date"
 
-    def __init__(self, settings, bypass, requests_session, get_global):
+    def __init__(self, settings, bypass, requests_session, get_global, bypass_shows):
         """Initialize new episode metadata source.
 
         The default implementation sets self.settings to the value of settings, and self.bypass to the value of bypass.
@@ -34,6 +34,8 @@ class EpisodeProcessor(metaclass=ABCMeta):
         self.get_global = get_global
         """Function for obtaining instances of ShowSource, EpisodeSource etc.
         For special purpose processors only."""
+        self.bypass_shows = bypass_shows
+        """set: Set of episode.show.id which this source must bypass (ie. not accept)."""
 
     @abstractmethod
     def accepts(self, episode) -> bool:
@@ -51,6 +53,9 @@ class EpisodeProcessor(metaclass=ABCMeta):
 
         if episode.media.url in self.bypass:
             # Bypass, even if start and end dates are set
+            return False
+        elif episode.show.id in self.bypass_shows:
+            # Bypass, due to the show
             return False
         elif self.start_date_key in self.settings \
                 or self.end_date_key in self.settings:

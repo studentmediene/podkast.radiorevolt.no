@@ -371,12 +371,6 @@ def create_processor(
     # appearance in a pipeline specifically
     processor_conf = dict()
     glb_processor_conf = settings['processors'].get(class_name, dict())
-    # Ensure we can specify both episodes and shows to bypass for
-    # processors which are both show and episode processors
-    glb_processor_conf['bypass'] = glb_processor_conf.get(
-        'bypass_' + pipeline_type,
-        []
-    )
     processor_conf.update(glb_processor_conf)
     processor_conf.update(local_processor_conf)
 
@@ -395,11 +389,14 @@ def create_processor(
             )
         )
     # Use it
+    extra_arg = [processor_conf.get('bypass_show', set())]\
+        if pipeline_type == 'episode' else []
     return processor_func(
         processor_conf,
-        processor_conf['bypass'],
+        processor_conf.get('bypass_' + pipeline_type, set()),
         requests_session,
-        get_global
+        get_global,
+        *extra_arg
     )
 
 
