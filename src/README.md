@@ -54,7 +54,6 @@ Generelt må du bare oppfylle kravene som stilles av pakkene i `requirements-to-
    * db.database
    * db.user
    * db.password
-   * redirector.db_file
 5. Sett opp uWSGI-innstillingene: Kopier `podkast.radiorevolt.no.template.ini`, endre filstien til `socket`
    så den peker til `data`-mappen og lagre som `podkast.radiorevolt.no.ini`.
 6. Sett opp PostgreSQL-server ved hjelp av nyeste backup fra forrige eller

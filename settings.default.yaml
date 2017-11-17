@@ -176,9 +176,9 @@ caching:
 # an episode, so this host can be used to log such traffic.
 redirector:
   # For the time being, this is separate from PostgreSQL and must point to
-  # the sqlite file.
-  # TODO: Specify the db_file relative to some directory
-  db_file: /path/to/data/redirects.db
+  # the sqlite file. It must either be an absolute path, or a path relative to
+  # the root of the project (the podkast.radiorevolt.no/ folder).
+  db_file: data/redirects.db
 
 # Miscellaneous settings concerning the webserver
 web:

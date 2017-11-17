@@ -21,7 +21,8 @@ class Redirector:
         so we can log downloads on the server podcasts are served from.
 
         Args:
-            db_file: Path to the sqlite3 database file used.
+            db_file: Path to the sqlite3 database file used. Either absolute or
+                relative to the repository root folder.
             url_service: Instance of UrlService, responsible for obtaining the
                 canonical show slug for a show.
             article_redirect_endpoint: Name of function registered in Flask,
@@ -35,11 +36,20 @@ class Redirector:
                 title, the original filename for the episode.
             url_for_func: Flask's url_for function.
         """
-        self.db_file = db_file
+        self.db_file = self.create_db_file_path(db_file)
         self.url_service = url_service
         self.article_redirect_endpoint = article_redirect_endpoint
         self.sound_redirect_endpoint = sound_redirect_endpoint
         self.url_for = url_for_func
+
+    @staticmethod
+    def create_db_file_path(db_file):
+        if os.path.isabs(db_file):
+            return db_file
+        this_dir = os.path.dirname(__file__)
+        # One up is src/, another up is podkast.radiorevolt.no/
+        relative_to = os.path.join(this_dir, '..', '..')
+        return os.path.abspath(os.path.join(relative_to, db_file))
 
     def get_original_sound(self, episode):
         """Get the episode sound file's original URL from its intermediate ID.
