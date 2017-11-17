@@ -145,8 +145,12 @@ pipelines:
 
     # Pipeline used when serving feeds to be relayed by Spotify.
     spotify:
-      - SkipAll:
-          end_date: 2017-11-05
+      # Skip until a certain date, but use different dates for different shows.
+      # (To not skip anything, bypass the show rather than specify an early date)
+      - SkipByDate:
+          default: 2018-01-01
+          232: 2017-10-26  # Filmofil
+          2674: 2017-10-22  # Rødmaling
       - _basis
 
     # Internal pipeline shared by web and spotify
