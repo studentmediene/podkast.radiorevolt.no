@@ -148,9 +148,12 @@ pipelines:
       # Skip until a certain date, but use different dates for different shows.
       # (To not skip anything, bypass the show rather than specify an early date)
       - SkipByDate:
-          default: 2018-01-01
+          default: 2018-02-01
           232: 2017-10-26  # Filmofil
           2674: 2017-10-22  # Rødmaling
+          2694: 2017-10-23 # 67% Sikkert
+          2673: 2017-09-17 # Satirikon
+          1957: 2017-10-19 # Uillustrert vitenskap
       - _basis
 
     # Internal pipeline shared by web and spotify
