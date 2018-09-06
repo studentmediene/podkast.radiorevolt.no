@@ -354,5 +354,14 @@
 		"subtitle": "Radio Revolts sportsmagasin",
 		"description": "Radio Revolts sportsprogram pjatter om det meste ymse som skjer i sportens verden. Du får aktualiteter fra OL blandet med rørende historier om helter fra en fordums tid. For hva skjedde egentlig med Anders Jacobsen, Oddvar Brå og Kolo Toure? Et radioprogram med fokus på sport, det populære, det sære, det herlige. Er idrett din flukt fra den virkelige verden og alt dens mas? Flomlys er her for deg.",
 		"website": "https://radiorevolt.no/programmer/flomlys"
+	},
+	"2731": {
+		"category": [
+			"Comedy"
+		],
+		"image": "https://radiorevolt.no/media/uploads/images/Formannskapet_logo.png",
+		"description": "Synes du det er gøy at Per \"hunken\" Sandberg drar damer han ikke har noen rett til? Smiler du av at Linnie Meister tar med typen på date dit hun spredte asken av faren sin, slik at kjæresten kunne møte svigers? Ellers kanskje aller viktigst, ler du av det spik spenna hakkende gale mennesket som er Kari Jaquesson? Er du usikker på hvordan du skriver Kari Jaquesson?\nFormannskapet gir deg K-jack, hunken, Linnie og mer. Verden er full av idioter som må styres på rett kjøl av kommunens nest øverste politiske organ uten parlamentarisk styring.",
+		"subtitle": "Kommunens nest øverste politiske organ uten parlamentarisk styring",
+		"website": "https://radiorevolt.no/programmer/formannskapet"
 	}
 }
