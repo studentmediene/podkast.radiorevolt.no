@@ -76,11 +76,6 @@
 			"Comedy"
 		]
 	},
-	"232": {
-		"category": [
-			"TV & Film"
-		]
-	},
 	"2345": {
 		"category": [
 			"Comedy"
@@ -102,12 +97,6 @@
 		"category": [
 			"Society & Culture",
 			"History"
-		]
-	},
-	"1980": {
-		"category": [
-			"Arts",
-			"Literature"
 		]
 	},
 	"2003": {
@@ -272,9 +261,9 @@
 	"2412": {
 		"category": [
 			"Society & Culture"
-			],
-			"image": "https://radiorevolt.no/media/uploads/images/nestenhelg.png",
-			"description":"Mia, Sofie, Alvar, Marcus og Jørgen lader opp til helg i Norges beste studentby hver fredag fra kl. 16.00-18.00!"
+		],
+		"image": "https://radiorevolt.no/media/uploads/images/nestenhelg.png",
+		"description": "Mia, Sofie, Alvar, Marcus og Jørgen lader opp til helg i Norges beste studentby hver fredag fra kl. 16.00-18.00!"
 	},
 	"2414": {
 		"category": [
@@ -297,12 +286,6 @@
 		"category": [
 			"Arts",
 			"Literature"
-		]
-	},
-	"2511": {
-		"category": [
-			"Technology",
-			"Tech News"
 		]
 	},
 	"2512": {
@@ -331,10 +314,6 @@
 		],
 		"image": "https://radiorevolt.no/media/uploads/images/76prosent.jpg",
 		"description": "67% sikkert er et vitenskapsprogram uten viten. Hver mandag tar Grete Faanes, Linn Jarvie og Karsten Nordnes for seg spørsmål man vanligvis ville googlet. Lurer du på om pingviner har knær? Eller om Paralympics har egne parkeringsplasser for de som ikke er handikappet? Vi vet ikke svaret, men vi diskuterer oss frem til et svar du kan være 67% sikker på."
-	},
-	"2676": {
-		"image": "https://radiorevolt.no/media/uploads/images/logo_VXvN8bE.png",
-		"description": "Johanne, Mathilde og Charlotte snakker om hva som definerer oss som millenniumsgenerasjon. I løpet av høsten skal vi ta for oss et bredt spekter av temaer, alt fra Pride og seksualitet, til reality TV, drikkekultur og kropp."
 	},
 	"2673": {
 		"image": "https://radiorevolt.no/media/uploads/images/satirikon-logo.png",
@@ -401,5 +380,40 @@
 		"description": "SNN er radioprogrammet som holder deg oppdatert på alt fra lokale til internasjonale nyheter som er relevante eller interessante for studenter i Trondheim. I løpet av timen på luften vil vi servere en godt krydret blanding av seriøse analyser, debatter og oppdateringer, samt at vi til tider tar oss friheten til å slå ut håret, og ser på det hele med et satirisk skråblikk.",
 		"subtitle": "SNN er radioprogrammet som holder deg oppdatert på studentnyheter",
 		"website": "https://radiorevolt.no/programmer/studentniste"
+	},
+	"1980": {
+		"category": [
+			"Arts",
+			"Literature"
+		],
+		"image": "https://radiorevolt.no/media/uploads/images/Bokbaren_v01.png",
+		"description": "Bokbaren er Radio Revolts litteraturmagasin. Hver tirsdag fra 20:00 til 21:00 diskuteres aktuell og tidløs litteratur, debatter og annet som rører seg innafor litteraturen og fiksjonens verden, både lokalt og globalt.",
+		"subtitle": "Sett deg godt til rette og fyll glasset med noe godt mens bokbarna i Bokbaren geleider deg inn i litteraturens verden. Hver tirsdag 20-21",
+		"website": "https://radiorevolt.no/programmer/bokbaren"
+	},
+	"232": {
+		"category": [
+			"TV & Film"
+		],
+		"image": "https://radiorevolt.no/media/uploads/images/filmofil.png",
+		"description": "Filmofil er radioshowet som holder deg oppdatert på fersk film samt tar deg med dypt inn i de levende bilders magiske verden. Vi byr på kinopremierer, skjulte perler, gode historier, video-anmeldelser, filmmusikk, nyheter, rariteter, konkuranser og ekte filmlidenskap!",
+		"subtitle": "Filmofil er radioshowet som holder deg oppdatert på fersk film. Hver torsdag fra 20.00-22.00.",
+		"website": "https://radiorevolt.no/programmer/filmofil"
+	},
+	"2511": {
+		"category": [
+			"Technology",
+			"Tech News"
+		],
+		"image": "https://radiorevolt.no/media/uploads/images/garasjen-04_I3ymi47.png",
+		"description": "Garasjen er Radio Revolts teknologimagasin - et fristed for deg som liker å være oppdatert på det siste innen teknologi, men heller vil høre heftige diskusjoner på radio enn å lese tørre artikler. Vet du forskjellen på SSL og SSE, drømmer du om å eie en 3D-scanner og skulle du gjerne hatt et par Google Glass å leke med? Dette er programmet for deg. Med Bendik, Jørgen, Bård, Endre, Kristian, Thorben, Magnus, Oda, Cecilie, Kristian Bjørn, Vemund og Andreas.",
+		"subtitle": "Garasjen er Radio Revolts teknologimagasin – et fristed som holder deg oppdatert på det siste innen teknologi på søndager fra kl. 19 til kl. 20.",
+		"website": "https://radiorevolt.no/programmer/garasjen"
+	},
+	"2676": {
+		"image": "https://radiorevolt.no/media/uploads/images/logo_VXvN8bE.png",
+		"description": "Johanne, Mathilde og Charlotte snakker om hva som definerer oss som millenniumsgenerasjon. I løpet av høsten skal vi ta for oss et bredt spekter av temaer, alt fra Pride og seksualitet, til reality TV, drikkekultur og kropp.",
+		"subtitle": "Johanne, Mathilde og Charlotte snakker om hvordan det er å være ung i dag, og tar opp temaer som seksualitet, dateing og realityserier",
+		"website": "https://radiorevolt.no/programmer/millennium"
 	}
 }
