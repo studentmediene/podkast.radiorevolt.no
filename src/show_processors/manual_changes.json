@@ -21,11 +21,6 @@
 			"email": "That person's email"
 		}
 	},
-	"2592": {
-		"category": ["Games & Hobbies", "Video Games"],
-		"description": "I spillmagasinet Nerdeprat diskuterer vi tema rundt spill og nerdekultur, med akademisk og humoristisk tilnærming. Vi tar også opp ukas nyheter og informerer deg om de spillene du burde spille, og kanskje de spillene du har gått glipp av. Du hører oss live hver torsdag 17:00-19:00 på Radio Revolt. (Intro og jingler inkluderer deler av låta Pie in the Sky, med tillatelse fra komponisten Karl Brueggemann fra Super Marcato Bros.)",
-		"website": "https://radiorevolt.no/programmer/nerdeprat"
-	},
 	"": {
 		"category": [
 			"Government & Organizations",
@@ -44,21 +39,10 @@
 			"Comedy"
 		]
 	},
-	"2438": {
-		"category": [
-			"Music"
-		]
-	},
 	"2590": {
 		"category": [
 			"Comedy"
 		]
-	},
-	"2649": {
-		"category": [
-			"News & Politics"
-		],
-		"image": "https://radiorevolt.no/media/uploads/images/Revoltmorgen.png"
 	},
 	"2651": {
 		"category": [
@@ -130,11 +114,6 @@
 	"2539": {
 		"category": [
 			"Comedy"
-		]
-	},
-	"1520": {
-		"category": [
-			"Music"
 		]
 	},
 	"2245": {
@@ -210,12 +189,6 @@
 			"Society & Culture"
 		]
 	},
-	"1957": {
-		"category": [
-			"Science & Medicine",
-			"Natural Sciences"
-		]
-	},
 	"1977": {
 		"category": [
 			"News & Politics"
@@ -257,13 +230,6 @@
 			"Sports & Recreation",
 			"Amateur"
 		]
-	},
-	"2412": {
-		"category": [
-			"Society & Culture"
-		],
-		"image": "https://radiorevolt.no/media/uploads/images/nestenhelg.png",
-		"description": "Mia, Sofie, Alvar, Marcus og Jørgen lader opp til helg i Norges beste studentby hver fredag fra kl. 16.00-18.00!"
 	},
 	"2414": {
 		"category": [
@@ -349,7 +315,7 @@
 		"category": [
 			"Comedy"
 		],
-		"image": "https://radiorevolt.no/media/uploads/images/LOGO_hvit-01.png",
+		"image": "https://radiorevolt.no/media/uploads/images/LOGO-01.png",
 		"description": "Svada er et flunkende nytt program som skal gjøre et dypdykk i samfunnets absurditeter. Vi skal være din guide til den jungelen av falske nyheter, tåpelige overskrifter og kommentarfeltkrigføring som finnes der ute. Hold på hatten, len deg tilbake og nyt en times reise gjennom det kaotiske lille helvetet vi kaller det moderne samfunnet.",
 		"subtitle": "Din guide til jungelen av falske nyheter, tåpelige overskrifter og kommentarfeltkrigføring som finnes der ute",
 		"website": "https://radiorevolt.no/programmer/svada"
@@ -412,8 +378,87 @@
 	},
 	"2676": {
 		"image": "https://radiorevolt.no/media/uploads/images/logo_VXvN8bE.png",
+		"category": [
+			"Society & Culture"
+		],
 		"description": "Johanne, Mathilde og Charlotte snakker om hva som definerer oss som millenniumsgenerasjon. I løpet av høsten skal vi ta for oss et bredt spekter av temaer, alt fra Pride og seksualitet, til reality TV, drikkekultur og kropp.",
 		"subtitle": "Johanne, Mathilde og Charlotte snakker om hvordan det er å være ung i dag, og tar opp temaer som seksualitet, dateing og realityserier",
 		"website": "https://radiorevolt.no/programmer/millennium"
+	},
+	"2592": {
+		"image": "https://radiorevolt.no/media/uploads/images/Nerdeprat_transparent.png",
+		"category": ["Games & Hobbies", "Video Games"],
+		"subtitle": "Spillmagasinet Nerdeprat holder deg oppdatert på alt av spill og nerdekultur hver torsdag fra 17:00-19:00.",
+		"description": "I spillmagasinet Nerdeprat diskuterer vi tema rundt spill og nerdekultur, med akademisk og humoristisk tilnærming. Vi tar også opp ukas nyheter og informerer deg om de spillene du burde spille, og kanskje de spillene du har gått glipp av. Du hører oss live hver torsdag 17:00-19:00 på Radio Revolt. (Intro og jingler inkluderer deler av låta Pie in the Sky, med tillatelse fra komponisten Karl Brueggemann fra Super Marcato Bros.)",
+		"website": "https://radiorevolt.no/programmer/nerdeprat"
+	},
+	"2412": {
+		"image": "https://radiorevolt.no/media/uploads/images/nestenhelg.png",
+		"category": [
+			"Society & Culture"
+		],
+		"subtitle": "Mia, Sofie, Alvar, Marcus og Jørgen lader opp til helg i Norges beste studentby hver fredag fra kl. 16.00-18.00!",
+		"description": "Programmet som tar deg med fra en strabasiøs uke og inn i en behagelig helg. Du får de viktigste studentnyhetene, alt om helgas happenings og aktuelle gjester og reportasjer fra studentbyen Trondheim. Og selvfølgelig god helgestemning!",
+		"website": "https://radiorevolt.no/programmer/nesten-helg"
+	},
+	"1520": {
+		"category": [
+			"Music"
+		]
+	},
+	"2448": {
+		"image": https://radiorevolt.no/media/uploads/images/radiodokumentar-01.png",
+		"category": [
+			"Society & Culture"
+		],
+		"subtitle": "Radio Revolts journalister lager dokumentarer om alt fra amerikansk denim til nepalske oppdrettsanlegg – hør dem her.",
+		"description": "Radio Revolts journalister lager dokumentarer om alt fra amerikansk denim til nepalske oppdrettsanlegg – hør dem her.",
+		"website": "https://radiorevolt.no/programmer/radiodokumentarer"
+	},
+	"2649": {
+		"image": "https://radiorevolt.no/media/uploads/images/Revoltmorgen.png"
+		"category": [
+			"News & Politics"
+		],
+		"subtitle": "Radio Revolts morgenprogram - for deg som ønsker å få en god og oppdatert start på studenthverdagen.",
+		"description": "Dette programmet vil være med deg i morgentimene og hjelpe deg i gang med din studenthverdag. Vi vil holde deg oppdatert på dagens tilbud i samtlige kantiner og kiosker, for ikke å glemme de spennende «standsa» på Gløshaugen og Dragvoll. Vi tar deg gjennom de harde morgentimene og skal dra deg ut av senga for å møte dagen, hver morgen på Radio Revolt.",
+		"website": "https://radiorevolt.no/media/uploads/images/revoltMorgon.png"
+	},
+	"2634": {
+		"image": "https://radiorevolt.no/media/uploads/images/Samfundm%C3%B8te_logo.png"
+		"category": [
+			"News & Politics"
+		],
+		"subtitle": "Vi sender live fra Samfundsmøtene i Storsalen på Studentersamfundet. Her finner du opptak av tidligere Samfundsmøter.",
+		"description": "Radio Revolt sender live fra Samfundsmøtene i Storsalen på Studentersamfundet. Her finner du lydopptak av tidligere Samfundsmøter. Det finnes også videoversjoner av disse opptakene.",
+		"website": "https://radiorevolt.no/programmer/samfundsmoter"
+	},
+	"2610": {
+		"image": "https://radiorevolt.no/media/uploads/images/ecb8e4d51f84fb5cc73c8f863edcd16c.png"
+		"category": [
+			"News & Politics"
+		],
+		"subtitle": "Radio Revolts spesialsendinger! Alt fra konserter til livesending fra Pstereo til debatt.",
+		"description": "I blant har vi spesialsendinger rundt omkring i byen. Dette kan være alt fra konserter vi tar opptak av, artige prosjekter, utesendinger fra Samfundet, Pstereo-festivalen, UKA og lignende.",
+		"website": "https://radiorevolt.no/programmer/spesialsendinger"
+	},
+	"1957": {
+		"image": "https://radiorevolt.no/media/uploads/images/UillVit.png",
+		"category": [
+			"Science & Medicine",
+			"Natural Sciences"
+		],
+		"subtitle": "Uillustrert Vitenskap er Radio Revolts populærvitenskapelige program.",
+		"description": "Lyst til å lære deg noen kule fun facts? Eller fakta du aldri trodde du kom til å trenge? Andreas, Andreas, Christine og Martin tar opp populærvitenskaplige temaer for å presentere de for deg på en underholdende og spennende måte! Tune inn på Radio Revolt og lytt på Uillustrert Vitenskap, tirsdager fra 20-21!",
+		"website": "https://radiorevolt.no/programmer/uillustrert-vitenskap"
+	},
+	"2438": {
+		"image": "https://radiorevolt.no/media/uploads/images/UkeSenderen.png",
+		"category": [
+			"Society & Culture"
+		],
+		"subtitle": "Hva skjer, har skjedd og kommer til og skje under UKA, Norges største kulturfestival? UKEsenderen gir deg svaret!",
+		"description": "UKEsenderen ble først opprettet i 1933, som et eksperiment med radiosendinger under akkurat UKA. Da var det Akademisk RadioKlubb (ARK) som stod for sendingene. UKEsenderen ble raskt en tradisjon og ble satt i drift under hver UKE. I 2003 ble UKEsenderen lagt ned, og Radio Revolt (da under navnet Studentradion i Trondheim) tok over stafettpinnen og har siden da dekket UKA hvert eneste år. Radio Revolts programledere, samt deres utallige reportere og sidekicks skal oppsummere det beste (og kanskje også det verste?) av ukens UKEarrangementer. Forventer intervjuer, anmeldelser, reportasjer, og løs og fast prat samt den beste musikken fra UKEartistene.",
+		"website": "https://radiorevolt.no/programmer/ukesenderen"
 	}
 }
