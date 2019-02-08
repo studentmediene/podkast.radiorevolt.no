@@ -460,5 +460,14 @@
 		"subtitle": "Hva skjer, har skjedd og kommer til og skje under UKA, Norges største kulturfestival? UKEsenderen gir deg svaret!",
 		"description": "UKEsenderen ble først opprettet i 1933, som et eksperiment med radiosendinger under akkurat UKA. Da var det Akademisk RadioKlubb (ARK) som stod for sendingene. UKEsenderen ble raskt en tradisjon og ble satt i drift under hver UKE. I 2003 ble UKEsenderen lagt ned, og Radio Revolt (da under navnet Studentradion i Trondheim) tok over stafettpinnen og har siden da dekket UKA hvert eneste år. Radio Revolts programledere, samt deres utallige reportere og sidekicks skal oppsummere det beste (og kanskje også det verste?) av ukens UKEarrangementer. Forventer intervjuer, anmeldelser, reportasjer, og løs og fast prat samt den beste musikken fra UKEartistene.",
 		"website": "https://radiorevolt.no/programmer/ukesenderen"
+	},
+	"2767": {
+		"image": "https://radiorevolt.no/media/uploads/images/huset_H2.png",
+		"category": [
+			"Society & Culture"
+		],
+		"subtitle": "Huset er et program om Studentersamfundet i Trondhjem og alle dets hemmeligheter.",
+		"description": "Programmet som tar for seg alt du ikke visste om Studentersamfundet i Trondhjem. Det blir historier om de store hendelsene før vår tid, musikk skrevet på og om huset og gjester fra de ulike gjengene som holder hjulene i gang. Bli med inn i Samfundets ganger, og lær hvordan det runde røde Huset ble slik vi kjenner det i dag.",
+		"website": "https://radiorevolt.no/programmer/huset"
 	}
 }
