@@ -325,9 +325,11 @@
 			"Comedy"
 		],
 		"image": "https://radiorevolt.no/media/uploads/images/Singelkrisa_transparent-01.png",
-		"description": "Marie har vært singel i 7 år. Presset om mann, barn, egen bolig er stor. Er det galt å være 29 år og singel? I såfall hva har hun gjort galt? Hun inviterer ulike gjester hver uke for å underholde deg om singellivet.  Gjestene skal sammen med Marie snakke om hvilke utfordringer en støter på som singel. Programmet skal ta lytterne med på en reise i deres liv som singel. Både Marie og gjestene skal fortelle ulike historier fra ulike møter med den en har vært tiltrukket av, og hva som gikk galt og hva som gikk bra.",
-		"subtitle": "Marie har vært singel i 7 år. Sammen med gjester jobber hun seg gjennom Singelkrisa!",
-		"website": "https://radiorevolt.no/programmer/singelkrisa"
+        "name": "Singelkrisa (utdatert)",
+		"description": "Singelkrisa flytter til TRD.by i Adresseavisa. Du finner episodene i en ny podkastfeed hos dem.",
+		"subtitle": "Gammel podkastfeed, bruk ny fra TRD.by",
+		"website": "https://radiorevolt.no/programmer/singelkrisa",
+        "withhold_from_itunes": true
 	},
 	"2764": {
 		"category": [
