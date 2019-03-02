@@ -471,5 +471,14 @@
 		"subtitle": "Huset er et program om Studentersamfundet i Trondhjem og alle dets hemmeligheter.",
 		"description": "Programmet som tar for seg alt du ikke visste om Studentersamfundet i Trondhjem. Det blir historier om de store hendelsene før vår tid, musikk skrevet på og om huset og gjester fra de ulike gjengene som holder hjulene i gang. Bli med inn i Samfundets ganger, og lær hvordan det runde røde Huset ble slik vi kjenner det i dag.",
 		"website": "https://radiorevolt.no/programmer/huset"
+	},
+	"2775": {
+		"image": "https://radiorevolt.no/media/uploads/images/radloslogo.jpg",
+		"category": [
+			"Society & Culture"	
+		],
+		"subtitle": "Rådløs løser studentenes problemer!",
+		"description": "I Rådløs kan du høre studenter løse andre studenters problemer ved hjelp av sin marginale livserfaring og inniblant med god hjelp fra folk som vet hva de snakker om fra SiT. Rådløs skal guide deg gjennom studenttilværelsen og vil bjuda på både underholdning og livsvisdom.",
+		"website": "https://radiorevolt.no/programmer/radls"
 	}
 }
