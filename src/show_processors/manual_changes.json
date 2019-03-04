@@ -480,5 +480,14 @@
 		"subtitle": "Rådløs løser studentenes problemer!",
 		"description": "I Rådløs kan du høre studenter løse andre studenters problemer ved hjelp av sin marginale livserfaring og inniblant med god hjelp fra folk som vet hva de snakker om fra SiT. Rådløs skal guide deg gjennom studenttilværelsen og vil bjuda på både underholdning og livsvisdom.",
 		"website": "https://radiorevolt.no/programmer/radls"
+	},
+	"2779": {
+		"image": "https://radiorevolt.no/media/uploads/images/radloslogo.jpg",
+		"category": [
+			"Society & Culture"
+		],
+		"subtitle": "TEDxTrondheim is all about sharing Trondheim with the world, and with Radio Revolt we're able to take a deeper dive into these big ideas and break them down and try to understand them.",
+		"description": "TEDx is celebrating its 10th birthday and with a video library being created from groups around the world that is over 100,000 strong. TEDxTrondheim is our local source for sharing Trondheim with the world and Radio Revolt is a strong platform for sharing ideas and passions. The crossXconnect show, hosted on Radio Revolt, is meant to take a deeper dive into these big ideas and break down how they affect us, teach us and challenge our understandings.",
+		"website": "https://radiorevolt.no/programmer/tedxtrd-crossxconnect"
 	}
 }
