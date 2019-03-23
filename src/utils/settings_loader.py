@@ -25,7 +25,7 @@ DEFAULT_METHOD = "yaml"
 
 def yaml_load_settings_from_file(configuration_file):
     with open(configuration_file) as file:
-        return yaml.load(file)
+        return yaml.safe_load(file)
 
 
 def yaml_load_settings():

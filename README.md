@@ -217,4 +217,11 @@ pipelines og processors i innstillingene.
 
 Kodestil: [Google Python Coding Style Guide](https://google.github.io/styleguide/pyguide.html), inkludert [pylint](https://www.pylint.org/). Skjønt, sistnevnte har ikke vært brukt så lenge, så mye følger ikke helt standarden. Da tar man gjerne og gjør det finere rundt der man gjør endringer :)
 
+## Notater
 
+* Jeg opplevde en gang på min lokale maskin at jeg fikk masse feil på feeds som
+  burde ha eksistert, og som du kunne se i databasen, men som ikke kom opp når du
+  søkte på navnet (men du fikk feil når programmet prøvde å legge til med samme
+  navn). Det tydet på at det var noe galt med indeksen, så jeg kjørte `reindex
+  index slug_to_slug_pkey;` eller noe sånt (du kan kjøre `\d slug_to_slug` for å
+  se hva indeksen heter). Da funka ting igjen.

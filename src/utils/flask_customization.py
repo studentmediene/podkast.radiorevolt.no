@@ -1,7 +1,7 @@
 import logging
 
 from flask import request, url_for, redirect, Flask
-from werkzeug.contrib.fixers import ProxyFix
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from utils import set_up_logger
 
