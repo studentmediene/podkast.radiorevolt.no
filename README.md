@@ -67,10 +67,10 @@ Generelt må du bare oppfylle kravene som stilles av pakkene i `requirements-to-
 9. Konfigurer automatisk oppstart og kjøring av webserver og gjentakende
    oppgave som prosesserer podkastbilder, gjennom SystemD.
 
-   1. Fra `systemd`-mappa, kopier filen `podkast.radiorevolt.no.service.template` til
+   1. Fra `systemd`-mappa, kopier filen `podkast.radiorevolt.no.template.service` til
       `podkast.radiorevolt.no.service`, og fyll inn navn på den egne brukeren fra
       steg 7 og filsti til mappa der programmet er satt opp.
-   2. Kopier filen `podkast.radiorevolt.no-images.service.template` til
+   2. Kopier filen `podkast.radiorevolt.no-images.template.service` til
       `podkast.radiorevolt.no-images.service` og fyll inn på samme måte som i
       forrige steg.
    3. Kopier inn filene til SystemD:
