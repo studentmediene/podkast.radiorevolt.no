@@ -1,0 +1,8 @@
+[Unit]
+Description=Process any new images for podcasts
+OnFailure=status-msg-teams@%n.service
+
+[Service]
+Type=oneshot
+User=<username>
+ExecStart=/usr/bin/make -C <path>/podkast.radiorevolt.no/src images

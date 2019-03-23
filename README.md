@@ -54,18 +54,42 @@ Generelt må du bare oppfylle kravene som stilles av pakkene i `requirements-to-
    * db.database
    * db.user
    * db.password
-5. Sett opp uWSGI-innstillingene: Kopier `podkast.radiorevolt.no.template.ini`, endre filstien til `socket`
-   så den peker til `data`-mappen og lagre som `podkast.radiorevolt.no.ini`.
+5. Sett opp uWSGI-innstillingene: Kopier `podkast.radiorevolt.no.template.ini`,
+   endre filstien til `socket` så den peker til `data`-mappen og lagre som
+   `podkast.radiorevolt.no.ini`.
 6. Sett opp PostgreSQL-server ved hjelp av nyeste backup fra forrige eller
    kjørende instans av podkastapplikasjonen. Det skal også finnes en SQL-fil
    i dette repoet som kan brukes til utvikling, men bruker du det i prod risikerer
    vi at noen URLer som folk bruker slutter å fungere.
 7. Sett opp egen bruker for podkastsystemet, som du deretter gir skrivetilgang
    til `data`-mappa og `src/static/images`-mappa.
-8. Sett opp en cron-jobb som kjører `make -C sti/til/podkast.radiorevolt.no/src images` hvert 5. til 10. minutt som denne brukeren.
-9. Bruk filene i `nginx` og `systemd`-mappene som utgangspunkt til å lage en
-   konfigurasjon for Nginx (webserver) og SystemD-tjenesten (automatisk oppstart,
-   legges i `/etc/systemd/system`).
+8. Bruk filene i `nginx`-mappa til å lage konfigurasjon for Nginx (webserver).
+9. Konfigurer automatisk oppstart og kjøring av webserver og gjentakende
+   oppgave som prosesserer podkastbilder, gjennom SystemD.
+
+   1. Fra `systemd`-mappa, kopier filen `podkast.radiorevolt.no.service.template` til
+      `podkast.radiorevolt.no.service`, og fyll inn navn på den egne brukeren fra
+      steg 7 og filsti til mappa der programmet er satt opp.
+   2. Kopier filen `podkast.radiorevolt.no-images.service.template` til
+      `podkast.radiorevolt.no-images.service` og fyll inn på samme måte som i
+      forrige steg.
+   3. Kopier inn filene til SystemD:
+
+      ```
+      sudo cp podkast.radiorevolt.no.service podkast.radiorevolt.no-images.{timer,service} /etc/systemd/system
+      ```
+
+   4. Be SystemD om å laste filer på nytt:
+
+      ```
+      sudo systemctl daemon-reload
+      ```
+
+   5. Aktiver (så ting starter når maskinen starter) og kjør i gang:
+
+      ```
+      sudo systemctl enable --now podkast.radiorevolt.no.service podkast.radiorevolt.no-images.timer
+      ```
 
 For utviklingsformål kan du kjøre `app.py` direkte for å få en
 utviklingsserver på port 5000 til vanlig (bruk `--help` for å se tilgjengelige
@@ -76,7 +100,7 @@ kjører programmet i riktig mappe. `make` kjører uWSGI-serveren (som Nginx kan
 koble seg til), og `make images` kjører skriptet som laster ned og behandler
 programbilder. Bruk `-C sti/til/podkast.radiorevolt.no/src` hvis du kjører `make` fra en annen mappe enn
 `src/`.
-    
+
 ## Funksjon
 
 En stor andel av Radio Revolts lyttere bruker podkaster til å konsumere

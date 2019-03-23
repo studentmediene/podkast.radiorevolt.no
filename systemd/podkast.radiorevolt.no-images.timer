@@ -1,0 +1,9 @@
+[Unit]
+Description=Run image processing twice every hour
+
+[Timer]
+OnCalendar=*:25,59:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target
