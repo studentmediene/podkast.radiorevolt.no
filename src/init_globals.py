@@ -142,10 +142,13 @@ def create_redirector(
     Returns:
         Configured and initialized instance of Redirector.
     """
-    return Redirector(
+    redirector = Redirector(
         settings['redirector']['db_file'],
         url_service,
         ARTICLE_REDIRECT_ENDPOINT,
         SOUND_REDIRECT_ENDPOINT,
         url_for
     )
+    # Ensure the database is set up
+    redirector.init_db()
+    return redirector
