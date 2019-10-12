@@ -1,47 +1,47 @@
 # Allow more static typing
-typing==3.6.6
+typing==3.7.4.1
 # Easily send HTTP requests
-requests==2.21.0
+requests==2.22.0
 # Easily generate podcast feeds
 podgen==1.0.0
 # Get duration of an MP3 file
-tinytag==1.0.0
+tinytag==1.2.2
 # Easily cache properties which could take some time to calculate
 cached-property==1.5.1
 # Make it possible to work with timezones
-pytz==2018.9
+pytz==2019.3
 # Testing without boilerplate
 pytest==2.9.2
 # For Chimera episode source
-Markdown==3.0.1
+Markdown==3.1.1
 # For progress bar
 clint==0.5.1
 # For parsing dates from RadioRevolt.no
 tonyg-rfc3339==0.1
 # Simple webserver framework
-Flask==1.0.2
+Flask==1.1.1
 # Our own webserver
 uWSGI==2.0.18
 # Image manipulation
 Pillow==5.4.1
 # Database connection (for SlugList)
-psycopg2==2.7.7
+psycopg2==2.8.3
 # For reading settings
-PyYAML==5.1
+PyYAML==5.1.2
 ## The following requirements were added by pip freeze:
 args==0.1.0
-certifi==2019.3.9
+certifi==2019.9.11
 chardet==3.0.4
 Click==7.0
 dateutils==0.6.6
-future==0.17.1
+future==0.18.0
 idna==2.8
 itsdangerous==1.1.0
-Jinja2==2.10
-lxml==4.3.2
+Jinja2==2.10.3
+lxml==4.4.1
 MarkupSafe==1.1.1
 py==1.8.0
 python-dateutil==2.8.0
 six==1.12.0
-urllib3==1.24.1
-Werkzeug==0.15.1
+urllib3==1.25.6
+Werkzeug==0.16.0
