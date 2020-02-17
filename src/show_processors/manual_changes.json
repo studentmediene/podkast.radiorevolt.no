@@ -498,5 +498,17 @@
 		"subtitle": "Lytt på Nytt veileder deg gjennom nyhetsbildet",
 		"description": "Sliter du med å henge med i alt som skjer omkring i verden og i Trondheim? Fortvil ikke, Lytt på Nytt skiller fakta fra oppspinn og holder deg løpende oppdatert på hva du som Trondheimstudent bør ha fått med deg.",
 		"website": "https://radiorevolt.no/programmer/lytt-pa-nytt"
+	},
+	"2807": {
+		"image": "https://radiorevolt.no/media/uploads/images/RR_LOGO.png",
+		"category": [
+			"Comedy",
+			"Technology",
+			"History",
+			"Education"
+		],
+		"subtitle": "Digresjonen, der du får servert alle temaer og tanker du surrer med når du egentlig burde sove.",
+		"description": "Digresjonen, Radio Revolt sitt kveldsmagasin, programmet for deg som kjøper kaffen din på (blå) resept og sover best mellom 12-18. Lurer du på om lyden av en 3D-printer er god ASMR? Om hvor vanlig kjølhaling var? Eller hvorfor engelske krigsskip var malt så rart under første verdenskrig? Her får du servert alle de temaene og tankene man surrer med når man egentlig burde sove. ",
+		"website": "https://radiorevolt.no/programmer/digresjonen"
 	}
 }
