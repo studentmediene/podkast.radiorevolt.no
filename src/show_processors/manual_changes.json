@@ -510,5 +510,13 @@
 		"subtitle": "Digresjonen, der du får servert alle temaer og tanker du surrer med når du egentlig burde sove.",
 		"description": "Digresjonen, Radio Revolt sitt kveldsmagasin, programmet for deg som kjøper kaffen din på (blå) resept og sover best mellom 12-18. Lurer du på om lyden av en 3D-printer er god ASMR? Om hvor vanlig kjølhaling var? Eller hvorfor engelske krigsskip var malt så rart under første verdenskrig? Her får du servert alle de temaene og tankene man surrer med når man egentlig burde sove. ",
 		"website": "https://radiorevolt.no/programmer/digresjonen"
+	},
+	"2808": {
+			"category": [
+			"True Crime"
+		],
+		"subtitle": "Radio Revolt sitt True Crime-program",
+		"description": "Krimkastingen er programmet der vi snakker om mystiske og interessante kriminalsaker fra virkeligheten, både fra fjernt og nært. Bli med Bethy og Christine når de går gjennom bakgrunnen for historien og prøver å finne ut hvordan og hvorfor ting skjedde.",
+		"website": "https://radiorevolt.no/programmer/krimkastingen"
 	}
 }
