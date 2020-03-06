@@ -44,8 +44,7 @@ processors:
     description: Podkast fra Radio Revolt
     image: "http://filer.radiorevolt.no/bilder/default_podkastlogo.png"
     category:
-      category: Education
-      subcategory: Higher Education
+      category: Comedy
     language: "no"  # "no" without quotes would be parsed as boolean false
     website: "https://radiorevolt.no/"
     authors:

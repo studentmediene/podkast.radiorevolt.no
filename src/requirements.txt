@@ -3,7 +3,7 @@ typing==3.7.4.1
 # Easily send HTTP requests
 requests==2.23.0
 # Easily generate podcast feeds
-podgen==1.0.1
+podgen==1.1.0rc1
 # Get duration of an MP3 file
 tinytag==1.2.2
 # Easily cache properties which could take some time to calculate
