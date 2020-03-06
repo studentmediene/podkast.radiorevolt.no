@@ -1,7 +1,7 @@
 # Allow more static typing
 typing==3.7.4.1
 # Easily send HTTP requests
-requests==2.22.0
+requests==2.23.0
 # Easily generate podcast feeds
 podgen==1.0.1
 # Get duration of an MP3 file
@@ -13,7 +13,7 @@ pytz==2019.3
 # Testing without boilerplate
 pytest==2.9.2
 # For Chimera episode source
-Markdown==3.1.1
+Markdown==3.2.1
 # For progress bar
 clint==0.5.1
 # For parsing dates from RadioRevolt.no
@@ -25,23 +25,25 @@ uWSGI==2.0.18
 # Image manipulation
 Pillow==5.4.1
 # Database connection (for SlugList)
-psycopg2==2.8.3
+psycopg2==2.8.4
 # For reading settings
-PyYAML==5.1.2
+PyYAML==5.3
 ## The following requirements were added by pip freeze:
 args==0.1.0
-certifi==2019.9.11
+certifi==2019.3.9
 chardet==3.0.4
-Click==7.0
+click==6.7
 dateutils==0.6.6
-future==0.18.0
+feedgen==0.3.2
+future==0.16.0
+gunicorn==19.6.0
 idna==2.8
-itsdangerous==1.1.0
-Jinja2==2.10.3
-lxml==4.4.1
-MarkupSafe==1.1.1
-py==1.8.0
-python-dateutil==2.8.0
-six==1.12.0
-urllib3==1.25.6
-Werkzeug==0.16.0
+itsdangerous==0.24
+Jinja2==2.11.1
+lxml==4.2.3
+MarkupSafe==1.0
+py==1.5.4
+python-dateutil==2.7.3
+six==1.11.0
+urllib3==1.24.1
+Werkzeug==1.0.0
