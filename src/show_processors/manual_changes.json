@@ -520,7 +520,10 @@
 		"website": "https://radiorevolt.no/programmer/krimkastingen"
 	},
 	"2810": {
-		"category": [],
+		"category": [
+			"Personal Journals",
+			"Documentary"
+		],
 		"subtitle": "Bli med Frida og lær om mennesker under utvikling.",
 		"description": "Hver lørdag 12 til 13 blir vi kjent med en ny student i Trondheim, og prater om ulike stadier i livet. Hva studerer de, og hvorfor endte de opp der? Hva tar man med seg av erfaringer fra barne- og ungdomsskolen og inn i studentlivet? Få bekreftet, eller avkreftet, stereotypier om studenter fra ulike studieretninger i byen.",
 		"website": "https://radiorevolt.no/programmer/under-utvikling"
