@@ -553,5 +553,13 @@
 		"subtitle": "Fortell Meg er radioprogrammet som minner deg på at du ikke er den eneste i verden som gjør sære og forunderlige ting.",
 		"description": "Har du gjort noe sykt kleint? Eller kanskje du har gjort noe du angrer skikkelig på? Sitter du inne med en historie som bare MÅ deles? Fortell Meg er radioprogrammet som minner deg på at du ikke er den eneste i verden som gjør sære og forunderlige ting. Hver uke tar vi deg med på en reise gjennom Trondheims morsomste og rareste historier. Kanskje lærer du noe nytt?",
 		"website": "https://radiorevolt.no/programmer/fortell-meg"
+	},
+	"2820": {
+		"category": [
+			"Comedy"
+		],
+		"subtitle": "SKRØNERIET PRESENTERER: Jon og Andreas Show",
+		"description": "Preik om høyt, lavt, løst og fast – hver lørdag kl 12-13.",
+		"website": "https://radiorevolt.no/programmer/skrneriet"
 	}
 }
