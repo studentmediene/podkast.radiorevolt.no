@@ -569,5 +569,14 @@
 	],
 	"subtitle": "D-pop er Radio Revolts eventyr-program! Sammen med våre helter gir vi deg en eventyrlig og magisk verden der du kan leve deg inn i rollespillets finurlige situasjoner sammen med alver, dverger troll og drager, og ikke minst våre helter!",
 	"description": "D-pop er Radio Revolts eventyr-program! Sammen med våre helter gir vi deg en eventyrlig og magisk verden der du kan leve deg inn i rollespillets finurlige situasjoner sammen med alver, dverger troll, drager og ikke minst våre helter! Alt av karakterer, verden og opplevelser er selvprodusert, men er inspirert av den offisielle femte-utgaven av «Dungeons and Dragons». Hør sendingene live på lørdager fra 1700-1800, eller på din favorittpodkasttjeneste!"
+		
+	},
+	"2837": {
+		"image": "https://radiorevolt.no/media/uploads/images/16577448928746_5470831096258097178_n.jpeg",
+		"categpry": [
+			"society & Culture"
+		],
+		"description": "Det hendte i de dager at Herman fikk en positiv koronatest. Etter det ballet det på seg og Trondheimstudentene var inne i sin andre smittebølge, men hva vil det egentlig si? Informasjonen er svak, og vi får lite innsikt fra de som blir isolert. I Isolert skal vi følge hverdagen til Herman og andre trondheimstudenter. Hva gjør man i isolasjon? Hvordan er maten? Hva burde man ta med seg? Samt andre perspektiver fra og rundt tilværelsen.",
+		"website": "https://radiorevolt.no/programmer/isolert"
 	}
 }
