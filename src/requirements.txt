@@ -27,7 +27,7 @@ Pillow==5.4.1
 # Database connection (for SlugList)
 psycopg2==2.8.4
 # For reading settings
-PyYAML==5.3
+PyYAML==5.4
 ## The following requirements were added by pip freeze:
 args==0.1.0
 certifi==2019.3.9
