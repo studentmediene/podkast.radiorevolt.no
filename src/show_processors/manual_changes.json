@@ -278,26 +278,26 @@
 		"category": [
 			"Comedy"
 		],
-		"image": "https://radiorevolt.no/media/uploads/images/76prosent.jpg",
+		"image": "https://kapinabackendprod.blob.core.windows.net/media/uploads/images/76prosent.jpg",
 		"description": "67% sikkert er et vitenskapsprogram uten viten. Hver mandag tar vi for seg spørsmål man vanligvis ville googlet. Lurer du på om pingviner har knær? Eller om Paralympics har egne parkeringsplasser for de som ikke er handikappet? Vi vet ikke svaret, men vi diskuterer oss frem til et svar du kan være 67% sikker på."
 	},
 	"2673": {
-		"image": "https://radiorevolt.no/media/uploads/images/satirikon-logo.png",
+		"image": "https://kapinabackendprod.blob.core.windows.net/media/uploads/images/satirikon-logo.png",
 		"description": "Radio Revolts humormagasin, med innslag av aktualitet og generell egosentrisme. Vi gir deg sketsjer, absurditeter av ymse slag, og en og annen meningsytring! (hahah, neida) Tre komikere gir deg ukentlig innhold av varierende mengde og kvalitet."
 	},
 	"2695": {
-		"image": "https://radiorevolt.no/media/uploads/images/Krenket_svart_gjennomsiktig_1-1.png",
+		"image": "https://kapinabackendprod.blob.core.windows.net/media/uploads/images/Krenket_svart_gjennomsiktig_1-1.png",
 		"description": "Vi tar deg med på en reise i studentlivet. Skam, fylla, kollektiv-stories og mye mere! Så her er det bare å skru på radioen og kose seg!"
 	},
 	"2697": {
-		"image": "https://radiorevolt.no/media/django-summernote/2017-05-09/2ab13803-73e4-4d2b-96d7-5f27b4a6838d.png",
+		"image": "https://kapinabackendprod.blob.core.windows.net/media/django-summernote/2017-05-09/2ab13803-73e4-4d2b-96d7-5f27b4a6838d.png",
 		"description": "Dusken podkast er studentavisen Under Duskens helt egen podkast. Podkasten vil komme ut annenhver uke, samme som papiravisen, og vil gå i dybden på et utvalg av saker du finner i siste nummer. I hver episode får du sjansen til å bli kjent med journalistene som har skrevet sakene, kildene som blir intervjuet i bladet, og du får innblikk i hvordan vi produserer avisen. Dette er en podkast for studenter, av studenter."
 	},
 	"2725": {
 		"category": [
 			"Sports & Recreation"
 		],
-		"image": "https://radiorevolt.no/media/uploads/images/flomlys_logo_ix5MZy7.png",
+		"image": "https://kapinabackendprod.blob.core.windows.net/media/uploads/images/flomlys_logo_ix5MZy7.png",
 		"subtitle": "Radio Revolts sportsmagasin",
 		"description": "Radio Revolts sportsprogram pjatter om det meste ymse som skjer i sportens verden. Du får aktualiteter fra OL blandet med rørende historier om helter fra en fordums tid. For hva skjedde egentlig med Anders Jacobsen, Oddvar Brå og Kolo Toure? Et radioprogram med fokus på sport, det populære, det sære, det herlige. Er idrett din flukt fra den virkelige verden og alt dens mas? Flomlys er her for deg.",
 		"website": "https://radiorevolt.no/programmer/flomlys"
@@ -306,7 +306,7 @@
 		"category": [
 			"Comedy"
 		],
-		"image": "https://radiorevolt.no/media/uploads/images/Formannskapet_logo.png",
+		"image": "https://kapinabackendprod.blob.core.windows.net/media/uploads/images/Formannskapet_logo.png",
 		"description": "Synes du det er gøy at Per \"hunken\" Sandberg drar damer han ikke har noen rett til? Smiler du av at Linnie Meister tar med typen på date dit hun spredte asken av faren sin, slik at kjæresten kunne møte svigers? Ellers kanskje aller viktigst, ler du av det spik spenna hakkende gale mennesket som er Kari Jaquesson? Er du usikker på hvordan du skriver Kari Jaquesson?\nFormannskapet gir deg K-jack, hunken, Linnie og mer. Verden er full av idioter som må styres på rett kjøl av kommunens nest øverste politiske organ uten parlamentarisk styring.",
 		"subtitle": "Kommunens nest øverste politiske organ uten parlamentarisk styring",
 		"website": "https://radiorevolt.no/programmer/formannskapet"
@@ -315,7 +315,7 @@
 		"category": [
 			"Comedy"
 		],
-		"image": "https://radiorevolt.no/media/uploads/images/LOGO-01.png",
+		"image": "https://kapinabackendprod.blob.core.windows.net/media/uploads/images/LOGO-01.png",
 		"description": "Svada er et flunkende nytt program som skal gjøre et dypdykk i samfunnets absurditeter. Vi skal være din guide til den jungelen av falske nyheter, tåpelige overskrifter og kommentarfeltkrigføring som finnes der ute. Hold på hatten, len deg tilbake og nyt en times reise gjennom det kaotiske lille helvetet vi kaller det moderne samfunnet.",
 		"subtitle": "Din guide til jungelen av falske nyheter, tåpelige overskrifter og kommentarfeltkrigføring som finnes der ute",
 		"website": "https://radiorevolt.no/programmer/svada"
@@ -324,7 +324,7 @@
 		"category": [
 			"Comedy"
 		],
-		"image": "https://radiorevolt.no/media/uploads/images/Singelkrisa_transparent-01.png",
+		"image": "https://kapinabackendprod.blob.core.windows.net/media/uploads/images/Singelkrisa_transparent-01.png",
 		"name": "Singelkrisa (utdatert)",
 		"description": "Singelkrisa flytter til TRD.by i Adresseavisa. Du finner episodene i en ny podkastfeed hos dem.",
 		"subtitle": "Gammel podkastfeed, bruk ny fra TRD.by",
@@ -344,7 +344,7 @@
 		"category": [
 			"News &amp; Politics"
 		],
-		"image": "https://radiorevolt.no/media/uploads/images/Artboard_1_copy_9.png",
+		"image": "https://kapinabackendprod.blob.core.windows.net/media/uploads/images/Artboard_1_copy_9.png",
 		"description": "SNN er radioprogrammet som holder deg oppdatert på alt fra lokale til internasjonale nyheter som er relevante eller interessante for studenter i Trondheim. I løpet av timen på luften vil vi servere en godt krydret blanding av seriøse analyser, debatter og oppdateringer, samt at vi til tider tar oss friheten til å slå ut håret, og ser på det hele med et satirisk skråblikk.",
 		"subtitle": "SNN er radioprogrammet som holder deg oppdatert på studentnyheter",
 		"website": "https://radiorevolt.no/programmer/studentniste"
@@ -354,7 +354,7 @@
 			"Arts",
 			"Literature"
 		],
-		"image": "https://radiorevolt.no/media/uploads/images/Bokbaren_v01.png",
+		"image": "https://kapinabackendprod.blob.core.windows.net/media/uploads/images/Bokbaren_v01.png",
 		"description": "Bokbaren er Radio Revolts litteraturmagasin. Her diskuteres aktuell og tidløs litteratur, debatter og annet som rører seg innafor litteraturen og fiksjonens verden, både lokalt og globalt.",
 		"subtitle": "Sett deg godt til rette og fyll glasset med noe godt mens bokbarna i Bokbaren geleider deg inn i litteraturens verden.",
 		"website": "https://radiorevolt.no/programmer/bokbaren"
@@ -363,7 +363,7 @@
 		"category": [
 			"TV & Film"
 		],
-		"image": "https://radiorevolt.no/media/uploads/images/filmofil.png",
+		"image": "https://kapinabackendprod.blob.core.windows.net/media/uploads/images/filmofil.png",
 		"description": "Filmofil er radioshowet som holder deg oppdatert på fersk film samt tar deg med dypt inn i de levende bilders magiske verden. Vi byr på kinopremierer, skjulte perler, gode historier, video-anmeldelser, filmmusikk, nyheter, rariteter, konkuranser og ekte filmlidenskap!",
 		"subtitle": "Filmofil er radioshowet som holder deg oppdatert på fersk film.",
 		"website": "https://radiorevolt.no/programmer/filmofil"
@@ -373,13 +373,13 @@
 			"Technology",
 			"Tech News"
 		],
-		"image": "https://radiorevolt.no/media/uploads/images/garasjen-04_I3ymi47.png",
+		"image": "https://kapinabackendprod.blob.core.windows.net/media/uploads/images/garasjen-04_I3ymi47.png",
 		"description": "Garasjen er programmet driftet av teknikerne her på Radio Revolt, vi snakker generelt om teknologi. Med Petter Martinussen, Cecilie Græsholt, Petter Mollerup, Kristian Bjørn Thoresen, Kristian Brudeli, Andreas Aaberge Eide, Guro Stamland, William Haugerud, Kristian Djuve, Mari Eggan, Gabriel Ekeland og Hallvard Tangvik Tellefsen Relling.",
 		"subtitle": "Garasjen er Radio Revolts teknologimagasin – et fristed som holder deg oppdatert på det siste innen teknologi.",
 		"website": "https://radiorevolt.no/programmer/garasjen"
 	},
 	"2676": {
-		"image": "https://radiorevolt.no/media/uploads/images/logo_VXvN8bE.png",
+		"image": "https://kapinabackendprod.blob.core.windows.net/media/uploads/images/logo_VXvN8bE.png",
 		"category": [
 			"Society & Culture"
 		],
@@ -388,7 +388,7 @@
 		"website": "https://radiorevolt.no/programmer/millennium"
 	},
 	"2592": {
-		"image": "https://radiorevolt.no/media/uploads/images/Nerdeprat_logo_2020.png",
+		"image": "https://kapinabackendprod.blob.core.windows.net/media/uploads/images/Nerdeprat_logo_2020.png",
 		"category": ["Games & Hobbies", "Video Games"],
 		"subtitle": "Spillmagasinet Nerdeprat holder deg oppdatert på alt av spill og nerdekultur.",
 		"description": "I spillmagasinet Nerdeprat diskuterer vi tema rundt spill og nerdekultur, med akademisk og humoristisk tilnærming. Vi tar også opp ukas nyheter og informerer deg om de spillene du burde spille, og kanskje de spillene du har gått glipp av. (Intro og jingler inkluderer deler av låta Pie in the Sky, med tillatelse fra komponisten Karl Brueggemann fra Super Marcato Bros.)",
@@ -409,7 +409,7 @@
 		]
 	},
 	"2448": {
-		"image": "https://radiorevolt.no/media/uploads/images/radiodokumentar-01.png",
+		"image": "https://kapinabackendprod.blob.core.windows.net/media/uploads/images/radiodokumentar-01.png",
 		"category": [
 			"Society & Culture"
 		],
@@ -418,16 +418,16 @@
 		"website": "https://radiorevolt.no/programmer/radiodokumentarer"
 	},
 	"2649": {
-		"image": "https://radiorevolt.no/media/uploads/images/Revoltmorgen.png",
+		"image": "https://kapinabackendprod.blob.core.windows.net/media/uploads/images/Revoltmorgen.png",
 		"category": [
 			"News & Politics"
 		],
 		"subtitle": "Radio Revolts morgenprogram - for deg som ønsker å få en god og oppdatert start på studenthverdagen.",
 		"description": "Dette programmet vil være med deg i morgentimene og hjelpe deg i gang med din studenthverdag. Vi vil holde deg oppdatert på dagens tilbud i samtlige kantiner og kiosker, for ikke å glemme de spennende «standsa» på Gløshaugen og Dragvoll. Vi tar deg gjennom de harde morgentimene og skal dra deg ut av senga for å møte dagen, hver morgen på Radio Revolt.",
-		"website": "https://radiorevolt.no/media/uploads/images/revoltMorgon.png"
+		"website": "https://kapinabackendprod.blob.core.windows.net/media/uploads/images/revoltMorgon.png"
 	},
 	"2634": {
-		"image": "https://radiorevolt.no/media/uploads/images/Samfundm%C3%B8te_logo.png",
+		"image": "https://kapinabackendprod.blob.core.windows.net/media/uploads/images/Samfundm%C3%B8te_logo.png",
 		"category": [
 			"News & Politics"
 		],
@@ -436,7 +436,7 @@
 		"website": "https://radiorevolt.no/programmer/samfundsmoter"
 	},
 	"2610": {
-		"image": "https://radiorevolt.no/media/uploads/images/ecb8e4d51f84fb5cc73c8f863edcd16c.png",
+		"image": "https://kapinabackendprod.blob.core.windows.net/media/uploads/images/ecb8e4d51f84fb5cc73c8f863edcd16c.png",
 		"category": [
 			"News & Politics"
 		],
@@ -445,7 +445,7 @@
 		"website": "https://radiorevolt.no/programmer/spesialsendinger"
 	},
 	"1957": {
-		"image": "https://radiorevolt.no/media/uploads/images/UillVit.png",
+		"image": "https://kapinabackendprod.blob.core.windows.net/media/uploads/images/UillVit.png",
 		"category": [
 			"Science & Medicine",
 			"Natural Sciences"
@@ -455,7 +455,7 @@
 		"website": "https://radiorevolt.no/programmer/uillustrert-vitenskap"
 	},
 	"2438": {
-		"image": "https://radiorevolt.no/media/uploads/images/UkeSenderen.png",
+		"image": "https://kapinabackendprod.blob.core.windows.net/media/uploads/images/UkeSenderen.png",
 		"category": [
 			"Society & Culture"
 		],
@@ -464,7 +464,7 @@
 		"website": "https://radiorevolt.no/programmer/ukesenderen"
 	},
 	"2767": {
-		"image": "https://radiorevolt.no/media/uploads/images/huset_H2_hpDAaXc.png",
+		"image": "https://kapinabackendprod.blob.core.windows.net/media/uploads/images/huset_H2_hpDAaXc.png",
 		"category": [
 			"Society & Culture"
 		],
@@ -473,7 +473,7 @@
 		"website": "https://radiorevolt.no/programmer/huset"
 	},
 	"2775": {
-		"image": "https://radiorevolt.no/media/uploads/images/radloslogo.jpg",
+		"image": "https://kapinabackendprod.blob.core.windows.net/media/uploads/images/radloslogo.jpg",
 		"category": [
 			"Society & Culture"
 		],
@@ -491,7 +491,7 @@
 		"website": "https://radiorevolt.no/programmer/tedxtrd-crossxconnect"
 	},
 	"2805": {
-		"image": "https://radiorevolt.no/media/uploads/images/Pigille_Sørensen_gul_med_bakgrunn.png",
+		"image": "https://kapinabackendprod.blob.core.windows.net/media/uploads/images/Pigille_Sørensen_gul_med_bakgrunn.png",
 		"category": [
 			"News & Politics"
 		],
@@ -546,7 +546,7 @@
 		"website": "https://samfundet.no/"
 	},
 	"2817": {
-		"image": "https://radiorevolt.no/media/uploads/images/Fortell_meg_logo.png",
+		"image": "https://kapinabackendprod.blob.core.windows.net/media/uploads/images/Fortell_meg_logo.png",
 		"category": [
 			"Comedy"
 		],
@@ -573,7 +573,7 @@
 			
 	},
 	"2837": {
-		"image": "https://radiorevolt.no/media/uploads/images/ISOLERTLOGO.png", 
+		"image": "https://kapinabackendprod.blob.core.windows.net/media/uploads/images/ISOLERTLOGO.png", 
 		"categpry": [
 			"society & Culture"
 		],
