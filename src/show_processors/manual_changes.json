@@ -587,6 +587,7 @@
 		"image": "https://filer.radiorevolt.no/bilder/kikkhullet.png",
 		"description": "Kikkhullet er Radio Revolts brennhete podkast. Hver episode er en erotisk novelle skrevet av studenter i Trondheim. Så plugg i øreproppene og sett deg godt til rette. Dette blir klamt.",
 		"subtitle": "Kikkhullet - Ett vindu inn til studentenes seksuelle fantasi.",
-		"website": "https://radiorevolt.no/programmer/kikkhullet"
+		"website": "https://radiorevolt.no/programmer/kikkhullet",
+		"explicit": true
 	}
 }
